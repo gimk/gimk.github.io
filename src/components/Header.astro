@@ -7,30 +7,132 @@ import { SITE } from "@consts";
 <header>
   <Container>
     <div class="flex flex-wrap gap-y-2 justify-between">
-      <Link href="/" underline={false}>
-        <div class="font-semibold">
-          {SITE.NAME}
+      <a href="/"
+        ><div>
+          <svg
+            class="cochon-svg"
+            width="40"
+            height="40"
+            viewBox="0 0 200 200"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g clip-path="url(#clip0_2313_5602)">
+              <rect
+                class="fill-stone-100 dark:fill-stone-900"
+                width="200"
+                height="200"
+                rx="100"></rect>
+              <path
+                class="fill-stone-900 dark:fill-stone-100"
+                d="M152.256 98.9896C152.085 99.4168 151.993 99.8496 152.012 100.306C152.851 120.331 190.403 165.414 208.086 185.745C209.925 187.86 208.856 191.052 206.071 191.798L105.09 218.854C102.537 219.539 100 217.725 100 215.215V90.3436C100 89.3302 100.43 88.3593 101.193 87.6482L132.52 58.4687C132.837 58.1736 133.204 57.9305 133.605 57.7495L158.821 46.3752C161.691 45.081 164.933 47.3168 164.507 50.2964L160.559 77.9293C160.518 78.2132 160.444 78.4917 160.337 78.7596L152.256 98.9896Z"
+              ></path>
+              <path
+                class="fill-stone-900 dark:fill-stone-100"
+                d="M47.744 98.9896C47.9147 99.4168 48.0069 99.8496 47.9878 100.306C47.1494 120.331 9.5965 165.414 -8.08553 185.745C-9.92479 187.86 -8.85643 191.052 -6.07075 191.798L94.9099 218.854C97.4631 219.539 100 217.725 100 215.215V90.3436C100 89.3302 99.5702 88.3593 98.8068 87.6482L67.4799 58.4687C67.1631 58.1736 66.7964 57.9305 66.3951 57.7495L41.1788 46.3752C38.3094 45.081 35.0674 47.3168 35.4932 50.2964L39.4414 77.9293C39.482 78.2132 39.5565 78.4917 39.6635 78.7596L47.744 98.9896Z"
+              ></path>
+              <circle
+                class="fill-stone-900 dark:fill-stone-100"
+                cx="100"
+                cy="113"
+                r="63"></circle>
+              <path
+                class="fill-stone-100 dark:fill-stone-900"
+                d="M100.5 150C84.7599 150 72 142.165 72 132.5C72 122.835 84.7599 115 100.5 115C116.24 115 129 122.835 129 132.5C129 142.165 116.24 150 100.5 150Z"
+              ></path>
+              <circle
+                class="fill-stone-900 dark:fill-stone-100"
+                cx="89.5"
+                cy="132.5"
+                r="5.5"></circle>
+              <circle
+                class="fill-stone-900 dark:fill-stone-100"
+                cx="110.5"
+                cy="132.5"
+                r="5.5"></circle>
+              <circle
+                class="fill-stone-100 dark:fill-stone-900"
+                cx="81"
+                cy="94"
+                r="8"></circle>
+              <circle
+                class="fill-stone-100 dark:fill-stone-900"
+                cx="120"
+                cy="94"
+                r="8"></circle>
+            </g>
+            <defs>
+              <clipPath id="clip0_2313_5602">
+                <rect
+                  class="fill-stone-900 dark:fill-stone-100"
+                  width="200"
+                  height="200"
+                  rx="100"></rect>
+              </clipPath>
+            </defs>
+          </svg>
         </div>
-      </Link>
-      <nav class="flex gap-1">
-        <a href="/projects" class="px-2 py-0.5 rounded-md flex items-center transition-colors duration-300 ease-in-out hover:text-black hover:dark:text-white hover:bg-black/5 hover:dark:bg-white/15">
+      </a>
+      <nav class="flex gap-2">
+        <a
+          href="/projects"
+          class="px-2 py-0.5 rounded-md flex items-center transition-colors duration-300 ease-in-out hover:text-black hover:dark:text-white hover:bg-black/5 hover:dark:bg-white/15"
+        >
           projects
         </a>
-        <a href="/work" class="px-2 py-0.5 rounded-md flex items-center transition-colors duration-300 ease-in-out hover:text-black hover:dark:text-white hover:bg-black/5 hover:dark:bg-white/15"> 
+        <a
+          href="/work"
+          class="px-2 py-0.5 rounded-md flex items-center transition-colors duration-300 ease-in-out hover:text-black hover:dark:text-white hover:bg-black/5 hover:dark:bg-white/15"
+        >
           work
         </a>
-        <a href="/blog" class="px-2 py-0.5 rounded-md flex items-center transition-colors duration-300 ease-in-out hover:text-black hover:dark:text-white hover:bg-black/5 hover:dark:bg-white/15">
+        <a
+          href="/blog"
+          class="px-2 py-0.5 rounded-md flex items-center transition-colors duration-300 ease-in-out hover:text-black hover:dark:text-white hover:bg-black/5 hover:dark:bg-white/15"
+        >
           blog
         </a>
-        <button id="theme-button" aria-label="Toggle theme button" class="group size-8 flex items-center justify-center rounded-md hover:bg-black/5 hover:dark:bg-white/15 transition-colors duration-300 ease-in-out">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"
-          class="block dark:hidden group-hover:stroke-black group-hover:dark:stroke-white transition-colors duration-300 ease-in-out">
-          <circle cx="12" cy="12" r="5"></circle> <line x1="12" y1="1" x2="12" y2="3"></line> <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line> <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line> <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line> <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line> </svg>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"
-          class="hidden dark:block group-hover:stroke-black group-hover:dark:stroke-white transition-colors duration-300 ease-in-out"> <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path> </svg>
+        <button
+          id="theme-button"
+          aria-label="Toggle theme button"
+          class="group px-2 py-0.5 rounded-md flex items-center transition-colors duration-300 ease-in-out hover:text-black hover:dark:text-white hover:bg-black/5 hover:dark:bg-white/15"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
+            class="block dark:hidden group-hover:stroke-black group-hover:dark:stroke-white transition-colors duration-300 ease-in-out"
+          >
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
+            class="hidden dark:block group-hover:stroke-black group-hover:dark:stroke-white transition-colors duration-300 ease-in-out"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
         </button>
       </nav>
     </div>
