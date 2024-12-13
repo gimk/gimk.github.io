@@ -2,6 +2,7 @@
 title: "Markdown syntax guide"
 description: "Get started writing content in markdown."
 date: "Mar 17 2024"
+draft: true
 ---
 
 ---
@@ -12,10 +13,15 @@ To create headings, use hash symbols (#) followed by a space. The number of hash
 
 ```md
 # Heading 1
+
 ## Heading 2
+
 ### Heading 3
+
 #### Heading 4
+
 ##### Heading 5
+
 ###### Heading 6
 ```
 
@@ -34,9 +40,13 @@ Simply type non-indented text, surrounded by empty lines.
 
 ```md
 <!-- empty line -->
+
 I really like using Markdown.
+
 <!-- empty line -->
+
 I think I'll use it to format all of my content from now on.
+
 <!-- empty line -->
 ```
 
@@ -51,11 +61,12 @@ I think I'll use it to format all of my content from now on.
 Use double `*` or `_` to denote bold text.
 
 ```md
-it was the **best** of times, 
-it was the __worst__ of times
+it was the **best** of times,
+it was the **worst** of times
 ```
+
 It was the **best** of times,<br/>
-it was the __worst__ of times
+it was the **worst** of times
 
 ---
 
@@ -64,11 +75,12 @@ it was the __worst__ of times
 Use single `*` to denote italic text.
 
 ```md
-it was the age of *wisdom*, 
-it was the age of *foolishness*
+it was the age of _wisdom_,
+it was the age of _foolishness_
 ```
-it was the age of *wisdom*,<br/>
-it was the age of *foolishness*
+
+it was the age of _wisdom_,<br/>
+it was the age of _foolishness_
 
 ---
 
@@ -77,11 +89,12 @@ it was the age of *foolishness*
 Use `*`, `**` and `_` to combine effects.
 
 ```md
-it was the season of ***light***, 
-it was the season of *__darkness__*
+it was the season of **_light_**,
+it was the season of _**darkness**_
 ```
-it was the season of ***light***,<br/> 
-it was the season of *__darkness__*
+
+it was the season of **_light_**,<br/>
+it was the season of _**darkness**_
 
 ---
 
@@ -90,8 +103,8 @@ it was the season of *__darkness__*
 Use triple `---` to denote a line break.
 
 ```md
-<!-- empty line -->
----
+## <!-- empty line -->
+
 <!-- empty line -->
 ```
 
@@ -140,15 +153,15 @@ Add a number followed by a period for items. For sub items, indent.
 ```md
 1. Item 1
 2. Item 2
-    1. Sub item 1
-    2. Sub item 2
+   1. Sub item 1
+   2. Sub item 2
 3. Item 3
 ```
 
 1. Item 1
 2. Item 2
-    1. Sub item 1
-    2. Sub item 2
+   1. Sub item 1
+   2. Sub item 2
 3. Item 3
 
 ---
@@ -160,15 +173,15 @@ Add a `-` or `+` for items. Don't mix. For sub items, indent.
 ```md
 - Item 1
 - Item 2
-    - Sub item 1
-    - Sub item 2
+  - Sub item 1
+  - Sub item 2
 - Item 3
 ```
 
 - Item 1
 - Item 2
-    - Sub item 1
-    - Sub item 2
+  - Sub item 1
+  - Sub item 2
 - Item 3
 
 ---
@@ -319,18 +332,18 @@ Combine a list with 2 square brackets. `spc` incomplete `x` complete.
 Use `-` for header, `|` for columns, `:` for alignment.
 
 ```md
-| Item    | Ct  |
-| :------ | --: |
-| Bread   | 1   |
-| Milk    | 1   |
-| Haribo  | 10  |
+| Item   |  Ct |
+| :----- | --: |
+| Bread  |   1 |
+| Milk   |   1 |
+| Haribo |  10 |
 ```
 
-| Item    | Buy |
-| :------ | --: |
-| Bread   | 1   |
-| Milk    | 1   |
-| Haribo  | 10  |
+| Item   | Buy |
+| :----- | --: |
+| Bread  |   1 |
+| Milk   |   1 |
+| Haribo |  10 |
 
 ---
 
@@ -377,9 +390,9 @@ Denote a code block by enclosing a section of valid code in triple backticks. Sy
 ````
 
 ```js
-  function hello() {
-    console.log("hello world");
-  }
+function hello() {
+  console.log("hello world");
+}
 ```
 
 ---
@@ -392,6 +405,3 @@ https://www.markdownguide.org/basic-syntax
 https://www.markdownguide.org/extended-syntax/
 
 ---
-
-
-
