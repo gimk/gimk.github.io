@@ -25,7 +25,7 @@ body {
 
 header {
   @apply fixed top-0 left-0 right-0 z-50 py-5;
-  @apply bg-gradient-to-t from-orange-100/25 to-orange-100 dark:bg-gradient-to-t dark:from-slate-950/25 dark:to-slate-950;
+  @apply bg-gradient-to-t from-orange-100/25 to-orange-100 to-75% dark:bg-gradient-to-t dark:from-slate-950/25 dark:to-slate-950 dark:to-75%;
   @apply backdrop-blur-sm;
 }
 
