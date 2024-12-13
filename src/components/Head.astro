@@ -102,7 +102,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
         toggleTheme(false);
       } else {
         localStorage.setItem("theme", "dark");
-        themeColorMeta.setAttribute("content", "#170206");
+        themeColorMeta.setAttribute("content", "#020617");
         toggleTheme(true);
       }
     });
@@ -178,9 +178,16 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
     if (userTheme === "light" || userTheme === "dark") {
       toggleTheme(userTheme === "dark");
-      themeColorMeta.setAttribute("content", "#170206");
     } else {
       toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+
+    if (
+      userTheme === "dark" ||
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      themeColorMeta.setAttribute("content", "#020617");
+    } else {
       themeColorMeta.setAttribute("content", "#ffedd5");
     }
   }
