@@ -83,8 +83,6 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
 <script is:inline>
   function init() {
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-
     preloadTheme();
     onScroll();
     animate();
@@ -95,13 +93,16 @@ const { title, description, image = "/nano.png" } = Astro.props;
     const backToPrev = document.getElementById("back-to-prev");
     backToPrev?.addEventListener("click", () => window.history.back());
 
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     const toggleThemeButton = document.getElementById("theme-button");
     toggleThemeButton?.addEventListener("click", () => {
       if (localStorage.theme === "dark") {
         localStorage.setItem("theme", "light");
+        themeColorMeta.setAttribute("content", "#ffedd5");
         toggleTheme(false);
       } else {
         localStorage.setItem("theme", "dark");
+        themeColorMeta.setAttribute("content", "#170206");
         toggleTheme(true);
       }
     });
@@ -163,10 +164,8 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
     if (dark) {
       document.documentElement.classList.add("dark");
-      themeColorMeta.setAttribute("content", "#170206");
     } else {
       document.documentElement.classList.remove("dark");
-      themeColorMeta.setAttribute("content", "#ffedd5");
     }
 
     window.getComputedStyle(css).opacity;
@@ -175,11 +174,14 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
   function preloadTheme() {
     const userTheme = localStorage.theme;
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
 
     if (userTheme === "light" || userTheme === "dark") {
       toggleTheme(userTheme === "dark");
+      themeColorMeta.setAttribute("content", "#170206");
     } else {
       toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
+      themeColorMeta.setAttribute("content", "#ffedd5");
     }
   }
 
