@@ -38,7 +38,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
 />
 
 <meta name="generator" content={Astro.generator} />
-<meta name="theme-color" content="bg-orange-100 dark:bg-slate-950" />
+<meta name="theme-color" content="#ffedd5" />
 
 <!-- Font preloads -->
 <link rel="preload" href={inter400} as="font" type="font/woff2" crossorigin />
@@ -83,6 +83,8 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
 <script is:inline>
   function init() {
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
     preloadTheme();
     onScroll();
     animate();
@@ -161,8 +163,10 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
     if (dark) {
       document.documentElement.classList.add("dark");
+      themeColorMeta.setAttribute("content", "#170206");
     } else {
       document.documentElement.classList.remove("dark");
+      themeColorMeta.setAttribute("content", "#ffedd5");
     }
 
     window.getComputedStyle(css).opacity;
