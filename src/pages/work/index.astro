@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import Container from "@components/Container.astro";
+import BackToPrev from "@components/BackToPrev.astro";
 import { dateRange } from "@lib/utils";
 import { WORK } from "@consts";
 
@@ -20,7 +21,10 @@ const work = await Promise.all(
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
   <Container>
-    <div class="space-y-10">
+    <div class="animate">
+      <BackToPrev href="/"> Back to home </BackToPrev>
+    </div>
+    <div class="space-y-10 my-10">
       <div class="animate font-semibold text-black dark:text-white">Work</div>
       <ul class="flex flex-col space-y-8">
         {
