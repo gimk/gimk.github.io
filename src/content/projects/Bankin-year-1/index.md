@@ -2,10 +2,13 @@
 title: "Bankin' first year"
 description: "App new design system and language"
 date: "Sept 2021"
-demoURL: "https://www.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach-(Copy)?page-id=2%3A15&node-id=3-74499&node-type=canvas&viewport=-11533%2C-1257%2C0.82&t=x6nHlUpV0nzDfHer-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1"
 ---
 
-![Future of coach project page](/projectfiles/bankin-cover.png)
+<div>
+  <img src="/projectfiles/bankin/bankin-cover.png" alt="Bankin year 1 project cover (Light Mode)" class="block dark:hidden"/>
+  <img src="/projectfiles/bankin/bankin-cover-2.png" alt="Bankin year 1 project cover (Dark Mode)" class="hidden dark:block"/>
+</div>
+
 First year working at Bankin' as a Product Designer.
 
 <u>I was the only Product Designer at Bankin'</u>, so all the projects and artboards shown below are my designs. However, the product team was also composed of one Product Manager and one Head of Product with which I worked closely during the various tasks that made up those projects.
@@ -19,25 +22,36 @@ The homepage of Bankin' was getting pretty old when I arrived in 2021. The desig
 Here are a few screens of the old version.
 
 <div class="grid grid-cols-3 gap-1">
-    <img src="/projectfiles/bankin-old-design 1.png" alt="Bankin' home page old design"/>
-    <img src="/projectfiles/bankin-old-design 2.png" alt="Bankin' home page old design"/>
-    <img src="/projectfiles/bankin-old-design 3.png" alt="Bankin' home page old design"/>
+    <img src="/projectfiles/bankin/bankin-old-design 1.png" alt="Bankin' home page old design"/>
+    <img src="/projectfiles/bankin/bankin-old-design 2.png" alt="Bankin' home page old design"/>
+    <img src="/projectfiles/bankin/bankin-old-design 3.png" alt="Bankin' home page old design"/>
 </div>
 
 Over the course of several months, we worked back and forth between the product, marketing, tech and operations teams to reach our goal. This led to many iterations that we were able to test along the way, which resulted in the released version below.
 
-<img src="/projectfiles/new-bankin-blue1.png" alt="Bankin' home page old design"/>
-<img src="/projectfiles/new-bankin-blue2.png" alt="Bankin' home page old design"/>
+<img src="/projectfiles/bankin/new-bankin-blue1.png" alt="Bankin' home page old design"/>
+<img src="/projectfiles/bankin/new-bankin-blue2.png" alt="Bankin' home page old design"/>
 
-And here are some details from there and there. Please zoom manually, as zooming functionality is not available yet.
+And here are some details from there and there. Please zoom manually, as I didn't implement any zoom functionality yet. Sorry.
 
 <div class="grid grid-cols-4 gap-1">
-    <img src="/projectfiles/newbankin-detail1.png" alt="Bankin' home page old design"/>
-    <img src="/projectfiles/newbankin-detail2.png" alt="Bankin' home page old design"/>
-    <img src="/projectfiles/newbankin-detail3.png" alt="Bankin' home page old design"/>
-    <img src="/projectfiles/newbankin-detail4.png" alt="Bankin' home page old design"/>
+    <img src="/projectfiles/bankin/newbankin-detail1.png" alt="Bankin' home page old design"/>
+    <img src="/projectfiles/bankin/newbankin-detail2.png" alt="Bankin' home page old design"/>
+    <img src="/projectfiles/bankin/newbankin-detail3.png" alt="Bankin' home page old design"/>
+    <img src="/projectfiles/bankin/newbankin-detail4.png" alt="Bankin' home page old design"/>
 </div>
 
 All these designs were thoroughly tested, with tens of user interviews and surveys. Having limited developer force to test it live, we tried to do the most during the design phase.
 
 Also, in an effort to modernize the UI, I introduced a new open source library. During this project, I worked on adding extra icons matching the style of the library.
+
+![Icon lib example](/projectfiles/bankin/icon-lib.png)
+
+---
+
+_I'll now walk you through some of the iterations and ideas behind this final design._
+
+The two main goals for this project were first, to have a landing page that represent the app value proposition, and second, modernize the UI.
+Bankin has evolved a great deal since the old design was implemented 5 years ago. Account aggregation itself doesn't bring back money so the company needed to diversify.
+
+The first thing we did was to add what we call "Opportunities" to the app : switch banks, internet provider or electrical company for example through the app and save money every month. The second was to add automated reward systems, like the Cashback, that rewards you a percentage of your purchase. And the last (for the moment) is the possibility to contract micro-credits directly in-app, when needed.
