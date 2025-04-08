@@ -15,9 +15,11 @@ After an initial brief and brainstorming from the CPO, I had to Imagine, prioriz
 
 ![Future of coach project page](/projectfiles/home-app-page1.png)
 
-<div class="text-center mx-16 mb-16 border rounded-2xl bg-black/5 border-black/25 dark:border-white/25 p-4 gap-2">
-    <img src="/chevron-up.svg" alt="chevron-up">
-    <p class="mt-1">This image on the left showcases the home page of our application. It provides a first look at the key features and user interface elements designed for intuitive navigation and quick access to essential functionalities.</p>
+<div>
+    <div class="text-center md:mx-16 mb-16 border rounded-2xl bg-black/5 border-black/25 dark:border-white/25 p-4 gap-2">
+        <img src="/chevron-up.svg" alt="chevron-up">
+        <p class="mt-1">This image on the left showcases the home page of our application. It provides a first look at the key features and user interface elements designed for intuitive navigation and quick access to essential functionalities.</p>
+    </div>
 </div>
 
 ![Future of coach project page](/projectfiles/home-app-page2.png)
