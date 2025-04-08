@@ -5,6 +5,7 @@ date: "Sept 2021"
 demoURL: "https://www.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach-(Copy)?page-id=2%3A15&node-id=3-74499&node-type=canvas&viewport=-11533%2C-1257%2C0.82&t=x6nHlUpV0nzDfHer-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1"
 ---
 
+![Future of coach project page](/projectfiles/bankin-cover.png)
 First year working at Bankin' as a Product Designer.
 
 <u>I was the only Product Designer at Bankin'</u>, so all the projects and artboards shown below are my designs. However, the product team was also composed of one Product Manager and one Head of Product with which I worked closely during the various tasks that made up those projects.
@@ -36,3 +37,7 @@ And here are some details from there and there. Please zoom manually, as zooming
     <img src="/projectfiles/newbankin-detail3.png" alt="Bankin' home page old design"/>
     <img src="/projectfiles/newbankin-detail4.png" alt="Bankin' home page old design"/>
 </div>
+
+All these designs were thoroughly tested, with tens of user interviews and surveys. Having limited developer force to test it live, we tried to do the most during the design phase.
+
+Also, in an effort to modernize the UI, I introduced a new open source library. During this project, I worked on adding extra icons matching the style of the library.
