@@ -90,3 +90,16 @@ Then, with this info we assign a profile to you, and use it to give you insights
 Bankin' is originally a fun and simplified finance app, so the whole interface here is made to reflect that. I used a colorful palette, and bold elements, to bring only the useful information to the user.
 
 This feature should be live in its final version around the end of 2023.
+
+## What else
+
+After that, I didn't keep much more projects. That said, the work didn't stop, and we made number of other features for the app.
+
+Below you can see paywalls, a reward system, a redesign of the budget feature, and a redesign of the onboarding!
+
+<div class="flex gap-4 md:-mx-24 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/see-more01.png" alt="more projects"/></div>
+    <div class=""><img src="/projectfiles/bankin/see-more02.png" alt="more projects"/></div>
+    <div class=""><img src="/projectfiles/bankin/see-more03.png" alt="more projects"/></div>
+    <div class=""><img src="/projectfiles/bankin/see-more04.png" alt="more projects"/></div>
+</div>
