@@ -16,7 +16,7 @@ The Bankin' app has more than 6 million downloads and is, at the time of writing
 
 All my designs are made for small phones first, which is what our user base use the most. I'm sorry, no fancy iPhone 13 Pro Max designs here.
 
-### New Homepage
+## New Homepage
 
 The homepage of Bankin' was getting pretty old when I arrived in 2021. The design followed the trends set by Google in 2014 and onwards, but it stayed pretty much the same since then. Also, it didn't follow the app value proposition anymore, since Bankin went from a simple account aggregation app, to a much more complex budget companion app.
 Here are a few screens of the old version.
@@ -87,13 +87,13 @@ After lots of iterations and testing, we came back to a more traditional list an
 
 ---
 
-#### What's next?
+### What's next?
 
 The version currently implemented is still far from what I've designed with the product team. A lot of features and blocks are still missing, to complete the experience and make it truly in agreement with our vision. The navigation is currently being revamped too, to continue to make the app better suited to the company value proposition.
 
 But I'd say it's still better than what it was, and the data we collected so far agrees with this statement. People like the new homepage, and even with the minor UX changes we made we're already seeing more conversion in our products.
 
-### Onboarding
+## Onboarding
 
 Reworking the app onboarding was my first project when I arrived at Bankin'. The old onboarding was very complex and time consuming (5-10 minutes), and years of AB-Testing made it very unstable.
 
@@ -138,7 +138,7 @@ Below are other final choices that we tested for the onboarding, that gave the u
     <div class=""><img src="/projectfiles/bankin/onb-choice2.png" alt=""/></div>
 </div>
 
-### Loans
+## Loans
 
 Another project I did from start to finish was the "mini-loans" we offer in our app. Such loans require, like all loans, an identity verification along with some kind of repayment capacity analysis.
 
@@ -165,7 +165,7 @@ Lastly, a series of screens are here for verification and confirmation purpose.
     <div class=""><img src="/projectfiles/bankin/credit-view3.png" alt=""/></div>
 </div>
 
-### Cashback
+## Cashback
 
 Cashback is a kind of reward system, that gives you back a percentage of the purchases you make.
 
@@ -202,7 +202,7 @@ Similarly, for the vouchers that have yet to be implemented, I designed another 
 This project was still a great challenge, since the Cashback is not so accessible to anyone, which can result in low interactions. For the various offers to coexist together I participated in many workshops, taking into account all user backgrounds to better frame our customers' interests.
 This approach yielded great results, as per our metrics more than 40% of our new users activate the cashback in their first week.
 
-### What about the design system?
+## What about the design system?
 
 Oh yes, I'm getting there.
 With a new design comes a new —or at least updated— design system for the app. For years now, Bankin' has been a single-designer-company, and as you should know, doing a design system correctly can be pretty time consuming, to say the least. That is why, the design system we had at Bankin' when I arrived was kind of... limited.
