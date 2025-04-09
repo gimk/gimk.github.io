@@ -21,7 +21,7 @@ All my designs are made for small phones first, which is what our user base use 
 The homepage of Bankin' was getting pretty old when I arrived in 2021. The design followed the trends set by Google in 2014 and onwards, but it stayed pretty much the same since then. Also, it didn't follow the app value proposition anymore, since Bankin went from a simple account aggregation app, to a much more complex budget companion app.
 Here are a few screens of the old version.
 
-<div class="grid grid-cols-3 gap-1 md:-mx-24 md:my-8">
+<div class="grid grid-cols-3 gap-4 md:-mx-24 md:my-8">
     <img src="/projectfiles/bankin/bankin-old-design 1.png" alt="Bankin' home page old design"/>
     <img src="/projectfiles/bankin/bankin-old-design 2.png" alt="Bankin' home page old design"/>
     <img src="/projectfiles/bankin/bankin-old-design 3.png" alt="Bankin' home page old design"/>
@@ -58,10 +58,10 @@ Bankin has evolved a great deal since the old design was implemented 5 years ago
 
 The first thing we did was to add what we call "Opportunities" to the app : switch banks, internet provider or electrical company for example through the app and save money every month. The second was to add automated reward systems, like the Cashback, that rewards you a percentage of your purchase. And the last (for the moment) is the possibility to contract micro-credits directly in-app, when needed.
 
-<div class="md:flex gap-4 md:-mx-32 md:my-8">
-    <div class="mx-24 md:mx-0"><img src="/projectfiles/bankin/collapsed-try.png" alt=""/></div>
-    <div class="mx-24 md:mx-0"><img src="/projectfiles/bankin/empty-try.png" alt=""/></div>
-    <div class="mx-24 md:mx-0"><img src="/projectfiles/bankin/filled-try.png" alt=""/></div>
+<div class="md:flex gap-4 md:-mx-24 md:my-8">
+    <div class="my-4 md:my-0 mx-24 md:mx-0"><img src="/projectfiles/bankin/collapsed-try.png" alt=""/></div>
+    <div class="my-4 md:my-0 mx-24 md:mx-0"><img src="/projectfiles/bankin/empty-try.png" alt=""/></div>
+    <div class="my-4 md:my-0 mx-24 md:mx-0"><img src="/projectfiles/bankin/filled-try.png" alt=""/></div>
 </div>
 
 Some of my early designs were doing just that. By having a collapsible shelf containing the user accounts, we could bring more attention to the rest of the app. And the "Last transactions" block right bellow was to push our solutions to the user through his own transactions.
@@ -69,15 +69,15 @@ Some of my early designs were doing just that. By having a collapsible shelf con
 By putting user accounts, and Bankin' accounts (Cashback and loans) together, we would've blurred the line between them.
 
 <div class="md:flex gap-4 md:-mx-8 md:my-8">
-    <div class="mx-24 md:mx-0"><img src="/projectfiles/bankin/newold-transactions1.png" alt=""/></div>
-    <div class="mx-24 md:mx-0"><img src="/projectfiles/bankin/newold-transactions2.png" alt=""/></div>
+    <div class="my-4 md:my-0 mx-24 md:mx-0"><img src="/projectfiles/bankin/newold-transactions1.png" alt=""/></div>
+    <div class="my-4 md:my-0 mx-24 md:mx-0"><img src="/projectfiles/bankin/newold-transactions2.png" alt=""/></div>
 </div>
 
 However, such designs had a few issues. The first being technical complexity; Bankin' had a real shortage of developers at the time, which prevented us from implementing drastic changes to the current layout of the homepage. The second reason was that the board wasn't very comfortable with too much change to the accounts section, since most of our stock users use it every day.
 
 After lots of iterations and testing, we came back to a more traditional list and card design that you saw earlier, and removed completely the "last transactions" block. Instead, we are working on a Story system, that highlight precisely a few of the user's transactions, and pushes them to take action when needed.
 
-<div class="flex md:-mx-32 md:my-8">
+<div class="flex md:-mx-24 md:my-8">
     <div class=""><img src="/projectfiles/bankin/stories1.png" alt=""/></div>
     <div class=""><img src="/projectfiles/bankin/stories2.png" alt=""/></div>
     <div class=""><img src="/projectfiles/bankin/stories3.png" alt=""/></div>
@@ -92,6 +92,115 @@ After lots of iterations and testing, we came back to a more traditional list an
 The version currently implemented is still far from what I've designed with the product team. A lot of features and blocks are still missing, to complete the experience and make it truly in agreement with our vision. The navigation is currently being revamped too, to continue to make the app better suited to the company value proposition.
 
 But I'd say it's still better than what it was, and the data we collected so far agrees with this statement. People like the new homepage, and even with the minor UX changes we made we're already seeing more conversion in our products.
+
+### Onboarding
+
+Reworking the app onboarding was my first project when I arrived at Bankin'. The old onboarding was very complex and time consuming (5-10 minutes), and years of AB-Testing made it very unstable.
+
+With the new onboarding, the set objective was trifold : present better what was the application value proposition, make the user opt-in on more features earlier, and make the whole process faster and less painful.
+
+I did dozens of iterations for this project, along with Principle prototypes that we used both during Guerilla Testing sessions at Gare de l'Est, and during user interviews, as we wanted to get it as right as possible for the user.
+
+The result was in two distinctive parts. First, as you can see below, the "stories" that replace the old login screen that just had text fields to create an account. Its goal is simply to give an insight to the user about what to expect in the app before creating as account. All illustrations are animated.
+
+<div class="md:flex md:-mx-24 md:my-8">
+    <div class="flex">
+        <div class=""><img src="/projectfiles/bankin/onb-story1.png" alt=""/></div>
+        <div class=""><img src="/projectfiles/bankin/onb-story2.png" alt=""/></div>
+    </div>
+    <div class="flex">
+        <div class=""><img src="/projectfiles/bankin/onb-story3.png" alt=""/></div>
+        <div class=""><img src="/projectfiles/bankin/onb-story4.png" alt=""/></div>
+    </div>
+</div>
+
+Then, after creating his account and adding its first bank (we're an account aggregator after all), the user is shown various cards one by one, each starting a small series of screens. Some are skippable.
+
+To further capture interest, each card shows a personalized element that we get from his bank connection : his electricity bill, bank charges, his last transactions, etc.
+
+<div class="flex md:-mx-16 md:my-8">
+    <div class="flex-col -mx-24">
+        <div class=""><img src="/projectfiles/bankin/onb-card1.png" alt=""/></div>
+        <div class=""><img src="/projectfiles/bankin/onb-card2.png" alt=""/></div>
+    </div>
+    <div class="flex-col -mx-24">
+        <div class=""><img src="/projectfiles/bankin/onb-card3.png" alt=""/></div>
+        <div class=""><img src="/projectfiles/bankin/onb-card4.png" alt=""/></div>
+    </div>
+</div>
+
+All these designs were thoroughly tested before being released, and the end result proved all our work : more than 75% of users complete the onboarding now, which increased dramatically our revenue per new user. It was a resounding success.
+
+Below are other final choices that we tested for the onboarding, that gave the user more leverage on what do do but unfortunately (and logically) it reduced our revenues.
+
+<div class="flex gap-4 md:-mx-16 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/onb-choice1.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/onb-choice2.png" alt=""/></div>
+</div>
+
+### Loans
+
+Another project I did from start to finish was the "mini-loans" we offer in our app. Such loans require, like all loans, an identity verification along with some kind of repayment capacity analysis.
+
+I was tasked with the creation of a native series of screens for the user to input his information, and then some screens for the loan itself (timeline, options, etc).
+
+This is pretty much straightforward. I separated each type of information by type, so the user stay focused and has no issues navigating the page. Once this is done, an animated loader plays, and the next page displays what amount of money he's able to borrow.
+
+<div class="flex gap-4 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/credit-result1.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/credit-result2.png" alt=""/></div>
+</div>
+
+Next comes the less fun part of the process. You choose what amount you want and review the repayment timeline, the delivery option, and such.
+
+<div class="flex gap-4 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/credit-view1.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/credit-view2.png" alt=""/></div>
+</div>
+
+Lastly, a series of screens are here for verification and confirmation purpose.
+
+<div class="flex gap-4 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/credit-view4.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/credit-view3.png" alt=""/></div>
+</div>
+
+### Cashback
+
+Cashback is a kind of reward system, that gives you back a percentage of the purchases you make.
+
+It can be automatic, or through a voucher, or finally through a referral link. All three of these systems are or will be in place in the Bankin' app. At the time of writing, the vouchers are yet to be implemented.
+
+The base for the designs shown below was made by Romain, the previous designer, but I added and changed a lot of things during my work for our projects.
+
+<div class="flex gap-4 mx-52 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/cashback-auto1.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/cashback-auto2.png" alt=""/></div>
+</div>
+
+When we added the automatic cashback, I had to come up with a solution, in order to make both this type and the referral link type of cashback coexist together. Using a simple symbol and a gradient, that we don't use elsewhere in the app, I made something easily recognisable by the user.
+
+<div class="flex gap-4 md:-mx-24 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/cashback-auto3.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/cashback-auto4.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/cashback-auto5.png" alt=""/></div>
+</div>
+
+Similarly, for the vouchers that have yet to be implemented, I designed another icon and color code to make it stand out.
+
+<div class="flex gap-4 mx-52 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/voucher1.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/voucher2.png" alt=""/></div>
+</div>
+
+<div class="flex gap-4 md:-mx-24 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/voucher3.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/voucher4.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/voucher5.png" alt=""/></div>
+</div>
+
+This project was still a great challenge, since the Cashback is not so accessible to anyone, which can result in low interactions. For the various offers to coexist together I participated in many workshops, taking into account all user backgrounds to better frame our customers' interests.
+This approach yielded great results, as per our metrics more than 40% of our new users activate the cashback in their first week.
 
 ### What about the design system?
 
@@ -121,3 +230,20 @@ In the Components file, elements are separated further into encapsulated categor
 - Items (account line, error lines, transactions...)
 - Cards (card like elements that contains multiple items)
 - Pages (contains multiple cards, and navigation)
+
+<div class="flex md:-mx-32 md:my-8">
+    <div class=""><img src="/projectfiles/bankin/ds-ex-1.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/ds-ex-2.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/ds-ex-3.png" alt=""/></div>
+    <div class=""><img src="/projectfiles/bankin/ds-ex-4.png" alt=""/></div>
+</div>
+
+If you add the Core file and Visual file, that makes a lot of categories! But the main advantage in using such a fine design system, is that the overrides possibilities are far greater when placing an element.
+
+For example bellow, for a single card in a dashboard, I can change each item (or account) for a two line account. I can make an error card, or even an advertisement, without detaching my symbol and editing it myself.
+
+![Component usage example on Sketch](/projectfiles/bankin/ds-usage-ex.png)
+
+Furthermore, every time I detach a high-level symbol, I get a group with more low-level symbols to work with, which prevents any unwanted changes for the developers afterwards.
+
+In the near future, and to make the design system even more useful, we should synchronise our development components with our design components, so every screen take less time to develop. But that dream probably won't see the day anytime soon, considering the long list of tasks we have for our tech team.
