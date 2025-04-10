@@ -1,7 +1,7 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import Container from "@components/Container.astro";
+import Container from "@components/Container-md.astro";
 import FormattedDate from "@components/FormattedDate.astro";
 import { readingTime } from "@lib/utils";
 import BackToPrev from "@components/BackToPrev.astro";
@@ -59,7 +59,7 @@ const { Content } = await project.render();
       }
     </div>
     <article class="animate">
-      <Content class="max-w-screen-md" />
+      <Content />
     </article>
   </Container>
 </PageLayout>
