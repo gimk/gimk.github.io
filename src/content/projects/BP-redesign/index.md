@@ -1,6 +1,6 @@
 ---
 title: "Banque Populaire Redesign"
-description: "Personal project I did back in 2021 because I was tired of my bank app"
+description: "Personal project I did because I was tired of my bank app."
 date: "Early 2021"
 ---
 

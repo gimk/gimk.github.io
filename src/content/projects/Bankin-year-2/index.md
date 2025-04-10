@@ -1,6 +1,6 @@
 ---
 title: "Bankin' second year"
-description: "In-depth redesign and new features"
+description: "In-depth redesign and new features."
 date: "July 2023"
 ---
 
