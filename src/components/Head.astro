@@ -21,7 +21,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const { title, description, image = "/nano.png" } = Astro.props;
 ---
 
-<!-- Global Metadata -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link
@@ -40,28 +39,23 @@ const { title, description, image = "/nano.png" } = Astro.props;
 <meta name="generator" content={Astro.generator} />
 <meta name="theme-color" />
 
-<!-- Font preloads -->
 <link rel="preload" href={inter400} as="font" type="font/woff2" crossorigin />
 <link rel="preload" href={inter600} as="font" type="font/woff2" crossorigin />
 <link rel="preload" href={lora400} as="font" type="font/woff2" crossorigin />
 <link rel="preload" href={lora600} as="font" type="font/woff2" crossorigin />
 
-<!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
 
-<!-- Primary Meta Tags -->
 <title>{title}</title>
 <meta name="title" content={title} />
 <meta name="description" content={description} />
 
-<!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
 <meta property="og:url" content={Astro.url} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={new URL(image, Astro.url)} />
 
-<!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image" />
 <meta property="twitter:url" content={Astro.url} />
 <meta property="twitter:title" content={title} />
@@ -71,6 +65,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
 <ViewTransitions />
 
 <script>
+  // This script runs only once on initial load for View Transitions
   import type { TransitionBeforeSwapEvent } from "astro:transitions/client";
   document.addEventListener("astro:before-swap", (e) =>
     [
@@ -82,45 +77,12 @@ const { title, description, image = "/nano.png" } = Astro.props;
 </script>
 
 <script is:inline>
-  function init() {
-    preloadTheme();
-    onScroll();
-    animate();
+  // Declare blinkTimeoutId in a scope accessible by scheduleNextBlink across init calls
+  let blinkTimeoutId = null;
 
-    const backToTop = document.getElementById("back-to-top");
-    backToTop?.addEventListener("click", (event) => scrollToTop(event));
-
-    const backToPrev = document.getElementById("back-to-prev");
-    backToPrev?.addEventListener("click", () => window.history.back());
-
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-    const toggleThemeButton = document.getElementById("theme-button");
-    toggleThemeButton?.addEventListener("click", () => {
-      if (localStorage.theme === "dark") {
-        localStorage.setItem("theme", "light");
-        themeColorMeta.setAttribute("content", "#ffedd5");
-        toggleTheme(false);
-      } else {
-        localStorage.setItem("theme", "dark");
-        themeColorMeta.setAttribute("content", "#020617");
-        toggleTheme(true);
-      }
-    });
-
-    window
-      .matchMedia("(prefers-color-scheme: dark)")
-      .addEventListener("change", (event) => {
-        if (localStorage.theme === "system") {
-          toggleTheme(event.matches);
-        }
-      });
-
-    document.addEventListener("scroll", onScroll);
-  }
-
+  // Function definitions (can be outside init if preferred, but keep pig-specific ones together)
   function animate() {
     const animateElements = document.querySelectorAll(".animate");
-
     animateElements.forEach((element, index) => {
       setTimeout(() => {
         element.classList.add("show");
@@ -146,7 +108,6 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
   function toggleTheme(dark) {
     const css = document.createElement("style");
-
     css.appendChild(
       document.createTextNode(
         `* {
@@ -159,40 +120,222 @@ const { title, description, image = "/nano.png" } = Astro.props;
         `
       )
     );
-
     document.head.appendChild(css);
-
     if (dark) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
-
-    window.getComputedStyle(css).opacity;
+    window.getComputedStyle(css).opacity; // Trigger reflow to apply transition disabling
     document.head.removeChild(css);
   }
 
   function preloadTheme() {
     const userTheme = localStorage.theme;
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-
-    if (userTheme === "light" || userTheme === "dark") {
-      toggleTheme(userTheme === "dark");
-    } else {
-      toggleTheme(window.matchMedia("(prefers-color-scheme: dark)").matches);
-    }
-
-    if (
+    const isDark =
       userTheme === "dark" ||
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    ) {
-      themeColorMeta.setAttribute("content", "#020617");
-    } else {
-      themeColorMeta.setAttribute("content", "#ffedd5");
+      (userTheme !== "light" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    toggleTheme(isDark);
+
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute("content", isDark ? "#020617" : "#ffedd5");
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => init());
-  document.addEventListener("astro:after-swap", () => init());
+  // --- Main Initialization function ---
+  // This function runs on initial load AND after Astro swaps content
+  function init() {
+    console.log("Running init()..."); // Add console log for debugging
+
+    // --- Theme, Scroll, Animation Setup ---
+    preloadTheme(); // Re-evaluate theme based on current state
+    onScroll(); // Set initial scroll state
+    animate(); // Trigger animations for new elements
+
+    const backToTop = document.getElementById("back-to-top");
+    backToTop?.removeEventListener("click", scrollToTop); // Remove previous listener
+    backToTop?.addEventListener("click", (event) => scrollToTop(event));
+
+    const backToPrev = document.getElementById("back-to-prev");
+    // Assuming backToPrev listener doesn't need removal/re-adding if element persists
+    if (backToPrev && !backToPrev.hasAttribute("data-listener-added")) {
+      backToPrev?.addEventListener("click", () => window.history.back());
+      backToPrev.setAttribute("data-listener-added", "true");
+    }
+
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const toggleThemeButton = document.getElementById("theme-button");
+    // Assuming theme button listener doesn't need removal/re-adding if element persists
+    if (
+      toggleThemeButton &&
+      !toggleThemeButton.hasAttribute("data-listener-added")
+    ) {
+      toggleThemeButton?.addEventListener("click", () => {
+        const isDark = document.documentElement.classList.contains("dark");
+        if (isDark) {
+          localStorage.setItem("theme", "light");
+          themeColorMeta?.setAttribute("content", "#ffedd5");
+          toggleTheme(false);
+        } else {
+          localStorage.setItem("theme", "dark");
+          themeColorMeta?.setAttribute("content", "#020617");
+          toggleTheme(true);
+        }
+      });
+      toggleThemeButton.setAttribute("data-listener-added", "true");
+    }
+
+    // Assuming media query listener doesn't need removal/re-adding
+    // window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ...);
+
+    document.removeEventListener("scroll", onScroll); // Remove previous listener
+    document.addEventListener("scroll", onScroll);
+
+    // --- PIG ANIMATION SETUP ---
+    // Get references to the SVG and its movable parts
+    const svg = document.querySelector(".cochon-svg");
+    const head = document.getElementById("head");
+    const snoutGroup = document.getElementById("snout-group");
+    const leftEar = document.getElementById("left-ear");
+    const rightEar = document.getElementById("right-ear");
+    const leftEye = document.getElementById("left-eye");
+    const rightEye = document.getElementById("right-eye");
+
+    // Check: Ensure all pig elements were found
+    if (
+      !svg ||
+      !head ||
+      !snoutGroup ||
+      !leftEar ||
+      !rightEar ||
+      !leftEye ||
+      !rightEye
+    ) {
+      console.error(
+        "Error: One or more Pig SVG elements not found! Pig animation cannot run."
+      );
+      // Stop *pig part* of init if elements are missing
+      return;
+    }
+
+    // Store original positions
+    const leftEyeOrigX = parseFloat(leftEye.getAttribute("cx") || "0");
+    const leftEyeOrigY = parseFloat(leftEye.getAttribute("cy") || "0");
+    const rightEyeOrigX = parseFloat(rightEye.getAttribute("cx") || "0");
+    const rightEyeOrigY = parseFloat(rightEye.getAttribute("cy") || "0");
+    const eyeOriginalRy = parseFloat(leftEye.getAttribute("ry") || "0");
+
+    // Parallax Configuration
+    const maxSnoutOffset = 1;
+    const maxHeadOffset = 0.7;
+    const maxEarOffset = 0.3;
+
+    // Blinking Configuration
+    const blinkDuration = 100;
+    const blinkRyValue = 1;
+    const minBlinkInterval = 5000;
+    const maxBlinkInterval = 8000;
+    // blinkTimeoutId is declared outside init
+
+    // Parallax Mouse Movement Function
+    function updatePigPosition(event) {
+      // Check elements still exist (might be overkill if header always persists)
+      if (
+        !svg ||
+        !head ||
+        !snoutGroup ||
+        !leftEar ||
+        !rightEar ||
+        !leftEye ||
+        !rightEye
+      )
+        return;
+
+      const mouseX = event.clientX;
+      const mouseY = event.clientY;
+      const svgRect = svg.getBoundingClientRect();
+      const svgCenterX = svgRect.left + svgRect.width / 2;
+      const svgCenterY = svgRect.top + svgRect.height / 2;
+      const deltaX = mouseX - svgCenterX;
+      const deltaY = mouseY - svgCenterY;
+
+      const normalizedOffsetX = svgRect.width
+        ? deltaX / (svgRect.width / 2)
+        : 0;
+      const normalizedOffsetY = svgRect.height
+        ? deltaY / (svgRect.height / 2)
+        : 0;
+
+      const snoutTx = normalizedOffsetX * maxSnoutOffset;
+      const snoutTy = normalizedOffsetY * maxSnoutOffset;
+      const headTx = normalizedOffsetX * maxHeadOffset;
+      const headTy = normalizedOffsetY * maxHeadOffset;
+      const earTx = normalizedOffsetX * maxEarOffset;
+      const earTy = normalizedOffsetY * maxEarOffset;
+
+      requestAnimationFrame(() => {
+        // Check elements still exist before setting attributes in async callback
+        if (
+          !head ||
+          !snoutGroup ||
+          !leftEar ||
+          !rightEar ||
+          !leftEye ||
+          !rightEye
+        )
+          return;
+
+        head.setAttribute("transform", `translate(${headTx} ${headTy})`);
+        snoutGroup.setAttribute(
+          "transform",
+          `translate(${snoutTx} ${snoutTy})`
+        );
+        leftEar.setAttribute("transform", `translate(${earTx} ${earTy})`);
+        rightEar.setAttribute("transform", `translate(${earTx} ${earTy})`);
+        leftEye.setAttribute("cx", (leftEyeOrigX + snoutTx).toString());
+        leftEye.setAttribute("cy", (leftEyeOrigY + snoutTy).toString());
+        rightEye.setAttribute("cx", (rightEyeOrigX + snoutTx).toString());
+        rightEye.setAttribute("cy", (rightEyeOrigY + snoutTy).toString());
+      });
+    }
+
+    // Blinking Functions
+    function triggerBlink() {
+      if (!leftEye || !rightEye) return; // Check elements before blinking
+      leftEye.setAttribute("ry", blinkRyValue.toString());
+      rightEye.setAttribute("ry", blinkRyValue.toString());
+
+      setTimeout(() => {
+        if (!leftEye || !rightEye) return; // Check elements before restoring
+        leftEye.setAttribute("ry", eyeOriginalRy.toString());
+        rightEye.setAttribute("ry", eyeOriginalRy.toString());
+        scheduleNextBlink();
+      }, blinkDuration);
+    }
+
+    function scheduleNextBlink() {
+      if (blinkTimeoutId !== null) {
+        clearTimeout(blinkTimeoutId);
+      }
+      const randomDelay =
+        Math.random() * (maxBlinkInterval - minBlinkInterval) +
+        minBlinkInterval;
+      blinkTimeoutId = window.setTimeout(triggerBlink, randomDelay);
+    }
+
+    // Setup Pig Listeners and Timers
+    document.removeEventListener("mousemove", updatePigPosition); // Remove old listener first
+    document.addEventListener("mousemove", updatePigPosition);
+    scheduleNextBlink(); // Start/Restart blinking loop
+  } // --- End of init() function ---
+
+  // --- Initial Setup ---
+  // Run init on initial load and after Astro swaps content
+  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("astro:after-swap", init);
+  // Preload theme immediately without waiting for DOMContentLoaded
   preloadTheme();
 </script>

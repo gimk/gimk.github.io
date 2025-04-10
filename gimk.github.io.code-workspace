@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"emmet.excludeLanguages": [],
+		"markdown.validate.enabled": false
+	}
+}
