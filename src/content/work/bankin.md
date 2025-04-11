@@ -2,7 +2,7 @@
 company: "Bankin'"
 role: "Product Designer"
 dateStart: "05/01/2021"
-dateEnd: "01/12/2023"
+dateEnd: "12/01/2023"
 ---
 
 Solo Product Designer at Bankin' (6 million users, Top 1 grossing app in finance at the time of writing)
