@@ -77,9 +77,10 @@ const { title, description, image = "/nano.png" } = Astro.props;
 </script>
 
 <script is:inline>
-  // Declare blinkTimeoutId and animation frame ID in a scope accessible across init calls
+  // Declare state variables in a scope accessible across init calls
   let blinkTimeoutId = null;
-  let pigAnimationLoopId = null; // To cancel the animation frame loop if needed
+  let pigAnimationLoopId = null;
+  let isWiggling = false; // State for wiggle animation
 
   // --- Other function definitions (animate, onScroll, etc.) ---
   function animate() {
@@ -223,9 +224,8 @@ const { title, description, image = "/nano.png" } = Astro.props;
     const maxHeadOffset = 0.6;
     const maxEarOffset = 0.5;
 
-    // --- Smoothing / Interpolation Setup ---
-    const smoothingFactor = 0.1; // Adjust between 0 (no movement) and 1 (instant movement). Smaller = smoother/more delay.
-    // Variables to store the target positions (updated by mousemove)
+    // Smoothing / Interpolation Setup
+    const smoothingFactor = 0.1;
     let targetSnoutTx = 0,
       targetSnoutTy = 0;
     let targetHeadTx = 0,
@@ -236,7 +236,6 @@ const { title, description, image = "/nano.png" } = Astro.props;
       targetLeftEyeCy = leftEyeOrigY;
     let targetRightEyeCx = rightEyeOrigX,
       targetRightEyeCy = rightEyeOrigY;
-    // Variables to store the current animated positions
     let currentSnoutTx = 0,
       currentSnoutTy = 0;
     let currentHeadTx = 0,
@@ -247,7 +246,12 @@ const { title, description, image = "/nano.png" } = Astro.props;
       currentLeftEyeCy = leftEyeOrigY;
     let currentRightEyeCx = rightEyeOrigX,
       currentRightEyeCy = rightEyeOrigY;
-    // --- End Smoothing Setup ---
+
+    // Wiggle Configuration
+    const wiggleThreshold = 60; // pixels distance to trigger wiggle
+    const wiggleAmplitude = 6; // svg units horizontal movement
+    const wiggleFrequency = 0.025; // speed of wiggle (rad/ms)
+    // isWiggling state is declared outside init
 
     // Blinking Configuration
     const blinkDuration = 100;
@@ -256,9 +260,9 @@ const { title, description, image = "/nano.png" } = Astro.props;
     const maxBlinkInterval = 8000;
     // blinkTimeoutId is declared outside init
 
-    // --- Parallax Mouse Movement Function (Updates TARGETS only) ---
-    function updatePigTargets(event) {
-      if (!svg) return; // Check svg exists
+    // --- Parallax & Wiggle Trigger Function (Updates TARGETS and Wiggle State) ---
+    function updatePigState(event) {
+      if (!svg) return;
 
       const mouseX = event.clientX;
       const mouseY = event.clientY;
@@ -268,31 +272,32 @@ const { title, description, image = "/nano.png" } = Astro.props;
       const deltaX = mouseX - svgCenterX;
       const deltaY = mouseY - svgCenterY;
 
+      // Check proximity for wiggle
+      const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+      isWiggling = distance < wiggleThreshold;
+
+      // Calculate parallax targets
       const normalizedOffsetX = svgRect.width
         ? deltaX / (svgRect.width / 2)
         : 0;
       const normalizedOffsetY = svgRect.height
         ? deltaY / (svgRect.height / 2)
         : 0;
-
-      // Update target variables
       targetSnoutTx = normalizedOffsetX * maxSnoutOffset;
       targetSnoutTy = normalizedOffsetY * maxSnoutOffset;
       targetHeadTx = normalizedOffsetX * maxHeadOffset;
       targetHeadTy = normalizedOffsetY * maxHeadOffset;
       targetEarTx = normalizedOffsetX * maxEarOffset;
       targetEarTy = normalizedOffsetY * maxEarOffset;
-
-      // Target eye positions also include the snout's target translation
       targetLeftEyeCx = leftEyeOrigX + targetSnoutTx;
       targetLeftEyeCy = leftEyeOrigY + targetSnoutTy;
       targetRightEyeCx = rightEyeOrigX + targetSnoutTx;
       targetRightEyeCy = rightEyeOrigY + targetSnoutTy;
     }
 
-    // --- Animation Loop (Interpolation + Applying positions) ---
+    // --- Animation Loop (Interpolation + Wiggle + Applying positions) ---
     function pigAnimationLoop() {
-      // Interpolate positions
+      // Interpolate base positions
       currentSnoutTx += (targetSnoutTx - currentSnoutTx) * smoothingFactor;
       currentSnoutTy += (targetSnoutTy - currentSnoutTy) * smoothingFactor;
       currentHeadTx += (targetHeadTx - currentHeadTx) * smoothingFactor;
@@ -308,28 +313,42 @@ const { title, description, image = "/nano.png" } = Astro.props;
       currentRightEyeCy +=
         (targetRightEyeCy - currentRightEyeCy) * smoothingFactor;
 
-      // Apply interpolated positions to SVG elements
-      // Add checks in case elements somehow disappear during async operations
+      // Calculate wiggle offset if close
+      let wiggleOffset = 0;
+      if (isWiggling) {
+        // Use time to create oscillation
+        wiggleOffset = Math.sin(Date.now() * wiggleFrequency) * wiggleAmplitude;
+      }
+
+      // Apply interpolated positions + wiggle offset to SVG elements
       if (head && snoutGroup && leftEar && rightEar && leftEye && rightEye) {
+        // Add wiggle to horizontal translation
         head.setAttribute(
           "transform",
-          `translate(${currentHeadTx} ${currentHeadTy})`
+          `translate(${currentHeadTx + wiggleOffset} ${currentHeadTy})`
         );
         snoutGroup.setAttribute(
           "transform",
-          `translate(${currentSnoutTx} ${currentSnoutTy})`
+          `translate(${currentSnoutTx + wiggleOffset} ${currentSnoutTy})`
         );
         leftEar.setAttribute(
           "transform",
-          `translate(${currentEarTx} ${currentEarTy})`
+          `translate(${currentEarTx + wiggleOffset} ${currentEarTy})`
         );
         rightEar.setAttribute(
           "transform",
-          `translate(${currentEarTx} ${currentEarTy})`
+          `translate(${currentEarTx + wiggleOffset} ${currentEarTy})`
         );
-        leftEye.setAttribute("cx", currentLeftEyeCx.toString());
+        // Add wiggle to eye horizontal position
+        leftEye.setAttribute(
+          "cx",
+          (currentLeftEyeCx + wiggleOffset).toString()
+        );
         leftEye.setAttribute("cy", currentLeftEyeCy.toString());
-        rightEye.setAttribute("cx", currentRightEyeCx.toString());
+        rightEye.setAttribute(
+          "cx",
+          (currentRightEyeCx + wiggleOffset).toString()
+        );
         rightEye.setAttribute("cy", currentRightEyeCy.toString());
       }
 
@@ -361,8 +380,11 @@ const { title, description, image = "/nano.png" } = Astro.props;
     }
 
     // --- Setup Listeners and Start Loops ---
-    document.removeEventListener("mousemove", updatePigTargets); // Remove old listener first
-    document.addEventListener("mousemove", updatePigTargets); // Add listener to update targets
+    document.removeEventListener("mousemove", updatePigState); // Use the new handler name
+    document.addEventListener("mousemove", updatePigState); // Add listener to update targets and wiggle state
+
+    // Remove click listener if it existed from previous versions
+    svg.removeEventListener("click", window.handlePigClick); // Assuming previous handler was global or attached to window
 
     // Cancel any previous animation loop before starting a new one
     if (pigAnimationLoopId !== null) {
