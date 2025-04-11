@@ -2,6 +2,7 @@
 title: "Future of Coach"
 description: "A modern vision for the Younited app."
 date: "June 15 2024"
+thumbnail: "/projectfiles/thumbnails/coach-thumbnail.png"
 demoURL: "https://www.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach-(Copy)?page-id=2%3A15&node-id=3-74499&node-type=canvas&viewport=-11533%2C-1257%2C0.82&t=x6nHlUpV0nzDfHer-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1"
 ---
 

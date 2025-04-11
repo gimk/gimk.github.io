@@ -1,0 +1,47 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+  entry: CollectionEntry<"projects">;
+};
+
+const { entry } = Astro.props;
+---
+
+<a
+  href={`/${entry.collection}/${entry.slug}`}
+  class="relative group flex flex-nowrap items-center overflow-hidden rounded-lg border border-black/15 dark:border-white/20 sm:hover:bg-black/5 dark:sm:hover:bg-white/5 transition-colors duration-300 ease-in-out h-20"
+>
+  <div class="relative h-full w-20 flex-shrink-0">
+    <img
+      class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
+      src={entry.data.thumbnail}
+      alt={`Thumbnail for ${entry.data.title}`}
+    />
+  </div>
+  <div class="flex flex-col flex-1 truncate pl-4 pr-10">
+    <div class="font-semibold truncate">
+      {entry.data.title}
+    </div>
+    <div class="text-sm truncate text-gray-600 dark:text-gray-400 mt-1">
+      {entry.data.description}
+    </div>
+  </div>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    class="absolute top-1/2 right-4 -translate-y-1/2 size-5 stroke-2 fill-none stroke-current"
+  >
+    <line
+      x1="5"
+      y1="12"
+      x2="19"
+      y2="12"
+      class="translate-x-3 sm:group-hover:translate-x-0 scale-x-0 sm:group-hover:scale-x-100 transition-transform duration-300 ease-in-out"
+    ></line>
+    <polyline
+      points="12 5 19 12 12 19"
+      class="-translate-x-1 sm:group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
+    ></polyline>
+  </svg>
+</a>

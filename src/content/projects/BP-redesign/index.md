@@ -2,6 +2,7 @@
 title: "Banque Populaire Redesign"
 description: "Personal project I did because I was tired of my bank app."
 date: "Early 2021"
+thumbnail: "/projectfiles/thumbnails/bp-thumbnail.png"
 ---
 
 ![Cover showing a dozen of screens skewed on blue background](/projectfiles/bp-redesign/cover.png)

@@ -2,6 +2,7 @@
 title: "Bankin' second year"
 description: "In-depth redesign and new features."
 date: "July 2023"
+thumbnail: "/projectfiles/thumbnails/bankin-thumbnail2.png"
 ---
 
 ![Cover showing a mockup of the redesigned transactions screen](/projectfiles/bankin/transaction-redesign.png)

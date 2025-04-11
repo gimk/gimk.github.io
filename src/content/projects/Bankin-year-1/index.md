@@ -2,6 +2,7 @@
 title: "Bankin' first year"
 description: "App new design system and language."
 date: "Sept 2021"
+thumbnail: "/projectfiles/thumbnails/bankin-thumbnail1.png"
 ---
 
 <div>
