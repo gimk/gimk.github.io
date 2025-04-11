@@ -77,10 +77,11 @@ const { title, description, image = "/nano.png" } = Astro.props;
 </script>
 
 <script is:inline>
-  // Declare blinkTimeoutId in a scope accessible by scheduleNextBlink across init calls
+  // Declare blinkTimeoutId and animation frame ID in a scope accessible across init calls
   let blinkTimeoutId = null;
+  let pigAnimationLoopId = null; // To cancel the animation frame loop if needed
 
-  // Function definitions (can be outside init if preferred, but keep pig-specific ones together)
+  // --- Other function definitions (animate, onScroll, etc.) ---
   function animate() {
     const animateElements = document.querySelectorAll(".animate");
     animateElements.forEach((element, index) => {
@@ -126,7 +127,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
     } else {
       document.documentElement.classList.remove("dark");
     }
-    window.getComputedStyle(css).opacity; // Trigger reflow to apply transition disabling
+    window.getComputedStyle(css).opacity; // Trigger reflow
     document.head.removeChild(css);
   }
 
@@ -137,30 +138,26 @@ const { title, description, image = "/nano.png" } = Astro.props;
       userTheme === "dark" ||
       (userTheme !== "light" &&
         window.matchMedia("(prefers-color-scheme: dark)").matches);
-
     toggleTheme(isDark);
-
     if (themeColorMeta) {
       themeColorMeta.setAttribute("content", isDark ? "#020617" : "#ffedd5");
     }
   }
 
   // --- Main Initialization function ---
-  // This function runs on initial load AND after Astro swaps content
   function init() {
-    console.log("Running init()..."); // Add console log for debugging
+    console.log("Running init()...");
 
     // --- Theme, Scroll, Animation Setup ---
-    preloadTheme(); // Re-evaluate theme based on current state
-    onScroll(); // Set initial scroll state
-    animate(); // Trigger animations for new elements
+    preloadTheme();
+    onScroll();
+    animate();
 
     const backToTop = document.getElementById("back-to-top");
-    backToTop?.removeEventListener("click", scrollToTop); // Remove previous listener
+    backToTop?.removeEventListener("click", scrollToTop);
     backToTop?.addEventListener("click", (event) => scrollToTop(event));
 
     const backToPrev = document.getElementById("back-to-prev");
-    // Assuming backToPrev listener doesn't need removal/re-adding if element persists
     if (backToPrev && !backToPrev.hasAttribute("data-listener-added")) {
       backToPrev?.addEventListener("click", () => window.history.back());
       backToPrev.setAttribute("data-listener-added", "true");
@@ -168,7 +165,6 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');
     const toggleThemeButton = document.getElementById("theme-button");
-    // Assuming theme button listener doesn't need removal/re-adding if element persists
     if (
       toggleThemeButton &&
       !toggleThemeButton.hasAttribute("data-listener-added")
@@ -188,14 +184,10 @@ const { title, description, image = "/nano.png" } = Astro.props;
       toggleThemeButton.setAttribute("data-listener-added", "true");
     }
 
-    // Assuming media query listener doesn't need removal/re-adding
-    // window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ...);
-
-    document.removeEventListener("scroll", onScroll); // Remove previous listener
+    document.removeEventListener("scroll", onScroll);
     document.addEventListener("scroll", onScroll);
 
     // --- PIG ANIMATION SETUP ---
-    // Get references to the SVG and its movable parts
     const svg = document.querySelector(".cochon-svg");
     const head = document.getElementById("head");
     const snoutGroup = document.getElementById("snout-group");
@@ -204,7 +196,6 @@ const { title, description, image = "/nano.png" } = Astro.props;
     const leftEye = document.getElementById("left-eye");
     const rightEye = document.getElementById("right-eye");
 
-    // Check: Ensure all pig elements were found
     if (
       !svg ||
       !head ||
@@ -217,7 +208,6 @@ const { title, description, image = "/nano.png" } = Astro.props;
       console.error(
         "Error: One or more Pig SVG elements not found! Pig animation cannot run."
       );
-      // Stop *pig part* of init if elements are missing
       return;
     }
 
@@ -233,6 +223,32 @@ const { title, description, image = "/nano.png" } = Astro.props;
     const maxHeadOffset = 0.6;
     const maxEarOffset = 0.5;
 
+    // --- Smoothing / Interpolation Setup ---
+    const smoothingFactor = 0.1; // Adjust between 0 (no movement) and 1 (instant movement). Smaller = smoother/more delay.
+    // Variables to store the target positions (updated by mousemove)
+    let targetSnoutTx = 0,
+      targetSnoutTy = 0;
+    let targetHeadTx = 0,
+      targetHeadTy = 0;
+    let targetEarTx = 0,
+      targetEarTy = 0;
+    let targetLeftEyeCx = leftEyeOrigX,
+      targetLeftEyeCy = leftEyeOrigY;
+    let targetRightEyeCx = rightEyeOrigX,
+      targetRightEyeCy = rightEyeOrigY;
+    // Variables to store the current animated positions
+    let currentSnoutTx = 0,
+      currentSnoutTy = 0;
+    let currentHeadTx = 0,
+      currentHeadTy = 0;
+    let currentEarTx = 0,
+      currentEarTy = 0;
+    let currentLeftEyeCx = leftEyeOrigX,
+      currentLeftEyeCy = leftEyeOrigY;
+    let currentRightEyeCx = rightEyeOrigX,
+      currentRightEyeCy = rightEyeOrigY;
+    // --- End Smoothing Setup ---
+
     // Blinking Configuration
     const blinkDuration = 100;
     const blinkRyValue = 1;
@@ -240,19 +256,9 @@ const { title, description, image = "/nano.png" } = Astro.props;
     const maxBlinkInterval = 8000;
     // blinkTimeoutId is declared outside init
 
-    // Parallax Mouse Movement Function
-    function updatePigPosition(event) {
-      // Check elements still exist (might be overkill if header always persists)
-      if (
-        !svg ||
-        !head ||
-        !snoutGroup ||
-        !leftEar ||
-        !rightEar ||
-        !leftEye ||
-        !rightEye
-      )
-        return;
+    // --- Parallax Mouse Movement Function (Updates TARGETS only) ---
+    function updatePigTargets(event) {
+      if (!svg) return; // Check svg exists
 
       const mouseX = event.clientX;
       const mouseY = event.clientY;
@@ -269,47 +275,75 @@ const { title, description, image = "/nano.png" } = Astro.props;
         ? deltaY / (svgRect.height / 2)
         : 0;
 
-      const snoutTx = normalizedOffsetX * maxSnoutOffset;
-      const snoutTy = normalizedOffsetY * maxSnoutOffset;
-      const headTx = normalizedOffsetX * maxHeadOffset;
-      const headTy = normalizedOffsetY * maxHeadOffset;
-      const earTx = normalizedOffsetX * maxEarOffset;
-      const earTy = normalizedOffsetY * maxEarOffset;
+      // Update target variables
+      targetSnoutTx = normalizedOffsetX * maxSnoutOffset;
+      targetSnoutTy = normalizedOffsetY * maxSnoutOffset;
+      targetHeadTx = normalizedOffsetX * maxHeadOffset;
+      targetHeadTy = normalizedOffsetY * maxHeadOffset;
+      targetEarTx = normalizedOffsetX * maxEarOffset;
+      targetEarTy = normalizedOffsetY * maxEarOffset;
 
-      requestAnimationFrame(() => {
-        // Check elements still exist before setting attributes in async callback
-        if (
-          !head ||
-          !snoutGroup ||
-          !leftEar ||
-          !rightEar ||
-          !leftEye ||
-          !rightEye
-        )
-          return;
-
-        head.setAttribute("transform", `translate(${headTx} ${headTy})`);
-        snoutGroup.setAttribute(
-          "transform",
-          `translate(${snoutTx} ${snoutTy})`
-        );
-        leftEar.setAttribute("transform", `translate(${earTx} ${earTy})`);
-        rightEar.setAttribute("transform", `translate(${earTx} ${earTy})`);
-        leftEye.setAttribute("cx", (leftEyeOrigX + snoutTx).toString());
-        leftEye.setAttribute("cy", (leftEyeOrigY + snoutTy).toString());
-        rightEye.setAttribute("cx", (rightEyeOrigX + snoutTx).toString());
-        rightEye.setAttribute("cy", (rightEyeOrigY + snoutTy).toString());
-      });
+      // Target eye positions also include the snout's target translation
+      targetLeftEyeCx = leftEyeOrigX + targetSnoutTx;
+      targetLeftEyeCy = leftEyeOrigY + targetSnoutTy;
+      targetRightEyeCx = rightEyeOrigX + targetSnoutTx;
+      targetRightEyeCy = rightEyeOrigY + targetSnoutTy;
     }
 
-    // Blinking Functions
+    // --- Animation Loop (Interpolation + Applying positions) ---
+    function pigAnimationLoop() {
+      // Interpolate positions
+      currentSnoutTx += (targetSnoutTx - currentSnoutTx) * smoothingFactor;
+      currentSnoutTy += (targetSnoutTy - currentSnoutTy) * smoothingFactor;
+      currentHeadTx += (targetHeadTx - currentHeadTx) * smoothingFactor;
+      currentHeadTy += (targetHeadTy - currentHeadTy) * smoothingFactor;
+      currentEarTx += (targetEarTx - currentEarTx) * smoothingFactor;
+      currentEarTy += (targetEarTy - currentEarTy) * smoothingFactor;
+      currentLeftEyeCx +=
+        (targetLeftEyeCx - currentLeftEyeCx) * smoothingFactor;
+      currentLeftEyeCy +=
+        (targetLeftEyeCy - currentLeftEyeCy) * smoothingFactor;
+      currentRightEyeCx +=
+        (targetRightEyeCx - currentRightEyeCx) * smoothingFactor;
+      currentRightEyeCy +=
+        (targetRightEyeCy - currentRightEyeCy) * smoothingFactor;
+
+      // Apply interpolated positions to SVG elements
+      // Add checks in case elements somehow disappear during async operations
+      if (head && snoutGroup && leftEar && rightEar && leftEye && rightEye) {
+        head.setAttribute(
+          "transform",
+          `translate(${currentHeadTx} ${currentHeadTy})`
+        );
+        snoutGroup.setAttribute(
+          "transform",
+          `translate(${currentSnoutTx} ${currentSnoutTy})`
+        );
+        leftEar.setAttribute(
+          "transform",
+          `translate(${currentEarTx} ${currentEarTy})`
+        );
+        rightEar.setAttribute(
+          "transform",
+          `translate(${currentEarTx} ${currentEarTy})`
+        );
+        leftEye.setAttribute("cx", currentLeftEyeCx.toString());
+        leftEye.setAttribute("cy", currentLeftEyeCy.toString());
+        rightEye.setAttribute("cx", currentRightEyeCx.toString());
+        rightEye.setAttribute("cy", currentRightEyeCy.toString());
+      }
+
+      // Continue the loop
+      pigAnimationLoopId = requestAnimationFrame(pigAnimationLoop);
+    }
+
+    // Blinking Functions (remain mostly the same)
     function triggerBlink() {
-      if (!leftEye || !rightEye) return; // Check elements before blinking
+      if (!leftEye || !rightEye) return;
       leftEye.setAttribute("ry", blinkRyValue.toString());
       rightEye.setAttribute("ry", blinkRyValue.toString());
-
       setTimeout(() => {
-        if (!leftEye || !rightEye) return; // Check elements before restoring
+        if (!leftEye || !rightEye) return;
         leftEye.setAttribute("ry", eyeOriginalRy.toString());
         rightEye.setAttribute("ry", eyeOriginalRy.toString());
         scheduleNextBlink();
@@ -326,16 +360,21 @@ const { title, description, image = "/nano.png" } = Astro.props;
       blinkTimeoutId = window.setTimeout(triggerBlink, randomDelay);
     }
 
-    // Setup Pig Listeners and Timers
-    document.removeEventListener("mousemove", updatePigPosition); // Remove old listener first
-    document.addEventListener("mousemove", updatePigPosition);
+    // --- Setup Listeners and Start Loops ---
+    document.removeEventListener("mousemove", updatePigTargets); // Remove old listener first
+    document.addEventListener("mousemove", updatePigTargets); // Add listener to update targets
+
+    // Cancel any previous animation loop before starting a new one
+    if (pigAnimationLoopId !== null) {
+      cancelAnimationFrame(pigAnimationLoopId);
+    }
+    pigAnimationLoop(); // Start the animation loop
+
     scheduleNextBlink(); // Start/Restart blinking loop
   } // --- End of init() function ---
 
   // --- Initial Setup ---
-  // Run init on initial load and after Astro swaps content
   document.addEventListener("DOMContentLoaded", init);
   document.addEventListener("astro:after-swap", init);
-  // Preload theme immediately without waiting for DOMContentLoaded
   preloadTheme();
 </script>
