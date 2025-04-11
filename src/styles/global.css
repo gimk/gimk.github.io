@@ -5,6 +5,7 @@
 html {
   overflow-y: scroll;
   color-scheme: light;
+  cursor: url('/cursor.svg') 16 16, auto !important;
 }
 
 html.dark {
@@ -14,7 +15,6 @@ html.dark {
 html,
 body {
   @apply size-full;
-  cursor: url('/cursor.svg') 16 16, auto;
 }
 
 body {
