@@ -1,7 +1,7 @@
 ---
 company: "Younited"
 role: "Senior Product Designer"
-dateStart: "01/01/2023"
+dateStart: "01/01/2024"
 dateEnd: "Today"
 ---
 
