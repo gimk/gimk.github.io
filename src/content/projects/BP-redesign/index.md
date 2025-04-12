@@ -20,7 +20,7 @@ As for the font itself, the original logo seemed to use a variation of Prompt. I
 
 Blue is somewhat overused in companies brandings today, but that's their original colour so I'll stick with it.
 
-<div class="mx-40 mt-8">
+<div class="max-w-60 mx-auto my-8">
     <img src="/projectfiles/bp-redesign/logo2.png" alt="Small version of the new logo"/>
 </div>
 
@@ -41,7 +41,7 @@ Once you'e authenticated, you lend on the account page. Here you can see your ac
 
 <p class="text-center">The illustration here is from Krestovskaya Anna, on <a href="https://dribbble.com/shots/6683266-How-to-build-a-remote-company">Dribbble</a>.</p>
 
-<div class="mx-40 mt-8">
+<div class="max-w-80 mx-auto my-8">
     <img src="/projectfiles/bp-redesign/link-illu.png" alt="Focus and link of the illustration"/>
 </div>
 
@@ -66,7 +66,7 @@ In this tab, you handle your card security concerns, see your PIN or unlock it a
 
 You can have both physical and virtual cards, and create or order more as needed.
 
-<div class="mx-32 my-8">
+<div class="max-w-96 mx-auto my-8">
     <img src="/projectfiles/bp-redesign/zoom-card.png" alt="Zoom on the physical and virtual cards"/>
 </div>
 

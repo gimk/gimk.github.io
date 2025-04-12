@@ -174,7 +174,7 @@ It can be automatic, or through a voucher, or finally through a referral link. A
 
 The base for the designs shown below was made by Romain, the previous designer, but I added and changed a lot of things during my work for our projects.
 
-<div class="flex gap-4 mx-52 md:my-8">
+<div class="flex gap-4 max-w-44 mx-auto my-8">
     <div class=""><img src="/projectfiles/bankin/cashback-auto1.png" alt=""/></div>
     <div class=""><img src="/projectfiles/bankin/cashback-auto2.png" alt=""/></div>
 </div>
@@ -189,7 +189,7 @@ When we added the automatic cashback, I had to come up with a solution, in order
 
 Similarly, for the vouchers that have yet to be implemented, I designed another icon and color code to make it stand out.
 
-<div class="flex gap-4 mx-52 md:my-8">
+<div class="flex gap-4 max-w-44 mx-auto my-8">
     <div class=""><img src="/projectfiles/bankin/voucher1.png" alt=""/></div>
     <div class=""><img src="/projectfiles/bankin/voucher2.png" alt=""/></div>
 </div>
