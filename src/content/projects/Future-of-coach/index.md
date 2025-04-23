@@ -112,6 +112,8 @@ The rest of the Home page and widgets is straighforward. We have widgets to cate
 
 Naturally, the best way to truly appreciate the effort invested in this project is to use the [**full prototype**](<https://www.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach-(Copy)?page-id=2%3A15&node-id=3-74499&node-type=canvas&viewport=-11533%2C-1257%2C0.82&t=x6nHlUpV0nzDfHer-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1>). Be aware, though, that navigating them can be a little challenging. These are scenarized prototypes based on personas, but you should still be able to easily observe most of the features mentioned above.
 
-<iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="800" height="450" src="https://embed.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach--Copy-?page-id=2%3A15&node-id=3-74499&p=f&viewport=-176%2C148%2C0.1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1&embed-host=share" allowfullscreen></iframe>
+<div class="flex justify-center">
+    <iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="450" height="800" src="https://embed.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach--Copy-?page-id=2%3A15&node-id=3-74499&p=f&viewport=-176%2C148%2C0.1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1&embed-host=share" allowfullscreen></iframe>
+</div>
 
 Thank you for reading!
