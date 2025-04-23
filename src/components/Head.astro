@@ -9,6 +9,7 @@ import inter400 from "@fontsource/inter/files/inter-latin-400-normal.woff2";
 import inter600 from "@fontsource/inter/files/inter-latin-600-normal.woff2";
 import lora400 from "@fontsource/lora/files/lora-latin-400-normal.woff2";
 import lora600 from "@fontsource/lora/files/lora-latin-600-normal.woff2";
+import { ClientRouter } from "astro:transitions";
 // Deprecated : import { ViewTransitions } from "astro:transitions";
 
 // Define component props
@@ -69,7 +70,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
-<ViewTransition />
+<ClientRouter />
 
 <script>
   // This script runs only once on initial load for View Transitions
