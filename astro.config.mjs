@@ -4,6 +4,6 @@ import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
-  site: "https://gimk.github.io",
+  site: "https://www.pantoine.com",
   integrations: [mdx(), sitemap(), tailwind()],
 });
