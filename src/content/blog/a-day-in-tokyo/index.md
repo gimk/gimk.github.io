@@ -1,7 +1,7 @@
 ---
 title: "A day in Tokyo"
 description: "Just a sneakpeek at a day of photography in Tokyo"
-date: "May 21, 2025"
+date: "March 21, 2025"
 draft: false
 ---
 
@@ -22,7 +22,7 @@ The next day, I naturally had to take that lens and my small camera for a tour i
     <img src="/blogfiles/unsplash00009.jpg" alt="Antoine Pouligny's Unsplash"/>
     <img src="/blogfiles/unsplash00012.jpg" alt="Antoine Pouligny's Unsplash"/>
     <img src="/blogfiles/unsplash00004.jpg" alt="Antoine Pouligny's Unsplash"/>
-<img src="/blogfiles/unsplash00005.jpg" alt="Antoine Pouligny's Unsplash"/>
+    <img src="/blogfiles/unsplash00005.jpg" alt="Antoine Pouligny's Unsplash"/>
 </div>
 
 <p class="mt-16">Thank you for checking out my first post, here is a dog wearing a tutu as thanks.</p>
