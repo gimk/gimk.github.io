@@ -1,0 +1,80 @@
+<div
+  id="ascii-container"
+  class="absolute inset-0 pointer-events-none -z-20 overflow-hidden select-none opacity-20 dark:opacity-[0.08]"
+  aria-hidden="true"
+>
+  <div class="mx-auto max-w-screen-xl px-5 h-full w-full relative">
+    <div
+      class="absolute -top-80 left-1/2 -translate-x-1/2 md:left-[15%] md:-translate-x-1/2"
+    >
+      <pre
+        id="ascii-canvas"
+        class="font-mono text-[10px] leading-[8px] tracking-[1px] text-orange-600 dark:text-orange-400">
+      </pre>
+    </div>
+  </div>
+</div>
+
+<script>
+  let frameId: number;
+
+  function initAscii() {
+    const canvas = document.getElementById(
+      "ascii-canvas",
+    ) as HTMLPreElement | null;
+    if (!canvas) return;
+
+    // Stop any existing animation
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+    }
+
+    const density = " .:-=+*#%@";
+    // Tripled dimensions for an expansive background effect
+    const cols = 360;
+    const rows = 240;
+    const radius = 105;
+    let time = 0;
+
+    function render() {
+      let output = "";
+      const cx = cols / 2;
+      const cy = rows / 2;
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const dx = (x - cx) * 0.6;
+          const dy = y - cy;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance <= radius) {
+            const wave =
+              Math.sin(distance * 0.15 - time) * 0.6 +
+              Math.cos(dx * 0.08 + time * 0.5) * 0.2 +
+              Math.sin(dy * 0.08 + time * 0.5) * 0.2;
+
+            const normalized = (wave + 1) / 2;
+            let charIndex = Math.floor(normalized * density.length);
+            charIndex = Math.max(0, Math.min(density.length - 1, charIndex));
+            output += density[charIndex];
+          } else {
+            output += " ";
+          }
+        }
+        output += "\n";
+      }
+
+      if (canvas) canvas.textContent = output;
+      // Slowed down 2x for a more subtle atmosphere
+      time += 0.0075;
+      frameId = requestAnimationFrame(render);
+    }
+
+    render();
+  }
+
+  // Initialize on load
+  initAscii();
+  // Initialize after view transitions
+  document.addEventListener("astro:after-swap", initAscii);
+</script>

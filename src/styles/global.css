@@ -17,7 +17,7 @@ body {
 }
 
 body {
-  @apply font-sans antialiased;
+  @apply font-sans antialiased relative;
   @apply flex flex-col min-h-screen;
   @apply bg-[#faf9f6] dark:bg-slate-950;
   @apply text-black/85 dark:text-white/85;

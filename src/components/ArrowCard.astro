@@ -13,7 +13,8 @@ const { entry } = Astro.props;
   class="relative group flex flex-nowrap items-center px-4 pr-10 bg-[#faf9f6] dark:bg-slate-950 border-x border-black/[0.05] dark:border-white/[0.05] sm:hover:bg-black/5 dark:sm:hover:bg-white/5 sm:hover:text-black dark:sm:hover:text-white transition-all duration-300 ease-in-out h-20"
 >
   <div class="horizontal-grid-line -top-px transition-all duration-300"></div>
-  <div class="horizontal-grid-line -bottom-px transition-all duration-300"></div>
+  <div class="horizontal-grid-line -bottom-px transition-all duration-300">
+  </div>
   <div class="flex flex-col flex-1 truncate">
     <div class="font-semibold truncate">
       {entry.data.title}
@@ -21,22 +22,22 @@ const { entry } = Astro.props;
     <div class="text-sm truncate opacity-60">
       {entry.data.description}
     </div>
-  </div>    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      class="absolute top-1/2 right-2 -translate-y-1/2 size-5 stroke-2 fill-none stroke-current"
-    >
-      <line
-        x1="5"
-        y1="12"
-        x2="19"
-        y2="12"
-        class="translate-x-3 sm:group-hover:translate-x-0 scale-x-0 sm:group-hover:scale-x-100 transition-transform duration-300 ease-in-out"
-      ></line>
-      <polyline
-        points="12 5 19 12 12 19"
-        class="-translate-x-1 sm:group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
-      ></polyline>
-    </svg>
   </div>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    class="absolute top-1/2 right-2 -translate-y-1/2 size-5 stroke-2 fill-none stroke-current"
+  >
+    <line
+      x1="5"
+      y1="12"
+      x2="19"
+      y2="12"
+      class="translate-x-3 sm:group-hover:translate-x-0 scale-x-0 sm:group-hover:scale-x-100 transition-transform duration-300 ease-in-out"
+    ></line>
+    <polyline
+      points="12 5 19 12 12 19"
+      class="-translate-x-1 sm:group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
+    ></polyline>
+  </svg>
 </a>
