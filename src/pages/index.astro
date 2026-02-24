@@ -36,11 +36,13 @@ const work = await Promise.all(
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <div class="grid grid-cols-1 md:grid-cols-8 items-start">
-      <aside class="md:col-span-2 pt-16 pb-8 md:pb-16 h-fit md:sticky md:top-24">
-        <h4 class="animate font-semibold text-black dark:text-white mb-6 pl-2">
-          Hi, I'm Antoine <span class="text-xl">👋</span>
-        </h4>
+    <div class="grid grid-cols-1 md:grid-cols-8 items-start pt-0">
+      <aside class="md:col-span-2 pb-8 md:pb-16">
+        <div class="h-20 flex items-center pl-2">
+          <h4 class="animate font-semibold text-black dark:text-white">
+            Hi, I'm Antoine <span class="text-xl">👋</span>
+          </h4>
+        </div>
         <article class="space-y-4">
           <p class="animate pl-2">
             I am a passionate <b>Senior Product Designer</b>, with a strong
@@ -88,18 +90,18 @@ const work = await Promise.all(
         </article>
       </aside>
 
-      <div class="md:col-start-4 md:col-span-5 pt-8 md:pt-16 pb-16 space-y-24">
-        <section class="animate space-y-6">
-          <div class="flex flex-wrap gap-y-2 items-center justify-between pl-2">
+      <div class="md:col-start-4 md:col-span-5 pb-16 space-y-24">
+        <section class="animate">
+          <div class="h-20 flex items-center justify-between pl-2">
             <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">
               Recent projects
             </h5>
             <Link href="/projects" class="text-sm"> See all projects </Link>
           </div>
-          <ul class="flex flex-col gap-4">
+          <ul class="flex flex-col gap-8 m-0 p-0 list-none">
             {
               projects.map((project) => (
-                <li>
+                <li class="animate">
                   <ArrowCardThumbnail entry={project} />
                 </li>
               ))
@@ -107,8 +109,8 @@ const work = await Promise.all(
           </ul>
         </section>
 
-        <section class="animate space-y-6">
-          <div class="flex flex-wrap gap-y-2 items-center justify-between pl-2">
+        <section class="animate">
+          <div class="h-20 flex items-center justify-between pl-2">
             <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">
               Work Experience
             </h5>
@@ -136,15 +138,15 @@ const work = await Promise.all(
           </ul>
         </section>
 
-        <section class="animate space-y-6">
-          <div class="flex flex-wrap gap-y-2 items-center justify-between pl-2">
+        <section class="animate">
+          <div class="h-20 flex items-center justify-between pl-2">
             <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">Latest posts</h5>
             <Link href="/blog" class="text-sm"> See all posts </Link>
           </div>
-          <ul class="flex flex-col gap-4">
+          <ul class="flex flex-col gap-8 m-0 p-0 list-none">
             {
               blog.map((post) => (
-                <li>
+                <li class="animate">
                   <ArrowCard entry={post} />
                 </li>
               ))

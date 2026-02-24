@@ -31,7 +31,7 @@ header {
 }
 
 main {
-  @apply flex-1 py-12;
+  @apply flex-1 py-4;
 }
 
 footer {
