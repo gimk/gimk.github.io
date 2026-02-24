@@ -31,11 +31,11 @@ header {
 }
 
 main {
-  @apply flex-1 py-4;
+  @apply flex-1 py-4 overflow-x-clip;
 }
 
 footer {
-  @apply py-8 text-sm;
+  @apply py-8 text-sm overflow-x-clip;
   @apply border-t border-black/10 dark:border-white/10;
 }
 
