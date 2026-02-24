@@ -8,40 +8,48 @@ import { WORK } from "@consts";
 
 const collection = (await getCollection("work")).sort(
   (a, b) =>
-    new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf()
+    new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf(),
 );
 
 const work = await Promise.all(
   collection.map(async (item) => {
     const { Content } = await item.render();
     return { ...item, Content };
-  })
+  }),
 );
 ---
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
   <Container>
-    <div class="grid grid-cols-1 md:grid-cols-8 gap-x-0 pt-0">
-      <aside class="md:col-span-2 flex flex-col gap-8 pb-6">
-        <div class="animate">
-          <BackToPrev href="/"> Back to home </BackToPrev>
+    <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 pt-0">
+      <aside class="md:col-span-3 pb-6 md:pb-16">
+        <div
+          class="relative bg-[#faf9f6] dark:bg-slate-950 border border-black/[0.05] dark:border-white/[0.05] z-20 pb-8 md:-mr-px -mt-px"
+        >
+          <div class="animate">
+            <BackToPrev href="/"> Back to home </BackToPrev>
+          </div>
+          <div class="px-4">
+            <div class="h-20 flex items-center">
+              <h1 class="animate font-semibold text-black dark:text-white text-3xl">
+                Work
+              </h1>
+            </div>
+            <p class="animate mt-4 text-sm opacity-60 font-serif">
+              My professional journey and the impact I've made across various
+              companies.
+            </p>
+          </div>
         </div>
-        <div class="animate pl-2">
-          <h1 class="font-semibold text-black dark:text-white text-3xl">
-            Work
-          </h1>
-        </div>
-        <p class="animate mt-4 text-sm opacity-60 font-serif pl-2">
-          My professional journey and the impact I've made across various companies.
-        </p>
       </aside>
 
-      <div class="md:col-start-4 md:col-span-5 pb-16">
+      <div class="md:col-start-5 md:col-span-6 pb-16">
         <ul class="flex flex-col gap-8 m-0 p-0 list-none">
           {
             work.map((entry) => (
-              <li class="animate pl-2">
-                <div class="flex flex-wrap items-baseline gap-x-2 md:pl-2">
+              <li class="animate relative bg-[#faf9f6] dark:bg-slate-950 border-x border-black/[0.05] dark:border-white/[0.05] z-10 px-4 py-4 md:-mr-px">
+                <div class="horizontal-grid-line -top-px" />
+                <div class="flex flex-wrap items-baseline gap-x-2">
                   <div class="font-semibold text-black dark:text-white text-lg">
                     {entry.data.company}
                   </div>
@@ -49,10 +57,13 @@ const work = await Promise.all(
                     {dateRange(entry.data.dateStart, entry.data.dateEnd)}
                   </div>
                 </div>
-                <div class="text-sm opacity-80 mb-6 uppercase tracking-wide font-medium md:pl-2">{entry.data.role}</div>
-                <article class="prose-sm md:pl-2">
+                <div class="text-sm opacity-80 mb-6 uppercase tracking-wide font-medium">
+                  {entry.data.role}
+                </div>
+                <article class="prose-sm">
                   <entry.Content />
                 </article>
+                <div class="horizontal-grid-line -bottom-px" />
               </li>
             ))
           }

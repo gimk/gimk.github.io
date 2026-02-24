@@ -22,7 +22,7 @@ const allwork = (await getCollection("work"))
   .sort(
     (a, b) =>
       new Date(b.data.dateStart).valueOf() -
-      new Date(a.data.dateStart).valueOf()
+      new Date(a.data.dateStart).valueOf(),
   )
   .slice(0, SITE.NUM_WORKS_ON_HOMEPAGE);
 
@@ -30,39 +30,48 @@ const work = await Promise.all(
   allwork.map(async (item) => {
     const { Content } = await item.render();
     return { ...item, Content };
-  })
+  }),
 );
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <div class="grid grid-cols-1 md:grid-cols-8 items-start pt-0">
-      <aside class="md:col-span-2 pb-6 md:pb-16">
-        <div class="h-20 flex items-center pl-2">
-          <h4 class="animate font-semibold text-black dark:text-white">
-            Hi, I'm Antoine <span class="text-xl">👋</span>
-          </h4>
-        </div>
-        <article class="space-y-4">
-          <p class="animate pl-2">
-            I am a passionate <b>Senior Product Designer</b>, with a strong
-            engineering background and <b>7 years</b> of experience in product and
-            design.
-          </p>
-          <p class="animate text-sm opacity-80 font-serif pl-2">
-            A few years back, I decided to dedicate my time to merge design and
-            engineering and create clear, simple, and meaningful <b>user systems</b>, that overperform without compromising the experience.
-          </p>
-          <p class="animate text-sm opacity-80 font-serif pl-2">
-            I'm also a definitive foodie, have been cooking for years, and
-            recently passed a French culinary license! 🧑‍🍳
-          </p>
-          
+    <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 items-start pt-0">
+      <aside class="md:col-span-3 pb-6 md:pb-16">
+        <div
+          class="relative bg-[#faf9f6] dark:bg-slate-950 border border-black/[0.05] dark:border-white/[0.05] z-20 pb-8 md:-mr-px px-4 -mt-px"
+        >
+          <div class="horizontal-grid-line -top-px"></div>
+          <div class="h-20 flex items-center">
+            <h4 class="animate font-semibold text-black dark:text-white">
+              Hi, I'm Antoine <span class="text-xl">👋</span>
+            </h4>
+          </div>
+          <article class="space-y-4">
+            <p class="animate">
+              I am a passionate <b>Senior Product Designer</b>, with a strong
+              engineering background and <b>7 years</b> of experience in product and
+              design.
+            </p>
+            <p class="animate text-sm opacity-80 font-serif">
+              A few years back, I decided to dedicate my time to merge design
+              and engineering and create clear, simple, and meaningful <b
+                >user systems</b
+              >, that overperform without compromising the experience.
+            </p>
+            <p class="animate text-sm opacity-80 font-serif">
+              I'm also a definitive foodie, have been cooking for years, and
+              recently passed a French culinary license! 🧑‍🍳
+            </p>
+          </article>
+
           <div class="animate pt-6 space-y-4">
-            <h5 class="font-semibold text-black dark:text-white text-sm uppercase tracking-wider pl-2">
+            <h5
+              class="font-semibold text-black dark:text-white text-sm uppercase tracking-wider"
+            >
               Connect
             </h5>
-            <ul class="flex flex-wrap gap-2 text-sm pl-2">
+            <ul class="flex flex-wrap gap-2 text-sm">
               {
                 SOCIALS.map((SOCIAL) => (
                   <li class="flex gap-x-2 text-nowrap">
@@ -87,13 +96,15 @@ const work = await Promise.all(
               </li>
             </ul>
           </div>
-        </article>
+        </div>
       </aside>
 
-      <div class="md:col-start-4 md:col-span-5 pb-16 space-y-24">
+      <div class="md:col-start-5 md:col-span-6 pb-16 space-y-24">
         <section class="animate">
-          <div class="h-20 flex items-center justify-between pl-2">
-            <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">
+          <div class="h-20 flex items-center justify-between pl-4">
+            <h5
+              class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
+            >
               Recent projects
             </h5>
             <Link href="/projects" class="text-sm"> See all projects </Link>
@@ -110,8 +121,10 @@ const work = await Promise.all(
         </section>
 
         <section class="animate">
-          <div class="h-20 flex items-center justify-between pl-2">
-            <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">
+          <div class="h-20 flex items-center justify-between pl-4">
+            <h5
+              class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
+            >
               Work Experience
             </h5>
             <Link href="/work" class="text-sm"> See all work </Link>
@@ -119,8 +132,9 @@ const work = await Promise.all(
           <ul class="flex flex-col space-y-10">
             {
               work.map((entry) => (
-                <li class="pl-2 md:pl-0">
-                  <div class="flex flex-wrap items-baseline gap-x-2 md:pl-2">
+                <li class="animate relative bg-[#faf9f6] dark:bg-slate-950 border-x border-black/[0.05] dark:border-white/[0.05] z-10 px-4 py-4 md:-mr-px">
+                  <div class="horizontal-grid-line -top-px" />
+                  <div class="flex flex-wrap items-baseline gap-x-1">
                     <div class="font-semibold text-black dark:text-white">
                       {entry.data.company}
                     </div>
@@ -128,10 +142,13 @@ const work = await Promise.all(
                       {dateRange(entry.data.dateStart, entry.data.dateEnd)}
                     </div>
                   </div>
-                  <div class="text-sm opacity-75 mb-4 uppercase tracking-wide font-medium md:pl-2">{entry.data.role}</div>
-                  <article class="prose-sm md:pl-2">
+                  <div class="text-sm opacity-75 mb-4 uppercase tracking-wide font-medium">
+                    {entry.data.role}
+                  </div>
+                  <article class="prose-sm">
                     <entry.Content />
                   </article>
+                  <div class="horizontal-grid-line -bottom-px" />
                 </li>
               ))
             }
@@ -139,8 +156,12 @@ const work = await Promise.all(
         </section>
 
         <section class="animate">
-          <div class="h-20 flex items-center justify-between pl-2">
-            <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">Latest posts</h5>
+          <div class="h-20 flex items-center justify-between pl-4">
+            <h5
+              class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
+            >
+              Latest posts
+            </h5>
             <Link href="/blog" class="text-sm"> See all posts </Link>
           </div>
           <ul class="flex flex-col gap-8 m-0 p-0 list-none">
