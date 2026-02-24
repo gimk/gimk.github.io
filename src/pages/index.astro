@@ -36,135 +36,122 @@ const work = await Promise.all(
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <h4 class="animate font-semibold text-black dark:text-white">
-      Hi, I'm Antoine <span class="text-xl">👋</span>
-    </h4>
-    <div class="space-y-16">
-      <section>
+    <div class="grid grid-cols-1 md:grid-cols-8 items-start">
+      <aside class="md:col-span-2 pt-16 pb-8 md:pb-16 h-fit md:sticky md:top-24">
+        <h4 class="animate font-semibold text-black dark:text-white mb-6 pl-2">
+          Hi, I'm Antoine <span class="text-xl">👋</span>
+        </h4>
         <article class="space-y-4">
-          <p class="animate">
+          <p class="animate pl-2">
             I am a passionate <b>Senior Product Designer</b>, with a strong
             engineering background and <b>7 years</b> of experience in product and
             design.
           </p>
-          <p class="animate">
+          <p class="animate text-sm opacity-80 font-serif pl-2">
             A few years back, I decided to dedicate my time to merge design and
-            engineering and create clear, simple, and meaningful <b
-              >user systems</b
-            >, that <span class="underline"
-              >overperform without compromising the experience.</span
-            >
+            engineering and create clear, simple, and meaningful <b>user systems</b>, that overperform without compromising the experience.
           </p>
-          <p class="animate">
+          <p class="animate text-sm opacity-80 font-serif pl-2">
             I'm also a definitive foodie, have been cooking for years, and
-            recently passed a French culinary license! <span class="text-xl"
-              >🧑‍🍳</span
-            >
+            recently passed a French culinary license! 🧑‍🍳
           </p>
-          <p class="animate">
-            Anyway, this is not a fancy and sometimes irrealistic designer
-            website, but a simple blog and portfolio that aims to take time to
-            explain what matters.
-          </p>
-        </article>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Recent projects
-          </h5>
-          <Link href="/projects"> See all projects </Link>
-        </div>
-        <ul class="flex flex-col gap-4">
-          {
-            projects.map((project) => (
-              <li>
-                <ArrowCardThumbnail entry={project} />
-              </li>
-            ))
-          }
-        </ul>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">
-            Work Experience
-          </h5>
-          <Link href="/work"> See all work </Link>
-        </div>
-        <ul class="flex flex-col space-y-4">
-          {
-            work.map((entry) => (
-              <li>
-                <div class="font-semibold text-black dark:text-white">
-                  {entry.data.company}
-                </div>
-                <div class="text-sm opacity-75">
-                  {dateRange(entry.data.dateStart, entry.data.dateEnd)}
-                </div>
-                <div class="text-sm opacity-75">{entry.data.role}</div>
-                <article>
-                  <entry.Content />
-                </article>
-              </li>
-            ))
-          }
-        </ul>
-      </section>
-
-      <section class="animate space-y-6">
-        <div class="flex flex-wrap gap-y-2 items-center justify-between">
-          <h5 class="font-semibold text-black dark:text-white">Latest posts</h5>
-          <Link href="/blog"> See all posts </Link>
-        </div>
-        <ul class="flex flex-col gap-4">
-          {
-            blog.map((post) => (
-              <li>
-                <ArrowCard entry={post} />
-              </li>
-            ))
-          }
-        </ul>
-      </section>
-
-      <section class="animate space-y-4">
-        <h5 class="font-semibold text-black dark:text-white">
-          Let's Connect <span class="text-xl">🤝</span>
-        </h5>
-        <article>
-          <p>
-            If you want to get in touch with me about something or just to say
-            hi, reach out on social media or send me an email.
-          </p>
-        </article>
-        <ul class="flex flex-wrap gap-2">
-          {
-            SOCIALS.map((SOCIAL) => (
-              <li class="flex gap-x-2 text-nowrap">
+          
+          <div class="animate pt-6 space-y-4">
+            <h5 class="font-semibold text-black dark:text-white text-sm uppercase tracking-wider pl-2">
+              Connect
+            </h5>
+            <ul class="flex flex-wrap gap-2 text-sm pl-2">
+              {
+                SOCIALS.map((SOCIAL) => (
+                  <li class="flex gap-x-2 text-nowrap">
+                    <Link
+                      href={SOCIAL.HREF}
+                      external
+                      aria-label={`${SITE.NAME} on ${SOCIAL.NAME}`}
+                    >
+                      {SOCIAL.NAME}
+                    </Link>
+                    {"/"}
+                  </li>
+                ))
+              }
+              <li class="line-clamp-1">
                 <Link
-                  href={SOCIAL.HREF}
-                  external
-                  aria-label={`${SITE.NAME} on ${SOCIAL.NAME}`}
+                  href={`mailto:${SITE.EMAIL}`}
+                  aria-label={`Email ${SITE.NAME}`}
                 >
-                  {SOCIAL.NAME}
+                  {SITE.EMAIL}
                 </Link>
-                {"/"}
               </li>
-            ))
-          }
-          <li class="line-clamp-1">
-            <Link
-              href={`mailto:${SITE.EMAIL}`}
-              aria-label={`Email ${SITE.NAME}`}
-            >
-              {SITE.EMAIL}
-            </Link>
-          </li>
-        </ul>
-      </section>
+            </ul>
+          </div>
+        </article>
+      </aside>
+
+      <div class="md:col-start-4 md:col-span-5 pt-8 md:pt-16 pb-16 space-y-24">
+        <section class="animate space-y-6">
+          <div class="flex flex-wrap gap-y-2 items-center justify-between pl-2">
+            <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">
+              Recent projects
+            </h5>
+            <Link href="/projects" class="text-sm"> See all projects </Link>
+          </div>
+          <ul class="flex flex-col gap-4">
+            {
+              projects.map((project) => (
+                <li>
+                  <ArrowCardThumbnail entry={project} />
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section class="animate space-y-6">
+          <div class="flex flex-wrap gap-y-2 items-center justify-between pl-2">
+            <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">
+              Work Experience
+            </h5>
+            <Link href="/work" class="text-sm"> See all work </Link>
+          </div>
+          <ul class="flex flex-col space-y-10">
+            {
+              work.map((entry) => (
+                <li class="pl-2 md:pl-0">
+                  <div class="flex flex-wrap items-baseline gap-x-2 md:pl-2">
+                    <div class="font-semibold text-black dark:text-white">
+                      {entry.data.company}
+                    </div>
+                    <div class="text-xs opacity-60">
+                      {dateRange(entry.data.dateStart, entry.data.dateEnd)}
+                    </div>
+                  </div>
+                  <div class="text-sm opacity-75 mb-4 uppercase tracking-wide font-medium md:pl-2">{entry.data.role}</div>
+                  <article class="prose-sm md:pl-2">
+                    <entry.Content />
+                  </article>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section class="animate space-y-6">
+          <div class="flex flex-wrap gap-y-2 items-center justify-between pl-2">
+            <h5 class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm">Latest posts</h5>
+            <Link href="/blog" class="text-sm"> See all posts </Link>
+          </div>
+          <ul class="flex flex-col gap-4">
+            {
+              blog.map((post) => (
+                <li>
+                  <ArrowCard entry={post} />
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </div>
     </div>
   </Container>
 </PageLayout>

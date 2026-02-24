@@ -13,22 +13,32 @@ const projects = (await getCollection("projects"))
 
 <PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
   <Container>
-    <div class="animate">
-      <BackToPrev href="/"> Back to home </BackToPrev>
-    </div>
-    <div class="space-y-10 my-10">
-      <div class="animate font-semibold text-black dark:text-white">
-        Projects
+    <div class="grid grid-cols-1 md:grid-cols-8 gap-x-0 pt-8 md:pt-16">
+      <aside class="md:col-span-2 flex flex-col gap-8">
+        <div class="animate">
+          <BackToPrev href="/"> Back to home </BackToPrev>
+        </div>
+        <div class="animate pl-2">
+          <h1 class="font-semibold text-black dark:text-white text-3xl">
+            Projects
+          </h1>
+        </div>
+        <p class="animate mt-4 text-sm opacity-60 font-serif pl-2">
+          A collection of projects I've worked on, ranging from full-scale product redesigns to experimental prototypes.
+        </p>
+      </aside>
+
+      <div class="md:col-start-4 md:col-span-5 pb-16">
+        <ul class="flex flex-col gap-8 m-0 p-0 list-none">
+          {
+            projects.map((project) => (
+              <li class="animate">
+                <ArrowCardThumbnail entry={project} />
+              </li>
+            ))
+          }
+        </ul>
       </div>
-      <ul class="animate flex flex-col gap-4">
-        {
-          projects.map((project) => (
-            <li>
-              <ArrowCardThumbnail entry={project} />
-            </li>
-          ))
-        }
-      </ul>
     </div>
   </Container>
 </PageLayout>

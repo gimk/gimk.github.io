@@ -18,23 +18,58 @@ body {
 
 body {
   @apply font-sans antialiased;
-  @apply flex flex-col;
-  @apply bg-orange-100 dark:bg-slate-950;
-  @apply text-black/75 dark:text-white/75;
+  @apply flex flex-col min-h-screen;
+  @apply bg-[#faf9f6] dark:bg-slate-950;
+  @apply text-black/85 dark:text-white/85;
 }
 
 header {
-  @apply fixed top-0 left-0 right-0 z-50 py-5;
-  @apply bg-gradient-to-t from-orange-100/25 to-orange-100 to-75% dark:bg-gradient-to-t dark:from-slate-950/25 dark:to-slate-950 dark:to-75%;
-  @apply backdrop-blur-sm;
+  @apply sticky top-0 left-0 right-0 z-50 py-4;
+  @apply bg-[#faf9f6]/80 dark:bg-slate-950/80;
+  @apply backdrop-blur-md;
+  @apply border-b border-black/10 dark:border-white/10;
 }
 
 main {
-  @apply flex-1 py-32;
+  @apply flex-1 py-12;
 }
 
 footer {
-  @apply py-5 text-sm;
+  @apply py-8 text-sm;
+  @apply border-t border-black/10 dark:border-white/10;
+}
+
+@layer utilities {
+  /* Horizontal lines: only dash when THEIR specific card is hovered */
+  .group:hover .horizontal-grid-line,
+  .group:hover.border-x {
+    border-style: dashed;
+    @apply border-black/15 dark:border-white/15;
+  }
+
+  /* Vertical framing for Desktop (md and above) */
+  @media (min-width: 768px) {
+    /* Content Framing (Cols 4-8): lines 3 and 8 dash when content items are hovered */
+    .container-grid:has(.md\:col-start-4 a:hover, .md\:col-start-4 button:hover) .line-3,
+    .container-grid:has(.md\:col-start-4 a:hover, .md\:col-start-4 button:hover) .line-8 {
+      border-style: dashed;
+      @apply border-black/15 dark:border-white/15;
+    }
+  }
+
+  /* Vertical framing for Mobile (below md) */
+  @media (max-width: 767px) {
+    /* On mobile, dash boundaries only when cards are hovered */
+    .container-grid:has(ul a:hover) .line-0,
+    .container-grid:has(ul a:hover) .line-8 {
+      border-style: dashed;
+      @apply border-black/15 dark:border-white/15;
+    }
+  }
+
+  .horizontal-grid-line {
+    @apply absolute left-[-100vw] right-[-100vw] border-t border-black/[0.05] dark:border-white/[0.05] pointer-events-none;
+  }
 }
 
 article {

@@ -21,33 +21,43 @@ const work = await Promise.all(
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
   <Container>
-    <div class="animate">
-      <BackToPrev href="/"> Back to home </BackToPrev>
-    </div>
-    <div class="space-y-10 my-10">
-      <div class="animate font-semibold text-black dark:text-white">Work</div>
-      <ul class="flex flex-col space-y-8">
-        {
-          work.map((entry) => (
-            <li class="animate">
-              <div class="font-semibold text-black dark:text-white">
-                {entry.data.company}
-              </div>
-              <div class="text-sm opacity-75">
-                {dateRange(entry.data.dateStart, entry.data.dateEnd)}
-              </div>
-              <div class="text-sm opacity-75">{entry.data.role}</div>
-              <article>
-                <entry.Content />
-              </article>
-            </li>
-          ))
-        }
-      </ul>
-      <!-- 
-      <ul class="animate flex flex-col gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-8 gap-x-0 pt-8 md:pt-16">
+      <aside class="md:col-span-2 flex flex-col gap-8">
+        <div class="animate">
+          <BackToPrev href="/"> Back to home </BackToPrev>
+        </div>
+        <div class="animate pl-2">
+          <h1 class="font-semibold text-black dark:text-white text-3xl">
+            Work
+          </h1>
+        </div>
+        <p class="animate mt-4 text-sm opacity-60 font-serif pl-2">
+          My professional journey and the impact I've made across various companies.
+        </p>
+      </aside>
 
-      </ul> -->
+      <div class="md:col-start-4 md:col-span-5 pb-16">
+        <ul class="flex flex-col gap-8 m-0 p-0 list-none">
+          {
+            work.map((entry) => (
+              <li class="animate pl-2">
+                <div class="flex flex-wrap items-baseline gap-x-2 md:pl-2">
+                  <div class="font-semibold text-black dark:text-white text-lg">
+                    {entry.data.company}
+                  </div>
+                  <div class="text-sm opacity-60">
+                    {dateRange(entry.data.dateStart, entry.data.dateEnd)}
+                  </div>
+                </div>
+                <div class="text-sm opacity-80 mb-6 uppercase tracking-wide font-medium md:pl-2">{entry.data.role}</div>
+                <article class="prose-sm md:pl-2">
+                  <entry.Content />
+                </article>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
     </div>
   </Container>
 </PageLayout>
