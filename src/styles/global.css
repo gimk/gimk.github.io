@@ -13,7 +13,7 @@ html.dark {
 
 html,
 body {
-  @apply size-full;
+  @apply w-full;
 }
 
 body {
