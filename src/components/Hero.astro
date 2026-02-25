@@ -71,7 +71,7 @@ import Link from "@components/Link.astro";
   >
     <pre
       id="hero-ascii"
-      class="font-mono text-[10px] leading-[8px] tracking-[1px] text-orange-600 dark:text-orange-500 opacity-40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
+      class="font-mono text-[10px] leading-[8px] tracking-[1px] text-orange-600 dark:text-orange-500 opacity-75 dark:opacity-50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
       style="mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);">
     </pre>
   </div>
@@ -94,8 +94,14 @@ import Link from "@components/Link.astro";
     // Mouse tracking for trail
     let mouseX = -1000;
     let mouseY = -1000;
-    const trailPoints: { x: number; y: number; age: number; char: string; vx?: number; vy?: number }[] =
-      [];
+    const trailPoints: {
+      x: number;
+      y: number;
+      age: number;
+      char: string;
+      vx?: number;
+      vy?: number;
+    }[] = [];
     const trailChars = "@#%*+=-:. ";
 
     function addPoint(x: number, y: number, age = 1.0, vx = 0, vy = 0) {
@@ -105,7 +111,7 @@ import Link from "@components/Link.astro";
         age,
         char: trailChars[Math.floor(Math.random() * trailChars.length)],
         vx,
-        vy
+        vy,
       });
       if (trailPoints.length > 300) trailPoints.shift();
     }
@@ -121,7 +127,7 @@ import Link from "@components/Link.astro";
       const rect = canvas.getBoundingClientRect();
       const cx = ((e.clientX - rect.left) / rect.width) * cols;
       const cy = ((e.clientY - rect.top) / rect.height) * rows;
-      
+
       // Create star burst
       const numParticles = 12;
       for (let i = 0; i < numParticles; i++) {
