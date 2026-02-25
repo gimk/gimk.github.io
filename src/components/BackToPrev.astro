@@ -8,13 +8,22 @@ const { href } = Astro.props;
 
 <a
   href={href}
-  class="relative group w-full flex items-center pr-3 hover:bg-black/5 dark:hover:bg-white/5 hover:text-black dark:hover:text-white transition-all duration-300 ease-in-out h-20"
+  class="back-to-prev relative group w-full flex items-center pr-3 transition-all duration-300 ease-in-out h-20 overflow-hidden group-hover:text-orange-500 dark:group-hover:text-orange-500"
 >
+  <div
+    class="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-[55%] dark:group-hover:opacity-[30%] transition-opacity duration-300"
+    aria-hidden="true"
+  >
+    <pre
+      class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-orange-500 dark:text-orange-500 absolute top-1/2 left-[16px] -translate-x-1/2 -translate-y-1/2"
+      style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);"
+    ></pre>
+  </div>
   <div class="flex items-center pl-7">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      class="absolute top-1/2 left-2 -translate-y-1/2 size-4 stroke-2 fill-none stroke-current"
+      class="absolute top-1/2 left-2 -translate-y-1/2 size-4 stroke-2 fill-none stroke-current group-hover:stroke-orange-500 transition-colors duration-300"
     >
       <line
         x1="5"
@@ -28,8 +37,67 @@ const { href } = Astro.props;
         class="translate-x-1 group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
       ></polyline>
     </svg>
-    <div class="text-sm font-medium">
+    <div class="text-sm font-medium transition-all duration-300">
       <slot />
     </div>
   </div>
 </a>
+
+<script>
+  function initBackToPrevAscii() {
+    const links = document.querySelectorAll(".back-to-prev");
+
+    links.forEach((link) => {
+      const canvas = link.querySelector(".ascii-canvas") as HTMLPreElement;
+      if (!canvas) return;
+
+      let frameId: number;
+      let time = 0;
+      const density = " .:-=+*#%@";
+      const cols = 60;
+      const rows = 10;
+
+      function render() {
+        let output = "";
+        const cx = cols / 2;
+        const cy = rows / 2;
+
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const dx = (x - cx) * 0.6;
+            const dy = y - cy;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            const wave =
+              Math.sin(distance * 0.3 - time) * 0.6 +
+              Math.cos(dx * 0.15 + time * 0.8) * 0.2 +
+              Math.sin(dy * 0.15 + time * 0.8) * 0.2;
+
+            const normalized = (wave + 1) / 2;
+            let charIndex = Math.floor(normalized * density.length);
+            charIndex = Math.max(0, Math.min(density.length - 1, charIndex));
+            output += density[charIndex];
+          }
+          output += "\n";
+        }
+
+        canvas.textContent = output;
+        time += 0.02;
+        frameId = requestAnimationFrame(render);
+      }
+
+      link.addEventListener("mouseenter", () => {
+        render();
+      });
+
+      link.addEventListener("mouseleave", () => {
+        cancelAnimationFrame(frameId);
+      });
+    });
+  }
+
+  // Initialize on load
+  initBackToPrevAscii();
+  // Initialize after view transitions
+  document.addEventListener("astro:after-swap", initBackToPrevAscii);
+</script>
