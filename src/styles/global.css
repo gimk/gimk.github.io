@@ -40,36 +40,6 @@ footer {
 }
 
 @layer utilities {
-  /* Horizontal lines: only dash when THEIR specific card is hovered */
-  .group:hover .horizontal-grid-line,
-  .group:hover.border-x {
-    border-style: dashed;
-    @apply border-black/15 dark:border-white/15;
-  }
-
-  /* Vertical framing for Desktop (md and above) */
-  @media (min-width: 768px) {
-    /* Content Framing (Cols 5-10): lines 4 and 10 dash when content items are hovered */
-    .container-grid:has(.md\:col-start-5 a:hover, .md\:col-start-5 button:hover) .line-4,
-    .container-grid:has(.md\:col-start-5 a:hover, .md\:col-start-5 button:hover) .line-10 {
-      border-style: dashed;
-      @apply border-black/15 dark:border-white/15;
-    }
-  }
-
-  /* Vertical framing for Mobile (below md) */
-  @media (max-width: 767px) {
-    /* On mobile, dash boundaries only when cards are hovered */
-    .container-grid:has(ul a:hover) .line-0,
-    .container-grid:has(ul a:hover) .line-10 {
-      border-style: dashed;
-      @apply border-black/15 dark:border-white/15;
-    }
-  }
-
-  .horizontal-grid-line {
-    @apply absolute left-[-100vw] right-[-100vw] border-t border-black/[0.05] dark:border-white/[0.05] pointer-events-none;
-  }
 }
 
 article {
