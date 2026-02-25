@@ -5,8 +5,9 @@ import PageLayout from "@layouts/PageLayout.astro";
 import ArrowCard from "@components/ArrowCard.astro";
 import ArrowCardThumbnail from "@components/ArrowCardThumbnail.astro";
 import Link from "@components/Link.astro";
+import Hero from "@components/Hero.astro";
 import { dateRange } from "@lib/utils";
-import { SITE, HOME, SOCIALS } from "@consts";
+import { SITE, HOME } from "@consts";
 
 const blog = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
@@ -36,91 +37,11 @@ const work = await Promise.all(
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
   <Container>
-    <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 items-start pt-0">
-      <aside class="md:col-span-3 pb-6 md:pb-16 md:sticky md:top-24">
-        <div class="h-20 flex items-center">
-          <h4
-            class="animate font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
-          >
-            Hi, I'm Antoine <span class="text-xl normal-case">👋</span>
-          </h4>
-        </div>
-        <div
-          class="relative bg-[#faf9f6] dark:bg-slate-950 z-20 pb-8 px-4 border border-black/10 dark:border-white/10 pt-4"
-        >
-          <article class="space-y-4">
-            <p class="animate">
-              I am a passionate <b>Senior Product Designer</b>, with a strong
-              engineering background and <b>7 years</b> of experience in product and
-              design.
-            </p>
-            <p class="animate text-sm opacity-80 font-serif">
-              A few years back, I decided to dedicate my time to merge design
-              and engineering and create clear, simple, and meaningful <b
-                >user systems</b
-              >, that overperform without compromising the experience.
-            </p>
-            <p class="animate text-sm opacity-80 font-serif">
-              I'm also a definitive foodie, have been cooking for years, and
-              recently passed a French culinary license! 🧑‍🍳
-            </p>
-          </article>
+    <Hero />
 
-          <div class="animate pt-6 space-y-4">
-            <h5
-              class="font-semibold text-black dark:text-white text-sm uppercase tracking-wider"
-            >
-              Connect
-            </h5>
-            <ul class="flex flex-wrap gap-2 text-sm">
-              {
-                SOCIALS.map((SOCIAL) => (
-                  <li class="flex gap-x-2 text-nowrap">
-                    <Link
-                      href={SOCIAL.HREF}
-                      external
-                      aria-label={`${SITE.NAME} on ${SOCIAL.NAME}`}
-                    >
-                      {SOCIAL.NAME}
-                    </Link>
-                    {"/"}
-                  </li>
-                ))
-              }
-              <li class="line-clamp-1">
-                <Link
-                  href={`mailto:${SITE.EMAIL}`}
-                  aria-label={`Email ${SITE.NAME}`}
-                >
-                  {SITE.EMAIL}
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </aside>
-
-      <div class="md:col-start-5 md:col-span-6 flex flex-col gap-24 pb-16">
-        <section class="animate">
-          <div class="h-20 flex items-center justify-between">
-            <h5
-              class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
-            >
-              Recent projects
-            </h5>
-            <Link href="/projects" class="text-sm"> See all projects </Link>
-          </div>
-          <ul class="flex flex-col gap-8 m-0 p-0 list-none">
-            {
-              projects.map((project) => (
-                <li class="animate">
-                  <ArrowCardThumbnail entry={project} />
-                </li>
-              ))
-            }
-          </ul>
-        </section>
-
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-24 pb-16 items-start">
+      <!-- Left Column: Work Experience -->
+      <div class="flex flex-col gap-24">
         <section class="animate">
           <div class="h-20 flex items-center justify-between">
             <h5
@@ -135,7 +56,6 @@ const work = await Promise.all(
               work.map((entry) => (
                 <li class="animate relative bg-[#faf9f6] dark:bg-slate-950 z-10 px-4 py-4 border border-black/10 dark:border-white/10">
                   <div class="flex flex-wrap items-baseline gap-x-1">
-                    {" "}
                     <div class="font-semibold text-black dark:text-white">
                       {entry.data.company}
                     </div>
@@ -149,6 +69,29 @@ const work = await Promise.all(
                   <article class="prose-sm">
                     <entry.Content />
                   </article>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </div>
+
+      <!-- Right Column: Recent Projects and Latest Posts -->
+      <div class="flex flex-col gap-3">
+        <section class="animate">
+          <div class="h-20 flex items-center justify-between">
+            <h5
+              class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
+            >
+              Recent projects
+            </h5>
+            <Link href="/projects" class="text-sm"> See all projects </Link>
+          </div>
+          <ul class="flex flex-col gap-8 m-0 p-0 list-none">
+            {
+              projects.map((project) => (
+                <li class="animate">
+                  <ArrowCardThumbnail entry={project} />
                 </li>
               ))
             }

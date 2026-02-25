@@ -1,0 +1,130 @@
+---
+import { SITE, SOCIALS } from "@consts";
+import Link from "@components/Link.astro";
+---
+
+<section
+  class="min-h-[600px] flex flex-col md:flex-row border border-black/10 dark:border-white/10 bg-[#faf9f6] dark:bg-slate-950 relative overflow-hidden mb-24"
+>
+  <!-- Left Side: Intro Content -->
+  <div
+    class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center z-10 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10"
+  >
+    <div class="flex items-center">
+      <h1
+        class="animate font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
+      >
+        Hi, I'm Antoine <span class="text-xl normal-case">👋</span>
+      </h1>
+    </div>
+
+    <article class="space-y-6 mt-2">
+      <p class="animate text-lg">
+        I am a passionate <b>Senior Product Designer</b>, with a strong
+        engineering background and <b>7 years</b> of experience in product and design.
+      </p>
+      <p class="animate text-sm opacity-80 font-serif leading-relaxed">
+        A few years back, I decided to dedicate my time to merge design and
+        engineering and create clear, simple, and meaningful <b>user systems</b
+        >, that overperform without compromising the experience.
+      </p>
+      <p class="animate text-sm opacity-80 font-serif leading-relaxed">
+        I'm also a definitive foodie, have been cooking for years, and recently
+        passed a French culinary license! 🧑‍🍳
+      </p>
+    </article>
+
+    <div class="animate pt-10 space-y-4">
+      <h5
+        class="font-semibold text-black dark:text-white text-xs uppercase tracking-widest"
+      >
+        Connect
+      </h5>
+      <ul class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+        {
+          SOCIALS.map((SOCIAL) => (
+            <li class="flex gap-x-2 text-nowrap items-center">
+              <Link
+                href={SOCIAL.HREF}
+                external
+                aria-label={`${SITE.NAME} on ${SOCIAL.NAME}`}
+              >
+                {SOCIAL.NAME}
+              </Link>
+              <span class="opacity-20">/</span>
+            </li>
+          ))
+        }
+        <li class="line-clamp-1">
+          <Link href={`mailto:${SITE.EMAIL}`} aria-label={`Email ${SITE.NAME}`}>
+            {SITE.EMAIL}
+          </Link>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right Side: Contained ASCII Animation -->
+  <div
+    class="w-full md:w-1/2 h-[400px] md:h-auto relative overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-center"
+  >
+    <pre
+      id="hero-ascii"
+      class="font-mono text-[10px] leading-[8px] tracking-[1px] text-orange-600 dark:text-orange-500 opacity-40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
+      style="mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);">
+    </pre>
+  </div>
+</section>
+
+<script>
+  function initHeroAscii() {
+    const canvas = document.getElementById(
+      "hero-ascii",
+    ) as HTMLPreElement | null;
+    if (!canvas) return;
+
+    const density = " .:-=+*#%@";
+    const cols = 200;
+    const rows = 100;
+    let time = 0;
+    let frameId: number;
+
+    function render() {
+      let output = "";
+      const cx = cols / 2;
+      const cy = rows / 2;
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const dx = (x - cx) * 0.6;
+          const dy = y - cy;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          const wave =
+            Math.sin(distance * 0.12 - time) * 0.6 +
+            Math.cos(dx * 0.08 + time * 0.5) * 0.2 +
+            Math.sin(dy * 0.08 + time * 0.5) * 0.2;
+
+          const normalized = (wave + 1) / 2;
+          let charIndex = Math.floor(normalized * density.length);
+          charIndex = Math.max(0, Math.min(density.length - 1, charIndex));
+          output += density[charIndex];
+        }
+        output += "\n";
+      }
+
+      if (canvas) canvas.textContent = output;
+      time += 0.008;
+      frameId = requestAnimationFrame(render);
+    }
+
+    render();
+
+    // Cleanup function for when component is unmounted (if needed in Astro view transitions)
+    return () => cancelAnimationFrame(frameId);
+  }
+
+  // Initialize
+  initHeroAscii();
+  document.addEventListener("astro:after-swap", initHeroAscii);
+</script>
