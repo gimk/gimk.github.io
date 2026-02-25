@@ -66,12 +66,13 @@ import Link from "@components/Link.astro";
 
   <!-- Right Side: Contained ASCII Animation -->
   <div
-    class="w-full md:w-1/2 h-[400px] md:h-auto relative overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-center"
+    id="hero-ascii-container"
+    class="w-full md:w-1/2 h-[400px] md:h-auto relative overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-center cursor-crosshair"
   >
     <pre
       id="hero-ascii"
       class="font-mono text-[10px] leading-[8px] tracking-[1px] text-orange-600 dark:text-orange-500 opacity-40 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none"
-      style="mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);">
+      style="mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);">
     </pre>
   </div>
 </section>
@@ -81,7 +82,8 @@ import Link from "@components/Link.astro";
     const canvas = document.getElementById(
       "hero-ascii",
     ) as HTMLPreElement | null;
-    if (!canvas) return;
+    const container = document.getElementById("hero-ascii-container");
+    if (!canvas || !container) return;
 
     const density = " .:-=+*#%@";
     const cols = 200;
@@ -89,12 +91,86 @@ import Link from "@components/Link.astro";
     let time = 0;
     let frameId: number;
 
+    // Mouse tracking for trail
+    let mouseX = -1000;
+    let mouseY = -1000;
+    const trailPoints: { x: number; y: number; age: number; char: string; vx?: number; vy?: number }[] =
+      [];
+    const trailChars = "@#%*+=-:. ";
+
+    function addPoint(x: number, y: number, age = 1.0, vx = 0, vy = 0) {
+      trailPoints.push({
+        x,
+        y,
+        age,
+        char: trailChars[Math.floor(Math.random() * trailChars.length)],
+        vx,
+        vy
+      });
+      if (trailPoints.length > 300) trailPoints.shift();
+    }
+
+    container.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / rect.width) * cols;
+      mouseY = ((e.clientY - rect.top) / rect.height) * rows;
+      addPoint(mouseX, mouseY);
+    });
+
+    container.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const cx = ((e.clientX - rect.left) / rect.width) * cols;
+      const cy = ((e.clientY - rect.top) / rect.height) * rows;
+      
+      // Create star burst
+      const numParticles = 12;
+      for (let i = 0; i < numParticles; i++) {
+        const angle = (i / numParticles) * Math.PI * 2;
+        const speed = 0.5 + Math.random() * 0.5;
+        addPoint(cx, cy, 1.2, Math.cos(angle) * speed, Math.sin(angle) * speed);
+      }
+    });
+
+    container.addEventListener("mouseleave", () => {
+      mouseX = -1000;
+      mouseY = -1000;
+    });
+
     function render() {
-      let output = "";
       const cx = cols / 2;
       const cy = rows / 2;
 
+      // Update trail ages and positions (drift + burst velocity)
+      for (let i = 0; i < trailPoints.length; i++) {
+        const point = trailPoints[i];
+        point.age -= 0.008;
+
+        // Apply burst velocity if it exists
+        if (point.vx !== undefined && point.vy !== undefined) {
+          point.x += point.vx;
+          point.y += point.vy;
+          // Apply some friction to the burst
+          point.vx *= 0.96;
+          point.vy *= 0.96;
+        }
+
+        // Drift away from center
+        const tdx = point.x - cx;
+        const tdy = point.y - cy;
+        const dist = Math.sqrt(tdx * tdx + tdy * tdy);
+        if (dist > 0) {
+          point.x += (tdx / dist) * 0.15;
+          point.y += (tdy / dist) * 0.15;
+        }
+      }
+      // Remove dead points
+      while (trailPoints.length > 0 && trailPoints[0].age <= 0) {
+        trailPoints.shift();
+      }
+
+      const grid: string[][] = [];
       for (let y = 0; y < rows; y++) {
+        grid[y] = [];
         for (let x = 0; x < cols; x++) {
           const dx = (x - cx) * 0.6;
           const dy = y - cy;
@@ -105,13 +181,37 @@ import Link from "@components/Link.astro";
             Math.cos(dx * 0.08 + time * 0.5) * 0.2 +
             Math.sin(dy * 0.08 + time * 0.5) * 0.2;
 
-          const normalized = (wave + 1) / 2;
+          // Add trail influence
+          let trailInfluence = 0;
+          for (const point of trailPoints) {
+            const tdx = x - point.x;
+            const tdy = (y - point.y) * 1.5; // Account for font aspect ratio
+            const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
+            const radius = 2.5; // Much smaller, cursor-sized
+            if (tdist < radius) {
+              trailInfluence += (1 - tdist / radius) * point.age * 0.5;
+            }
+          }
+
+          const normalized = (wave + 1) / 2 + trailInfluence;
           let charIndex = Math.floor(normalized * density.length);
           charIndex = Math.max(0, Math.min(density.length - 1, charIndex));
-          output += density[charIndex];
+          grid[y][x] = density[charIndex];
         }
-        output += "\n";
       }
+
+      // Explicitly overlay the specific characters of the trail
+      for (const point of trailPoints) {
+        const px = Math.floor(point.x);
+        const py = Math.floor(point.y);
+        if (px >= 0 && px < cols && py >= 0 && py < rows) {
+          if (Math.random() < point.age * 0.5) {
+            grid[py][px] = point.char;
+          }
+        }
+      }
+
+      const output = grid.map((row) => row.join("")).join("\n");
 
       if (canvas) canvas.textContent = output;
       time += 0.008;
