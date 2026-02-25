@@ -38,14 +38,14 @@ const work = await Promise.all(
   <Container>
     <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 items-start pt-0">
       <aside class="md:col-span-3 pb-6 md:pb-16">
+        <div class="h-20 flex items-center">
+          <h4 class="animate font-semibold text-black dark:text-white uppercase tracking-wider text-sm">
+            Hi, I'm Antoine <span class="text-xl normal-case">👋</span>
+          </h4>
+        </div>
         <div
-          class="relative bg-[#faf9f6] dark:bg-slate-950 z-20 pb-8 px-4 border border-black/10 dark:border-white/10"
+          class="relative bg-[#faf9f6] dark:bg-slate-950 z-20 pb-8 px-4 border border-black/10 dark:border-white/10 pt-4"
         >
-          <div class="h-20 flex items-center">
-            <h4 class="animate font-semibold text-black dark:text-white">
-              Hi, I'm Antoine <span class="text-xl">👋</span>
-            </h4>
-          </div>
           <article class="space-y-4">
             <p class="animate">
               I am a passionate <b>Senior Product Designer</b>, with a strong
@@ -98,9 +98,9 @@ const work = await Promise.all(
         </div>
       </aside>
 
-      <div class="md:col-start-5 md:col-span-6 pb-16 space-y-24">
+      <div class="md:col-start-5 md:col-span-6 flex flex-col gap-24 pb-16">
         <section class="animate">
-          <div class="h-20 flex items-center justify-between pl-4">
+          <div class="h-20 flex items-center justify-between">
             <h5
               class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
             >
@@ -120,7 +120,7 @@ const work = await Promise.all(
         </section>
 
         <section class="animate">
-          <div class="h-20 flex items-center justify-between pl-4">
+          <div class="h-20 flex items-center justify-between">
             <h5
               class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
             >
@@ -128,11 +128,13 @@ const work = await Promise.all(
             </h5>
             <Link href="/work" class="text-sm"> See all work </Link>
           </div>
-          <ul class="flex flex-col space-y-10">
-                        {
-                          work.map((entry) => (
-                            <li class="animate relative bg-[#faf9f6] dark:bg-slate-950 z-10 px-4 py-4 border border-black/10 dark:border-white/10">
-                              <div class="flex flex-wrap items-baseline gap-x-1">                    <div class="font-semibold text-black dark:text-white">
+          <ul class="flex flex-col gap-8">
+            {
+              work.map((entry) => (
+                <li class="animate relative bg-[#faf9f6] dark:bg-slate-950 z-10 px-4 py-4 border border-black/10 dark:border-white/10">
+                  <div class="flex flex-wrap items-baseline gap-x-1">
+                    {" "}
+                    <div class="font-semibold text-black dark:text-white">
                       {entry.data.company}
                     </div>
                     <div class="text-xs opacity-60">
@@ -152,7 +154,7 @@ const work = await Promise.all(
         </section>
 
         <section class="animate">
-          <div class="h-20 flex items-center justify-between pl-4">
+          <div class="h-20 flex items-center justify-between">
             <h5
               class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm"
             >

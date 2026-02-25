@@ -31,7 +31,7 @@ header {
 }
 
 main {
-  @apply flex-1 py-4 overflow-x-clip;
+  @apply flex-1 py-8 overflow-x-clip;
 }
 
 footer {
