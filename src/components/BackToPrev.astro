@@ -15,8 +15,8 @@ const { href } = Astro.props;
     aria-hidden="true"
   >
     <pre
-      class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-orange-500 dark:text-orange-500 absolute top-1/2 left-[16px] -translate-x-1/2 -translate-y-1/2"
-      style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);"
+      class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-orange-500 dark:text-orange-500 absolute top-1/2 left-[16px] -translate-x-1/2 -translate-y-1/2 scale-75"
+      style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%);"
     ></pre>
   </div>
   <div class="flex items-center pl-7">
@@ -54,8 +54,8 @@ const { href } = Astro.props;
       let frameId: number;
       let time = 0;
       const density = " .:-=+*#%@";
-      const cols = 60;
-      const rows = 10;
+      const cols = 200;
+      const rows = 40;
 
       function render() {
         let output = "";

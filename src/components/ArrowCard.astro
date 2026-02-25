@@ -18,7 +18,7 @@ const { entry } = Astro.props;
   >
     <pre
       class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-orange-500 dark:text-orange-500 absolute top-1/2 right-[18px] translate-x-1/2 -translate-y-1/2"
-      style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);"
+      style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%);"
     ></pre>
   </div>
   <div class="flex flex-col flex-1 truncate">
@@ -59,8 +59,8 @@ const { entry } = Astro.props;
       let frameId: number;
       let time = 0;
       const density = " .:-=+*#%@";
-      const cols = 120;
-      const rows = 20;
+      const cols = 200;
+      const rows = 40;
 
       function render() {
         let output = "";
