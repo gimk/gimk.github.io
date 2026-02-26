@@ -121,7 +121,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
       css = document.createElement("style");
       css.appendChild(
         document.createTextNode(
-          `* {
+          `*:not(.sun-moon, .sun-moon *, .sun-core, .sun-beams, .moon-mask, .moon-mask *) {
              -webkit-transition: none !important;
              -moz-transition: none !important;
              -o-transition: none !important;
@@ -204,12 +204,12 @@ const { title, description, image = "/nano.png" } = Astro.props;
           // Switch to light theme
           localStorage.setItem("theme", "light");
           themeColorMeta?.setAttribute("content", "#fff7ed");
-          toggleTheme(false, false);
+          toggleTheme(false, true);
         } else {
           // Switch to dark theme
           localStorage.setItem("theme", "dark");
           themeColorMeta?.setAttribute("content", "#020617");
-          toggleTheme(true, false);
+          toggleTheme(true, true);
         }
       });
       toggleThemeButton.setAttribute("data-listener-added", "true"); // Mark as added
