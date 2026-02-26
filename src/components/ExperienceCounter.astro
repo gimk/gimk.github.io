@@ -1,0 +1,32 @@
+<span id="experience-counter" class="font-semibold">7 years</span>
+
+<script>
+  function updateCounter() {
+    const startDate = new Date('2018-03-01');
+    const now = new Date();
+    
+    let years = now.getFullYear() - startDate.getFullYear();
+    let months = now.getMonth() - startDate.getMonth();
+    let days = now.getDate() - startDate.getDate();
+
+    if (days < 0) {
+      months--;
+      const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      days += lastMonth.getDate();
+    }
+
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    const counter = document.getElementById('experience-counter');
+    if (counter) {
+      counter.textContent = `${years} years, ${months} months, and ${days} days`;
+    }
+  }
+
+  updateCounter();
+  // Update once a day or on navigation
+  document.addEventListener("astro:after-swap", updateCounter);
+</script>
