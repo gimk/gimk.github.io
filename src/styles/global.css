@@ -67,7 +67,7 @@ article {
 }
 
 article img {
-  @apply cursor-zoom-in rounded-lg;
+  @apply cursor-zoom-in;
 }
 
 h1, h2, h3, h4, h5, h6 {

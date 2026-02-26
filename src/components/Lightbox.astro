@@ -37,6 +37,7 @@
       lightboxImg.classList.add("scale-100");
       
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     };
 
     const closeLightbox = () => {
@@ -46,6 +47,7 @@
       lightboxImg.classList.remove("scale-100");
       
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       
       setTimeout(() => {
         if (lightbox.classList.contains("opacity-0")) {
