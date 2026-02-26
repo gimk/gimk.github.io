@@ -19,11 +19,11 @@ const { href } = Astro.props;
       style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%);"
     ></pre>
   </div>
-  <div class="flex items-center pl-7">
+  <div class="flex items-center pl-10">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      class="absolute top-1/2 left-2 -translate-y-1/2 size-4 stroke-2 fill-none stroke-current group-hover:stroke-orange-500 transition-colors duration-300"
+      class="absolute top-1/2 left-4 -translate-y-1/2 size-4 stroke-2 fill-none stroke-current group-hover:stroke-orange-500 transition-colors duration-300"
     >
       <line
         x1="5"
@@ -53,11 +53,36 @@ const { href } = Astro.props;
 
       let frameId: number;
       let time = 0;
+      let lastTime = 0;
+      const FPS_LIMIT = 24;
+      const FRAME_MIN_TIME = 1000 / FPS_LIMIT;
       const density = " .:-=+*#%@";
-      const cols = 200;
-      const rows = 40;
+      const cols = 200; // Restored original density
+      const rows = 40; // Restored original density
+      let isVisible = true;
 
-      function render() {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          isVisible = entry.isIntersecting;
+        },
+        { threshold: 0 },
+      );
+      observer.observe(link);
+
+      function render(timestamp: number) {
+        if (!isVisible) {
+          frameId = requestAnimationFrame(render);
+          return;
+        }
+
+        // Throttle FPS
+        const elapsed = timestamp - lastTime;
+        if (elapsed < FRAME_MIN_TIME) {
+          frameId = requestAnimationFrame(render);
+          return;
+        }
+        lastTime = timestamp;
+
         let output = "";
         const cx = cols / 2;
         const cy = rows / 2;
@@ -82,12 +107,12 @@ const { href } = Astro.props;
         }
 
         canvas.textContent = output;
-        time += 0.02;
+        time += 0.05; // Adjusted for lower FPS
         frameId = requestAnimationFrame(render);
       }
 
       link.addEventListener("mouseenter", () => {
-        render();
+        frameId = requestAnimationFrame(render);
       });
 
       link.addEventListener("mouseleave", () => {

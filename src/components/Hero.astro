@@ -78,6 +78,11 @@ import Link from "@components/Link.astro";
 </section>
 
 <script>
+  let frameId: number;
+  let lastTime = 0;
+  const FPS_LIMIT = 24;
+  const FRAME_MIN_TIME = 1000 / FPS_LIMIT;
+
   function initHeroAscii() {
     const canvas = document.getElementById(
       "hero-ascii",
@@ -85,11 +90,17 @@ import Link from "@components/Link.astro";
     const container = document.getElementById("hero-ascii-container");
     if (!canvas || !container) return;
 
+    // Stop any existing animation
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+    }
+
     const density = " .:-=+*#%@";
+    // Restored original grid size for high-density look
     const cols = 200;
     const rows = 100;
     let time = 0;
-    let frameId: number;
+    let isVisible = true;
 
     // Mouse tracking for trail
     let mouseX = -1000;
@@ -104,6 +115,15 @@ import Link from "@components/Link.astro";
     }[] = [];
     const trailChars = "@#%*+=-:. ";
 
+    // Pause when not in view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    observer.observe(container);
+
     function addPoint(x: number, y: number, age = 1.0, vx = 0, vy = 0) {
       trailPoints.push({
         x,
@@ -113,7 +133,7 @@ import Link from "@components/Link.astro";
         vx,
         vy,
       });
-      if (trailPoints.length > 300) trailPoints.shift();
+      if (trailPoints.length > 200) trailPoints.shift();
     }
 
     container.addEventListener("mousemove", (e) => {
@@ -129,7 +149,7 @@ import Link from "@components/Link.astro";
       const cy = ((e.clientY - rect.top) / rect.height) * rows;
 
       // Create star burst
-      const numParticles = 12;
+      const numParticles = 8;
       for (let i = 0; i < numParticles; i++) {
         const angle = (i / numParticles) * Math.PI * 2;
         const speed = 0.5 + Math.random() * 0.5;
@@ -142,25 +162,35 @@ import Link from "@components/Link.astro";
       mouseY = -1000;
     });
 
-    function render() {
+    function render(timestamp: number) {
+      if (!isVisible) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Throttle FPS
+      const elapsed = timestamp - lastTime;
+      if (elapsed < FRAME_MIN_TIME) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+      lastTime = timestamp;
+
       const cx = cols / 2;
       const cy = rows / 2;
 
-      // Update trail ages and positions (drift + burst velocity)
+      // Update trail ages and positions
       for (let i = 0; i < trailPoints.length; i++) {
         const point = trailPoints[i];
-        point.age -= 0.008;
+        point.age -= 0.02; // Age faster due to lower FPS
 
-        // Apply burst velocity if it exists
         if (point.vx !== undefined && point.vy !== undefined) {
           point.x += point.vx;
           point.y += point.vy;
-          // Apply some friction to the burst
-          point.vx *= 0.96;
-          point.vy *= 0.96;
+          point.vx *= 0.94;
+          point.vy *= 0.94;
         }
 
-        // Drift away from center
         const tdx = point.x - cx;
         const tdy = point.y - cy;
         const dist = Math.sqrt(tdx * tdx + tdy * tdy);
@@ -169,12 +199,14 @@ import Link from "@components/Link.astro";
           point.y += (tdy / dist) * 0.15;
         }
       }
-      // Remove dead points
+      
       while (trailPoints.length > 0 && trailPoints[0].age <= 0) {
         trailPoints.shift();
       }
 
       const grid: string[][] = [];
+      const radiusSq = 2.5 * 2.5;
+
       for (let y = 0; y < rows; y++) {
         grid[y] = [];
         for (let x = 0; x < cols; x++) {
@@ -187,15 +219,18 @@ import Link from "@components/Link.astro";
             Math.cos(dx * 0.08 + time * 0.5) * 0.2 +
             Math.sin(dy * 0.08 + time * 0.5) * 0.2;
 
-          // Add trail influence
+          // Optimized trail influence
           let trailInfluence = 0;
           for (const point of trailPoints) {
-            const tdx = x - point.x;
-            const tdy = (y - point.y) * 1.5; // Account for font aspect ratio
-            const tdist = Math.sqrt(tdx * tdx + tdy * tdy);
-            const radius = 2.5; // Much smaller, cursor-sized
-            if (tdist < radius) {
-              trailInfluence += (1 - tdist / radius) * point.age * 0.5;
+            const adx = Math.abs(x - point.x);
+            const ady = Math.abs(y - point.y) * 1.5;
+            
+            // Skip expensive sqrt if outside bounding box
+            if (adx < 2.5 && ady < 2.5) {
+                const tdistSq = adx * adx + ady * ady;
+                if (tdistSq < radiusSq) {
+                    trailInfluence += (1 - Math.sqrt(tdistSq) / 2.5) * point.age * 0.5;
+                }
             }
           }
 
@@ -206,7 +241,6 @@ import Link from "@components/Link.astro";
         }
       }
 
-      // Explicitly overlay the specific characters of the trail
       for (const point of trailPoints) {
         const px = Math.floor(point.x);
         const py = Math.floor(point.y);
@@ -218,15 +252,13 @@ import Link from "@components/Link.astro";
       }
 
       const output = grid.map((row) => row.join("")).join("\n");
-
       if (canvas) canvas.textContent = output;
-      time += 0.008;
+      
+      time += 0.02; // Faster increment for lower FPS
       frameId = requestAnimationFrame(render);
     }
 
-    render();
-
-    // Cleanup function for when component is unmounted (if needed in Astro view transitions)
+    frameId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(frameId);
   }
 

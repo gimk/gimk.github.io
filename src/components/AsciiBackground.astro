@@ -18,6 +18,9 @@
 
 <script>
   let frameId: number;
+  let lastTime = 0;
+  const FPS_LIMIT = 24;
+  const FRAME_MIN_TIME = 1000 / FPS_LIMIT;
 
   function initAscii() {
     const canvas = document.getElementById(
@@ -32,12 +35,35 @@
     }
 
     const density = " .:-=+*#%@";
-    // Expanded dimensions to prevent cut-offs on large screens
+    // Restored original dimensions for high-density look
     const cols = 400;
     const rows = 300;
     let time = 0;
+    let isVisible = true;
 
-    function render() {
+    // Pause when not in view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    observer.observe(container);
+
+    function render(timestamp: number) {
+      if (!isVisible) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Throttle FPS
+      const elapsed = timestamp - lastTime;
+      if (elapsed < FRAME_MIN_TIME) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+      lastTime = timestamp;
+
       let output = "";
       const cx = cols / 2;
       const cy = rows / 2;
@@ -64,12 +90,12 @@
       if (canvas) {
         canvas.textContent = output;
       }
-      // Slowed down 2x for a more subtle atmosphere
-      time += 0.0075;
+      // Adjusted time increment for the lower FPS to keep motion speed consistent
+      time += 0.02;
       frameId = requestAnimationFrame(render);
     }
 
-    render();
+    frameId = requestAnimationFrame(render);
   }
 
   // Initialize on load

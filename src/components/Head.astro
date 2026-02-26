@@ -341,22 +341,45 @@ const { title, description, image = "/nano.png" } = Astro.props;
     }
 
     // --- Main Pig Animation Loop (called by requestAnimationFrame) ---
-    function pigAnimationLoop() {
+    let lastPigFrameTime = 0;
+    const PIG_FPS = 30;
+    const PIG_FRAME_TIME = 1000 / PIG_FPS;
+
+    function pigAnimationLoop(timestamp) {
+      // Throttle FPS
+      const elapsed = timestamp - lastPigFrameTime;
+      if (elapsed < PIG_FRAME_TIME) {
+        pigAnimationLoopId = requestAnimationFrame(pigAnimationLoop);
+        return;
+      }
+      lastPigFrameTime = timestamp;
+
       // Interpolate (lerp) current positions towards target positions for smooth movement
-      currentSnoutTx += (targetSnoutTx - currentSnoutTx) * smoothingFactor;
-      currentSnoutTy += (targetSnoutTy - currentSnoutTy) * smoothingFactor;
-      currentHeadTx += (targetHeadTx - currentHeadTx) * smoothingFactor;
-      currentHeadTy += (targetHeadTy - currentHeadTy) * smoothingFactor;
-      currentEarTx += (targetEarTx - currentEarTx) * smoothingFactor;
-      currentEarTy += (targetEarTy - currentEarTy) * smoothingFactor;
-      currentLeftEyeCx +=
-        (targetLeftEyeCx - currentLeftEyeCx) * smoothingFactor;
-      currentLeftEyeCy +=
-        (targetLeftEyeCy - currentLeftEyeCy) * smoothingFactor;
-      currentRightEyeCx +=
-        (targetRightEyeCx - currentRightEyeCx) * smoothingFactor;
-      currentRightEyeCy +=
-        (targetRightEyeCy - currentRightEyeCy) * smoothingFactor;
+      const snoutDx = (targetSnoutTx - currentSnoutTx) * smoothingFactor;
+      const snoutDy = (targetSnoutTy - currentSnoutTy) * smoothingFactor;
+      const headDx = (targetHeadTx - currentHeadTx) * smoothingFactor;
+      const headDy = (targetHeadTy - currentHeadTy) * smoothingFactor;
+      const earDx = (targetEarTx - currentEarTx) * smoothingFactor;
+      const earDy = (targetEarTy - currentEarTy) * smoothingFactor;
+      const eyeLDx = (targetLeftEyeCx - currentLeftEyeCx) * smoothingFactor;
+      const eyeLDy = (targetLeftEyeCy - currentLeftEyeCy) * smoothingFactor;
+      const eyeRDx = (targetRightEyeCx - currentRightEyeCx) * smoothingFactor;
+      const eyeRDy = (targetRightEyeCy - currentRightEyeCy) * smoothingFactor;
+
+      currentSnoutTx += snoutDx;
+      currentSnoutTy += snoutDy;
+      currentHeadTx += headDx;
+      currentHeadTy += headDy;
+      currentEarTx += earDx;
+      currentEarTy += earDy;
+      currentLeftEyeCx += eyeLDx;
+      currentLeftEyeCy += eyeLDy;
+      currentRightEyeCx += eyeRDx;
+      currentRightEyeCy += eyeRDy;
+
+      // Convergence check: if all deltas are tiny and not wiggling, we can potentially pause
+      // But for simplicity and to keep the wiggle active, we'll just keep it throttled for now.
+      // To really save CPU, we'd stop the loop if mouse hasn't moved.
 
       // Calculate wiggle offset if the mouse is close enough
       let wiggleOffset = 0;
@@ -366,9 +389,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
       }
 
       // Apply the calculated (interpolated + wiggle) positions to the SVG elements
-      // Check if elements exist again just in case (though checked earlier)
       if (head && snoutGroup && leftEar && rightEar && leftEye && rightEye) {
-        // Apply transform attribute for translation (parallax + wiggle)
         head.setAttribute(
           "transform",
           `translate(${currentHeadTx + wiggleOffset} ${currentHeadTy})`
@@ -386,7 +407,6 @@ const { title, description, image = "/nano.png" } = Astro.props;
           `translate(${currentEarTx + wiggleOffset} ${currentEarTy})`
         );
 
-        // Apply cx/cy attributes for eye positions (parallax + wiggle)
         leftEye.setAttribute(
           "cx",
           (currentLeftEyeCx + wiggleOffset).toString()
@@ -451,7 +471,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
       cancelAnimationFrame(pigAnimationLoopId);
       pigAnimationLoopId = null; // Reset the ID
     }
-    pigAnimationLoop(); // Start the main animation loop
+    pigAnimationLoop(performance.now()); // Start the main animation loop
 
     // Start the blinking cycle
     scheduleNextBlink();
