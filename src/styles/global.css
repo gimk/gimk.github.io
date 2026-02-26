@@ -28,7 +28,25 @@ header {
   @apply bg-[#faf9f6]/80 dark:bg-slate-950/80;
   @apply backdrop-blur-md;
   @apply border-b border-black/10 dark:border-white/10;
+  isolation: isolate;
 }
+
+header::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% + 8px);
+  z-index: -1;
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+  background-size: 4px 4px;
+  @apply text-black/5 dark:text-white/5;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, transparent, black 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 100%);
+}
+
 
 main {
   @apply flex-1 py-8 overflow-x-clip;
@@ -101,8 +119,9 @@ html.scrolled #back-to-top {
   transition: top 0.3s ease, left 0.3s ease, color 0.3s ease;
 }
 
-.shadow-ascii:hover::after {
+.shadow-hover:hover::after {
   top: 4px;
   left: 4px;
-  @apply text-black/30 dark:text-white/30;
+  background-image: radial-gradient(circle, currentColor 0.8px, transparent 0.8px);
+  @apply text-orange-500/40 dark:text-orange-500/40;
 }
