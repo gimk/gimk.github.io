@@ -3,9 +3,10 @@ import { SITE, SOCIALS } from "@consts";
 import Link from "@components/Link.astro";
 ---
 
-<section
-  class="min-h-[600px] flex flex-col md:flex-row border border-black/10 dark:border-white/10 bg-[#faf9f6] dark:bg-slate-950 relative overflow-hidden mb-24"
->
+<div class="shadow-ascii">
+  <section
+    class="min-h-[600px] flex flex-col md:flex-row border border-black/10 dark:border-white/10 bg-[#faf9f6] dark:bg-slate-950 relative overflow-hidden mb-24"
+  >
   <!-- Left Side: Intro Content -->
   <div
     class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center z-10 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10"
@@ -75,8 +76,8 @@ import Link from "@components/Link.astro";
       style="mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);">
     </pre>
   </div>
-</section>
-
+  </section>
+</div>
 <script>
   let frameId: number;
   let lastTime = 0;

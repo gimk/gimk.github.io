@@ -23,11 +23,12 @@ const work = await Promise.all(
   <Container>
     <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 items-start pt-0">
       <aside class="md:col-span-3 pb-6 md:pb-16 md:sticky md:top-24">
-        <div
-          class="relative bg-[#faf9f6] dark:bg-slate-950 z-20 pb-8 border border-black/10 dark:border-white/10"
-        >
+        <div class="shadow-ascii">
+          <div
+            class="relative bg-[#faf9f6] dark:bg-slate-950 z-20 pb-8 border border-black/10 dark:border-white/10"
+          >
           <div class="animate">
-            <BackToPrev href="/"> Back to home </BackToPrev>
+            <BackToPrev href="/" hideShadow={true} hideBorder={true}> Back to home </BackToPrev>
           </div>
           <div class="px-4">
             <div class="h-20 flex items-center">
@@ -41,14 +42,17 @@ const work = await Promise.all(
             </p>
           </div>
         </div>
+      </div>
       </aside>
 
       <div class="md:col-start-5 md:col-span-6 pb-16">
         <ul class="flex flex-col gap-8 m-0 p-0 list-none">
           {
             work.map((entry) => (
-              <li class="animate relative bg-[#faf9f6] dark:bg-slate-950 z-10 px-4 py-4 border border-black/10 dark:border-white/10">
-                <div class="flex flex-wrap items-baseline gap-x-2">
+              <li class="animate relative">
+                <div class="shadow-ascii">
+                  <div class="bg-[#faf9f6] dark:bg-slate-950 px-4 py-4 border border-black/10 dark:border-white/10">
+                    <div class="flex flex-wrap items-baseline gap-x-2">
                   <div class="font-semibold text-black dark:text-white text-lg">
                     {entry.data.company}
                   </div>
@@ -62,7 +66,9 @@ const work = await Promise.all(
                 <article class="prose-sm">
                   <entry.Content />
                 </article>
-              </li>
+              </div>
+            </div>
+          </li>
             ))
           }
         </ul>

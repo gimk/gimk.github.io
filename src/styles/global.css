@@ -80,3 +80,29 @@ html #back-to-top {
 html.scrolled #back-to-top {
   @apply opacity-100 pointer-events-auto;
 }
+
+.shadow-ascii {
+  position: relative;
+  isolation: isolate;
+}
+
+.shadow-ascii::after {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+  background-size: 4px 4px;
+  @apply text-black/10 dark:text-white/10;
+  pointer-events: none;
+  transition: top 0.3s ease, left 0.3s ease, color 0.3s ease;
+}
+
+.shadow-ascii:hover::after {
+  top: 4px;
+  left: 4px;
+  @apply text-black/30 dark:text-white/30;
+}

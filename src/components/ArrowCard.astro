@@ -8,10 +8,11 @@ type Props = {
 const { entry } = Astro.props;
 ---
 
-<a
-  href={`/${entry.collection}/${entry.slug}`}
-  class="arrow-card relative group flex flex-nowrap items-center px-4 pr-10 bg-[#faf9f6] dark:bg-slate-950 border border-black/10 dark:border-white/10 sm:hover:text-black dark:sm:hover:text-white transition-all duration-300 ease-in-out h-20 overflow-hidden"
->
+<div class="shadow-ascii">
+  <a
+    href={`/${entry.collection}/${entry.slug}`}
+    class="arrow-card relative group flex flex-nowrap items-center px-4 pr-10 bg-[#faf9f6] dark:bg-slate-950 border border-black/10 dark:border-white/10 sm:hover:text-black dark:sm:hover:text-white transition-all duration-300 ease-in-out h-20 overflow-hidden"
+  >
   <div
     class="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-75 dark:group-hover:opacity-50 transition-opacity duration-300"
     aria-hidden="true"
@@ -46,8 +47,8 @@ const { entry } = Astro.props;
       class="-translate-x-1 sm:group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
     ></polyline>
   </svg>
-</a>
-
+  </a>
+</div>
 <script>
   function initArrowCardAscii() {
     const cards = document.querySelectorAll(".arrow-card");
