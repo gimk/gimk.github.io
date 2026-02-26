@@ -253,28 +253,35 @@ const { title, description, image = "/nano.png" } = Astro.props;
     // --- Animation Configuration ---
 
     // Parallax Effect Configuration (how much each part moves relative to mouse)
-    const maxSnoutOffset = 0.9; // Snout moves the most
-    const maxHeadOffset = 0.6; // Head moves less
-    const maxEarOffset = 0.5; // Ears move the least for parallax
+    const maxSnoutOffset = 1;  // Snout moves the most
+    const maxEyeOffset = 0.8;    // Eyes
+    const maxHeadOffset = 0.5;   // Head
+    const maxEarOffset = 0.2;    // Ears
 
     // Smoothing / Interpolation (Lerp) Setup (makes movement smoother)
-    const smoothingFactor = 0.1; // Lower value = smoother, slower response
+    const smoothingFactor = 0.2; // Lower value = smoother, slower response
     let targetSnoutTx = 0,
-      targetSnoutTy = 0; // Target positions based on mouse
+      targetSnoutTy = 0,
+      targetSnoutRotation = 0; // Target positions/rotation based on mouse
     let targetHeadTx = 0,
       targetHeadTy = 0;
-    let targetEarTx = 0,
-      targetEarTy = 0;
+    let targetLeftEarTx = 0,
+      targetLeftEarTy = 0;
+    let targetRightEarTx = 0,
+      targetRightEarTy = 0;
     let targetLeftEyeCx = leftEyeOrigX,
       targetLeftEyeCy = leftEyeOrigY;
     let targetRightEyeCx = rightEyeOrigX,
       targetRightEyeCy = rightEyeOrigY;
     let currentSnoutTx = 0,
-      currentSnoutTy = 0; // Current interpolated positions
+      currentSnoutTy = 0,
+      currentSnoutRotation = 0; // Current interpolated positions/rotation
     let currentHeadTx = 0,
       currentHeadTy = 0;
-    let currentEarTx = 0,
-      currentEarTy = 0;
+    let currentLeftEarTx = 0,
+      currentLeftEarTy = 0;
+    let currentRightEarTx = 0,
+      currentRightEarTy = 0;
     let currentLeftEyeCx = leftEyeOrigX,
       currentLeftEyeCy = leftEyeOrigY;
     let currentRightEyeCx = rightEyeOrigX,
@@ -319,18 +326,34 @@ const { title, description, image = "/nano.png" } = Astro.props;
         ? deltaY / (svgRect.height / 2)
         : 0;
 
-      // Calculate TARGET translation values for parallax effect
+      // Calculate TARGET translation and rotation values for parallax effect
       targetSnoutTx = normalizedOffsetX * maxSnoutOffset;
       targetSnoutTy = normalizedOffsetY * maxSnoutOffset;
+      targetSnoutRotation = Math.max(-15, Math.min(15, normalizedOffsetX * -0.4)); // Rotate snout slightly (degrees), clamped to prevent spinning
       targetHeadTx = normalizedOffsetX * maxHeadOffset;
       targetHeadTy = normalizedOffsetY * maxHeadOffset;
-      targetEarTx = normalizedOffsetX * maxEarOffset;
-      targetEarTy = normalizedOffsetY * maxEarOffset;
-      // Eyes follow the snout's parallax movement
-      targetLeftEyeCx = leftEyeOrigX + targetSnoutTx;
-      targetLeftEyeCy = leftEyeOrigY + targetSnoutTy;
-      targetRightEyeCx = rightEyeOrigX + targetSnoutTx;
-      targetRightEyeCy = rightEyeOrigY + targetSnoutTy;
+      
+      // 3D Spherical Rotation Effect
+      // We tilt the vertical position of left vs right components based on horizontal look direction
+      // This mimics drawing along the curved surface of a sphere.
+      const ear3dTilt = normalizedOffsetX * 0.2;
+      const eye3dTilt = normalizedOffsetX * 0.1;
+
+      targetLeftEarTx = normalizedOffsetX * maxEarOffset;
+      targetLeftEarTy = (normalizedOffsetY * maxEarOffset) + ear3dTilt;
+      targetRightEarTx = normalizedOffsetX * maxEarOffset;
+      targetRightEarTy = (normalizedOffsetY * maxEarOffset) - ear3dTilt;
+      
+      const targetLeftEyeTx = normalizedOffsetX * maxEyeOffset;
+      const targetLeftEyeTy = (normalizedOffsetY * maxEyeOffset) + eye3dTilt;
+      const targetRightEyeTx = normalizedOffsetX * maxEyeOffset;
+      const targetRightEyeTy = (normalizedOffsetY * maxEyeOffset) - eye3dTilt;
+
+      // Eyes follow the independent eye parallax movement
+      targetLeftEyeCx = leftEyeOrigX + targetLeftEyeTx;
+      targetLeftEyeCy = leftEyeOrigY + targetLeftEyeTy;
+      targetRightEyeCx = rightEyeOrigX + targetRightEyeTx;
+      targetRightEyeCy = rightEyeOrigY + targetRightEyeTy;
     }
 
     // --- Main Pig Animation Loop (called by requestAnimationFrame) ---
@@ -350,10 +373,13 @@ const { title, description, image = "/nano.png" } = Astro.props;
       // Interpolate (lerp) current positions towards target positions for smooth movement
       const snoutDx = (targetSnoutTx - currentSnoutTx) * smoothingFactor;
       const snoutDy = (targetSnoutTy - currentSnoutTy) * smoothingFactor;
+      const snoutDr = (targetSnoutRotation - currentSnoutRotation) * smoothingFactor;
       const headDx = (targetHeadTx - currentHeadTx) * smoothingFactor;
       const headDy = (targetHeadTy - currentHeadTy) * smoothingFactor;
-      const earDx = (targetEarTx - currentEarTx) * smoothingFactor;
-      const earDy = (targetEarTy - currentEarTy) * smoothingFactor;
+      const leftEarDx = (targetLeftEarTx - currentLeftEarTx) * smoothingFactor;
+      const leftEarDy = (targetLeftEarTy - currentLeftEarTy) * smoothingFactor;
+      const rightEarDx = (targetRightEarTx - currentRightEarTx) * smoothingFactor;
+      const rightEarDy = (targetRightEarTy - currentRightEarTy) * smoothingFactor;
       const eyeLDx = (targetLeftEyeCx - currentLeftEyeCx) * smoothingFactor;
       const eyeLDy = (targetLeftEyeCy - currentLeftEyeCy) * smoothingFactor;
       const eyeRDx = (targetRightEyeCx - currentRightEyeCx) * smoothingFactor;
@@ -361,10 +387,13 @@ const { title, description, image = "/nano.png" } = Astro.props;
 
       currentSnoutTx += snoutDx;
       currentSnoutTy += snoutDy;
+      currentSnoutRotation += snoutDr;
       currentHeadTx += headDx;
       currentHeadTy += headDy;
-      currentEarTx += earDx;
-      currentEarTy += earDy;
+      currentLeftEarTx += leftEarDx;
+      currentLeftEarTy += leftEarDy;
+      currentRightEarTx += rightEarDx;
+      currentRightEarTy += rightEarDy;
       currentLeftEyeCx += eyeLDx;
       currentLeftEyeCy += eyeLDy;
       currentRightEyeCx += eyeRDx;
@@ -389,15 +418,15 @@ const { title, description, image = "/nano.png" } = Astro.props;
         );
         snoutGroup.setAttribute(
           "transform",
-          `translate(${currentSnoutTx + wiggleOffset} ${currentSnoutTy})`
+          `translate(${currentSnoutTx + wiggleOffset} ${currentSnoutTy}) rotate(${currentSnoutRotation} 100.5 132.5)`
         );
         leftEar.setAttribute(
           "transform",
-          `translate(${currentEarTx + wiggleOffset} ${currentEarTy})`
+          `translate(${currentLeftEarTx + wiggleOffset} ${currentLeftEarTy})`
         );
         rightEar.setAttribute(
           "transform",
-          `translate(${currentEarTx + wiggleOffset} ${currentEarTy})`
+          `translate(${currentRightEarTx + wiggleOffset} ${currentRightEarTy})`
         );
 
         leftEye.setAttribute(
