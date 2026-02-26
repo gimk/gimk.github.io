@@ -114,21 +114,24 @@ const { title, description, image = "/nano.png" } = Astro.props;
   }
 
   // Function to toggle dark/light theme instantly (avoids transition flicker)
-  function toggleTheme(dark) {
-    // Create a temporary style element to disable all transitions
-    const css = document.createElement("style");
-    css.appendChild(
-      document.createTextNode(
-        `* {
-           -webkit-transition: none !important;
-           -moz-transition: none !important;
-           -o-transition: none !important;
-           -ms-transition: none !important;
-           transition: none !important;
-        }`
-      )
-    );
-    document.head.appendChild(css);
+  function toggleTheme(dark, disableTransitions = true) {
+    let css = null;
+    if (disableTransitions) {
+      // Create a temporary style element to disable all transitions
+      css = document.createElement("style");
+      css.appendChild(
+        document.createTextNode(
+          `* {
+             -webkit-transition: none !important;
+             -moz-transition: none !important;
+             -o-transition: none !important;
+             -ms-transition: none !important;
+             transition: none !important;
+          }`
+        )
+      );
+      document.head.appendChild(css);
+    }
 
     // Add or remove the 'dark' class from the root element
     if (dark) {
@@ -137,9 +140,11 @@ const { title, description, image = "/nano.png" } = Astro.props;
       document.documentElement.classList.remove("dark");
     }
 
-    // Force browser reflow to apply changes immediately before removing the style override
-    window.getComputedStyle(css).opacity;
-    document.head.removeChild(css);
+    if (disableTransitions) {
+      // Force browser reflow to apply changes immediately before removing the style override
+      window.getComputedStyle(css).opacity;
+      document.head.removeChild(css);
+    }
   }
 
   // Function to apply the theme based on localStorage or system preference on initial load
@@ -199,12 +204,12 @@ const { title, description, image = "/nano.png" } = Astro.props;
           // Switch to light theme
           localStorage.setItem("theme", "light");
           themeColorMeta?.setAttribute("content", "#fff7ed");
-          toggleTheme(false);
+          toggleTheme(false, false);
         } else {
           // Switch to dark theme
           localStorage.setItem("theme", "dark");
           themeColorMeta?.setAttribute("content", "#020617");
-          toggleTheme(true);
+          toggleTheme(true, false);
         }
       });
       toggleThemeButton.setAttribute("data-listener-added", "true"); // Mark as added
