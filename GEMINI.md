@@ -1,7 +1,7 @@
 # GEMINI.md - Antoine Pouligny's Portfolio
 
 ## Project Overview
-This is a personal portfolio website for Antoine Pouligny, a Senior Product Designer. It is built using **Astro 5**, **Tailwind CSS**, and **TypeScript**. The project is based on the *Astro Nano* theme but has been significantly customized with a unique "Construction" aesthetic, featuring visible grid lines and framed content areas.
+This is a personal portfolio website for Antoine Pouligny, a Senior Product Designer. It is built using **Astro 5**, **Tailwind CSS**, and **TypeScript**. The project is based on the *Astro Nano* theme but has been significantly customized with a unique ASCII/terminal aesthetic, featuring an animated ASCII background and ASCII-style shadow effects.
 
 ### Architecture & Tech Stack
 - **Framework:** [Astro](https://astro.build/) (v5.x)
@@ -15,7 +15,8 @@ This is a personal portfolio website for Antoine Pouligny, a Senior Product Desi
 - `src/pages/`: Main routes (`index.astro`, `blog/`, `projects/`, `work/`).
 - `src/layouts/`: Shared layouts, primarily `PageLayout.astro`.
 - `src/components/`: Reusable UI components.
-  - `Container.astro`: Implements the core 10-column grid system and vertical background lines.
+  - `Container.astro` / `Container-md.astro`: Standard max-width containers for centering content.
+  - `AsciiBackground.astro`: Implements the animated ASCII background.
   - `ArrowCard.astro` / `ArrowCardThumbnail.astro`: Standard card components for blog posts and projects.
   - `Link.astro`: Utility for styled internal/external links.
 - `src/content/`: Data for Content Collections (blog, work, projects).
@@ -45,18 +46,15 @@ npm run lint:fix  # Automatically fix errors
 
 ## Development Conventions
 
-### 10-Column Grid System
-The site uses a custom 10-column grid system implemented in `Container.astro`. 
-- **Desktop (md):** Columns are 10% wide each.
-- **Construction Lines:** Vertical lines are placed at every 10% interval using `absolute` positioning and `border-l`.
-- **Framing:** Key sections (like the intro on the home page) use a framed container with an opaque background (`bg-[#faf9f6]`) and `z-10` to hide underlying grid lines.
-- **Alignment:** When adding framed containers, use `md:-mr-px` or similar negative margins to ensure borders perfectly overlap with the background grid lines (which are typically `border-l` on the subsequent column).
+### Layout & Aesthetic System
+The site has transitioned to an ASCII/terminal aesthetic.
+- **Containers:** `Container.astro` (xl width) and `Container-md.astro` (md width) are used to wrap content sections.
+- **Background:** `AsciiBackground.astro` provides an animated ASCII wave background using a canvas of characters (`.:-=+*#%@`).
 
 ### Styling Guidelines
 - **Colors:** Default background is `#faf9f6` (light) and `slate-950` (dark).
-- **Typography:** Inter (Sans) for UI and Lora (Serif) for body text/prose.
-- **Hover Effects:** Use the `.container-grid:has(...)` pattern in `global.css` to trigger "dashed" line animations when hovering over specific elements.
-- **Opaque Backgrounds:** When framing elements to hide grid lines, ensure you use the theme's background colors to maintain the "card" effect.
+- **Typography:** DM Sans (Sans) for UI, Fraunces (Serif) for body text/prose, and JetBrains Mono (Mono) for headings and accents.
+- **Hover Effects:** Use the `.shadow-ascii` and `.shadow-hover` classes in `global.css` to trigger an interactive dotted/ASCII trailing shadow effect.
 
 ### Content Collections
 - **Blog:** Uses standard Markdown with frontmatter (`title`, `description`, `date`).
