@@ -8,11 +8,11 @@ demoURL: "https://www.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach-(Co
 
 ![Future of coach cover](/projectfiles/coach/future-of-coach-cover.png)
 
-At first, _Future of coach_ was only about the vision of Younited personal budget feature. During the couple of weeks needed for this project though, the scope increased tremedously.
+At first, _Future of coach_ was only about the vision of Younited personal budget feature. During the couple of weeks needed for this project though, the scope increased tremendously.
 
-It was always the goal to make extensive use of modern gen AI features, but we went beyond that and made a complete new app, made from the ground up for banking features, loans (our core business), and budgetisation.
+It was always the goal to make extensive use of modern gen AI features, but we went beyond that and made a complete new app, made from the ground up for banking features, loans (our core business), and budgeting.
 
-After an initial brief and brainstorming from the CPO, I had to Imagine, priorize and design three personas and their experience with a totally revamped Younited Coach experience, during 12 intense days. The project wasn't really supposed to be this big, but I saw it as an opportunity to materialize some ideas and concepts I imagined during my previous work at Bankin', plus a healthy dose of modern AI interactions.
+After an initial brief and brainstorming from the CPO, I had to imagine, prioritize, and design three personas and their experience with a totally revamped Younited Coach experience, during 12 intense days. The project wasn't really supposed to be this big, but I saw it as an opportunity to materialize some ideas and concepts I imagined during my previous work at Bankin', plus a healthy dose of modern AI interactions.
 
 ![Future of coach project page](/projectfiles/coach/home-app-page1.png)
 
@@ -54,7 +54,7 @@ Obviously I'm skipping steps with my screens here. You would have to subscribe t
 
 ## Timeline
 
-The Timeline page is very useful to keep an eye on the overall health of your finances. It keeps track of your expenses for the current month and calculate an overdraft probability before its end.
+The Timeline page is very useful to keep an eye on the overall health of your finances. It keeps track of your expenses for the current month and calculates an overdraft probability before its end.
 
 It’s also the place to keep track of your recurring expenses. One fun feature here is the _AI-powered Subscription Manager_, using our subtly named AI, **CoachAI**.
 
@@ -100,7 +100,7 @@ _Sigh_, I wish the transaction names were more explicit.
     <div class=""><img src="/projectfiles/coach/transac-find3.png" alt="Ask coachai to find what the hell is this transaction"/></div>
 </div>
 
-The rest of the Home page and widgets is straighforward. We have widgets to categorize transactions, show your monthly savings, but also widgets for your carbon footprint, credit score, future expenses, and so on.
+The rest of the Home page and widgets is straightforward. We have widgets to categorize transactions, show your monthly savings, but also widgets for your carbon footprint, credit score, future expenses, and so on.
 
 <div class="flex gap-2 md:gap-4 md:my-8 md:-mx-24">
     <div class=""><img src="/projectfiles/coach/features1.png" alt="A screenshot of a widget on the home page"/></div>

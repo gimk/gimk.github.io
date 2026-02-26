@@ -66,6 +66,10 @@ article {
   @apply prose-headings:text-black prose-headings:dark:text-white;
 }
 
+article img {
+  @apply cursor-zoom-in rounded-lg;
+}
+
 h1, h2, h3, h4, h5, h6 {
   @apply font-mono;
 }

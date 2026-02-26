@@ -1,0 +1,103 @@
+<div id="lightbox" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out cursor-zoom-out">
+  <div class="relative w-full h-full flex items-center justify-center p-4 md:p-10">
+    <img id="lightbox-img" src="" alt="Zoomed image" class="max-w-full max-h-full object-contain shadow-2xl scale-95 transition-transform duration-300 ease-in-out cursor-zoom-out" />
+    <button id="lightbox-close" class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors p-2 z-[110]" aria-label="Close lightbox">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  interface LightboxImage extends HTMLImageElement {
+    _lightboxHandler?: (e: MouseEvent) => void;
+  }
+
+  function setupLightbox() {
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightbox-img") as HTMLImageElement;
+    const lightboxClose = document.getElementById("lightbox-close");
+    const images = document.querySelectorAll("article img");
+
+    if (!lightbox || !lightboxImg || !lightboxClose) return;
+
+    const openLightbox = (src: string, alt: string) => {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt;
+      
+      lightbox.classList.remove("opacity-0", "pointer-events-none");
+      lightbox.classList.add("opacity-100", "pointer-events-auto");
+      
+      // Force a reflow for the scale transition
+      void lightboxImg.offsetWidth;
+      
+      lightboxImg.classList.remove("scale-95");
+      lightboxImg.classList.add("scale-100");
+      
+      document.body.style.overflow = "hidden";
+    };
+
+    const closeLightbox = () => {
+      lightbox.classList.add("opacity-0", "pointer-events-none");
+      lightbox.classList.remove("opacity-100", "pointer-events-auto");
+      lightboxImg.classList.add("scale-95");
+      lightboxImg.classList.remove("scale-100");
+      
+      document.body.style.overflow = "";
+      
+      setTimeout(() => {
+        if (lightbox.classList.contains("opacity-0")) {
+          lightboxImg.src = "";
+        }
+      }, 300);
+    };
+
+    images.forEach((img) => {
+      // Avoid adding multiple listeners if setupLightbox is called multiple times
+      const element = img as LightboxImage;
+      if (element._lightboxHandler) {
+        element.removeEventListener("click", element._lightboxHandler);
+      }
+      
+      const handler = (e: MouseEvent) => {
+        e.preventDefault();
+        openLightbox(element.src, element.alt);
+      };
+      
+      element._lightboxHandler = handler;
+      element.addEventListener("click", handler);
+    });
+
+    lightbox.addEventListener("click", (e) => {
+      // Close if clicking the background (lightbox or its first child container)
+      // or the close button
+      if (e.target === lightbox || (e.target as HTMLElement).closest("#lightbox-close") || e.target === lightbox.firstElementChild) {
+        closeLightbox();
+      }
+    });
+
+    // Also close when clicking the image since it has cursor-zoom-out
+    lightboxImg.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeLightbox();
+    });
+
+    // Close on Escape key
+    const onKeydown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        closeLightbox();
+      }
+    };
+    
+    document.removeEventListener("keydown", onKeydown);
+    document.addEventListener("keydown", onKeydown);
+  }
+
+  // Initial setup
+  setupLightbox();
+
+  // Re-setup after Astro page transitions
+  document.addEventListener("astro:after-swap", setupLightbox);
+</script>

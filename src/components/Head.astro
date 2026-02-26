@@ -72,7 +72,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
     [
       // Select all font preload links in the incoming document's head
       ...(e as TransitionBeforeSwapEvent).newDocument.head.querySelectorAll(
-        'link[as="font"]'
+        "link[as=\"font\"]"
       ),
       // Remove each found link to prevent duplicate preloading issues
     ].forEach((link) => link.remove())
@@ -145,7 +145,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
   // Function to apply the theme based on localStorage or system preference on initial load
   function preloadTheme() {
     const userTheme = localStorage.theme;
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const themeColorMeta = document.querySelector("meta[name=\"theme-color\"]");
     // Determine if dark mode should be enabled
     const isDark =
       userTheme === "dark" ||
@@ -186,7 +186,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
     }
 
     // Theme Toggle Button
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const themeColorMeta = document.querySelector("meta[name=\"theme-color\"]");
     const toggleThemeButton = document.getElementById("theme-button");
     // Add listener only if it hasn't been added before
     if (

@@ -30,14 +30,14 @@ The interesting feature in this case is the chat button, bottom right, which wil
     <div class=""><img src="/projectfiles/coach-desktop/Opened.png" alt="Main page, chat opened"/></div>
 </div>
 
-The whole opening and closing is accentuated by simple animations and a _pulsating gradient_ a bit like Apple Intelligence. Although, because of time and tools constraints, it's not going to be as impressive, _just yet_. You can have a look at the animation on the prototype below.
+The whole opening and closing is accentuated by simple animations and a _pulsating gradient_ a bit like Apple Intelligence. Although, because of time and tool constraints, it's not going to be as impressive, _just yet_. You can have a look at the animation on the prototype below.
 
 I recommend going fullscreen!
 
 <div class="flex items-center md:my-12 md:-mx-24"><iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="1200" height="600" src="https://embed.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach--Copy-?page-id=4077%3A10661&node-id=4090-8099&viewport=547%2C233%2C0.19&scaling=scale-down&content-scaling=fixed&starting-point-node-id=4090%3A8099&show-proto-sidebar=1&embed-host=share" allowfullscreen></iframe></div>
 
 I have lots of ideas for _power-user_ features, which would go very well with a desktop app. Multi-selection, quick account filtering, transaction check-off. Also, with all that space, interaction between the AI chat and content is much easier; I could add contextual buttons to quickly ask questions and such.
-I haven't made any of these additions yet, but given the time, they are a few of the paths I could take to improve the design.
+I haven't made any of these additions yet, but given the time, there are a few paths I could take to improve the design.
 
 I also made desktop designs for the Project page. And you can see the opened version of the navigation menu!
 
@@ -60,7 +60,7 @@ I think that using pop-ups in a desktop app is **lazy** most of the time, except
 Here you can see the same page, but filled with projects and with the chat opened. It's quite dense now, but you could always close the chat to gain some space.
 Anyway, here you can see an opened project, with all the information, actions and documents available in a typical credit at Younited. Loan progression is clearly visible, and there's even some guides to help you organize your finances! Only one project can be opened at the same time.
 
-This covers everything I made in the couple of evenings I had to produce this desktop version. It's obviously incomplete, and is looking more like a Dribbble shot than an actual product, but I think it showcases to an extent my ability to design for a different format, like a _desktop_.
+This covers everything I made in the couple of evenings I had to produce this desktop version. It's obviously incomplete, and looks more like a Dribbble shot than an actual product, but I think it showcases to an extent my ability to design for a different format, like a _desktop_.
 
 It's much older, but I also worked on a desktop-first environment at Mention. I don't have much to show but the two designs I kept are [here](/projects/older-projects).
 

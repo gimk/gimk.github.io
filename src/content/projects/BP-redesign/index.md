@@ -5,14 +5,14 @@ date: "Early 2021"
 thumbnail: "/projectfiles/thumbnails/bp-thumbnail.png"
 ---
 
-![Cover showing a dozen of screens skewed on blue background](/projectfiles/bp-redesign/cover.png)
+![Cover showing dozens of screens skewed on blue background](/projectfiles/bp-redesign/cover.png)
 
-Let's be honest here, most old banks apps aren't up to the standards we have today.
+Let's be honest here, most old bank apps aren't up to the standards we have today.
 With this personal project, I hope to bring this bank app to an acceptable level of usability, and if possible to make it pleasing to the eye.
 
 ![Mockup of two phones with home page](/projectfiles/bp-redesign/cover2.png)
 
-Let's start with the Logo. I used more definitives colours instead of the gradient and dark blue. It feels far better on a screen, and the contrast is satisfying. I also removed the few rounded corners of the icon and changed the dimensions to fit the logo type.
+Let's start with the Logo. I used more definitive colors instead of the gradient and dark blue. It feels far better on a screen, and the contrast is satisfying. I also removed the few rounded corners of the icon and changed the dimensions to fit the logo type.
 
 ![Redesigned logo of banque populaire](/projectfiles/bp-redesign/logo.png)
 
@@ -31,7 +31,7 @@ Blue is somewhat overused in companies brandings today, but that's their origina
     <div class=""><img src="/projectfiles/bp-redesign/login2.png" alt=""/></div>
 </div>
 
-Once you'e authenticated, you lend on the account page. Here you can see your accounts or savings, all your past transactions, and set a budget feature, to give you an overview of your month.
+Once you'e authenticated, you land on the account page. Here you can see your accounts or savings, all your past transactions, and set a budget feature, to give you an overview of your month.
 
 <div class="flex gap-4 md:-mx-24 md:my-8">
     <div class=""><img src="/projectfiles/bp-redesign/home1.png" alt="Home redesign focus"/></div>
@@ -45,7 +45,7 @@ Once you'e authenticated, you lend on the account page. Here you can see your ac
     <img src="/projectfiles/bp-redesign/link-illu.png" alt="Focus and link of the illustration"/>
 </div>
 
-Bellow is the process to do a new money transfer. You type in the amount, then you choose the originating account, and then the receiving one. You can choose one of your accounts, an external account, or use PayLib to send money via a phone number or email.
+Below is the process to do a new money transfer. You type in the amount, then you choose the originating account, and then the receiving one. You can choose one of your accounts, an external account, or use PayLib to send money via a phone number or email.
 
 <div class="flex gap-4 md:-mx-24 md:my-8">
     <div class=""><img src="/projectfiles/bp-redesign/transac1.png" alt="Transactions redesign focus"/></div>
@@ -58,7 +58,7 @@ Bellow is the process to do a new money transfer. You type in the amount, then y
     <div class=""><img src="/projectfiles/bp-redesign/transac5.png" alt="transaction redesign funnel"/></div>
 </div>
 
-In this tab, you handle your card security concerns, see your PIN or unlock it after 3 failed attempts, and a few other options. All sensible actions are locked behind an authentification wall.
+In this tab, you handle your card security concerns, see your PIN or unlock it after 3 failed attempts, and a few other options. All sensitive actions are locked behind an authentification wall.
 
 <div class="mx-32">
     <img src="/projectfiles/bp-redesign/card1.png" alt="Card management tab of the app"/>

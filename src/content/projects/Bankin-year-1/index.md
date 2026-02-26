@@ -13,13 +13,13 @@ thumbnail: "/projectfiles/thumbnails/bankin-thumbnail1.png"
 First year working at Bankin' as a Product Designer.
 
 <u>I was the only Product Designer at Bankin'</u>, so all the projects and artboards shown below are my designs. However, the product team was also composed of one Product Manager and one Head of Product with which I worked closely during the various tasks that made up those projects.
-The Bankin' app has more than 6 million downloads and is, at the time of writing, the #1 grossing finance app in France (Play Store). So it's safe to say that all the designs shown on this page has, or will, be seen by hundred of thousands of people.
+The Bankin' app has more than 6 million downloads and is, at the time of writing, the #1 grossing finance app in France (Play Store). So it's safe to say that all the designs shown on this page have been, or will be, seen by hundred of thousands of people.
 
-All my designs are made for small phones first, which is what our user base use the most. I'm sorry, no fancy iPhone 13 Pro Max designs here.
+All my designs are made for small phones first, which is what our user base uses the most. I'm sorry, no fancy iPhone 13 Pro Max designs here.
 
 ## New Homepage
 
-The homepage of Bankin' was getting pretty old when I arrived in 2021. The design followed the trends set by Google in 2014 and onwards, but it stayed pretty much the same since then. Also, it didn't follow the app value proposition anymore, since Bankin went from a simple account aggregation app, to a much more complex budget companion app.
+The homepage of Bankin' was getting pretty old when I arrived in 2021. The design followed the trends set by Google in 2014 and onwards, but it stayed pretty much the same since then. Also, it didn't follow the app's value proposition anymore, since Bankin went from a simple account aggregation app, to a much more complex budget companion app.
 Here are a few screens of the old version.
 
 <div class="grid grid-cols-3 gap-4 md:-mx-24 md:my-8">
@@ -35,7 +35,7 @@ Over the course of several months, we worked back and forth between the product,
     <div class="mx-24 md:mx-0"><img src="/projectfiles/bankin/new-bankin-blue2.png" alt="Bankin' home page old design"/></div>
 </div>
 
-And here are some details from there and there. Please zoom manually, as I didn't implement any zoom functionality yet. Sorry.
+And here are some details from there and there. Tap on an image to zoom.
 
 <div class="grid grid-cols-4 gap-1 md:-mx-24 md:my-8">
     <img src="/projectfiles/bankin/newbankin-detail1.png" alt="Bankin' home page old design"/>
@@ -54,7 +54,7 @@ Also, in an effort to modernize the UI, I introduced a new open source library. 
 
 _I'll now walk you through some of the iterations and ideas behind this final design._
 
-The two main goals for this project were first, to have a landing page that represent the app value proposition, and second, modernize the UI.
+The two main goals for this project were first, to have a landing page that represents the app's value proposition, and second, modernize the UI.
 Bankin has evolved a great deal since the old design was implemented 5 years ago. Account aggregation itself doesn't bring back money so the company needed to diversify.
 
 The first thing we did was to add what we call "Opportunities" to the app : switch banks, internet provider or electrical company for example through the app and save money every month. The second was to add automated reward systems, like the Cashback, that rewards you a percentage of your purchase. And the last (for the moment) is the possibility to contract micro-credits directly in-app, when needed.
@@ -102,7 +102,7 @@ With the new onboarding, the set objective was trifold : present better what was
 
 I did dozens of iterations for this project, along with Principle prototypes that we used both during Guerilla Testing sessions at Gare de l'Est, and during user interviews, as we wanted to get it as right as possible for the user.
 
-The result was in two distinctive parts. First, as you can see below, the "stories" that replace the old login screen that just had text fields to create an account. Its goal is simply to give an insight to the user about what to expect in the app before creating as account. All illustrations are animated.
+The result was in two distinctive parts. First, as you can see below, the "stories" replace the old login screen that just had text fields to create an account. Its goal is simply to give the user insight about what to expect in the app before creating as account. All illustrations are animated.
 
 <div class="md:flex md:-mx-24 md:my-8">
     <div class="flex">
@@ -115,7 +115,7 @@ The result was in two distinctive parts. First, as you can see below, the "stori
     </div>
 </div>
 
-Then, after creating his account and adding its first bank (we're an account aggregator after all), the user is shown various cards one by one, each starting a small series of screens. Some are skippable.
+Then, after creating his account and adding their first bank (we're an account aggregator after all), the user is shown various cards one by one, each starting a small series of screens. Some are skippable.
 
 To further capture interest, each card shows a personalized element that we get from his bank connection : his electricity bill, bank charges, his last transactions, etc.
 
@@ -132,7 +132,7 @@ To further capture interest, each card shows a personalized element that we get 
 
 All these designs were thoroughly tested before being released, and the end result proved all our work : more than 75% of users complete the onboarding now, which increased dramatically our revenue per new user. It was a resounding success.
 
-Below are other final choices that we tested for the onboarding, that gave the user more leverage on what do do but unfortunately (and logically) it reduced our revenues.
+Below are other final choices that we tested for the onboarding, that gave the user more leverage on what to do, but unfortunately (and logically) it reduced our revenues.
 
 <div class="flex gap-4 md:-mx-16 md:my-8">
     <div class=""><img src="/projectfiles/bankin/onb-choice1.png" alt=""/></div>
