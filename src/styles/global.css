@@ -34,17 +34,17 @@ header {
 header::after {
   content: "";
   position: absolute;
-  top: 0;
+  top: 100%;
   left: 0;
   width: 100%;
-  height: calc(100% + 8px);
+  height: 16px;
   z-index: -1;
   background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
   background-size: 4px 4px;
-  @apply text-black/5 dark:text-white/5;
+  @apply text-black/10 dark:text-white/10;
   pointer-events: none;
-  mask-image: linear-gradient(to bottom, transparent, black 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 100%);
+  mask-image: linear-gradient(to bottom, black, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
 }
 
 
