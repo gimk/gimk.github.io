@@ -25,10 +25,14 @@ body {
 
 header {
   @apply sticky top-0 left-0 right-0 z-50 py-4;
-  @apply bg-[#faf9f6]/80 dark:bg-slate-950/80;
   @apply backdrop-blur-md;
   @apply border-b border-black/10 dark:border-white/10;
   isolation: isolate;
+  background: linear-gradient(to bottom, #faf9f6 0%, rgba(250, 249, 246, 0.7) 100%);
+}
+
+html.dark header {
+  background: linear-gradient(to bottom, #020617 0%, rgba(2, 6, 23, 0.7) 100%);
 }
 
 header::after {
