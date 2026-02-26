@@ -22,7 +22,21 @@
 
     const counter = document.getElementById('experience-counter');
     if (counter) {
-      counter.textContent = `${years} years, ${months} months, and ${days} days`;
+      const parts = [];
+      if (years > 0) parts.push(`${years} year${years > 1 ? 's' : ''}`);
+      if (months > 0) parts.push(`${months} month${months > 1 ? 's' : ''}`);
+      if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+
+      let text = '';
+      if (parts.length === 1) {
+        text = parts[0];
+      } else if (parts.length === 2) {
+        text = parts.join(' and ');
+      } else if (parts.length === 3) {
+        text = `${parts[0]}, ${parts[1]}, and ${parts[2]}`;
+      }
+      
+      counter.textContent = text || 'less than a day';
     }
   }
 
