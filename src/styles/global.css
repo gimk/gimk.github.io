@@ -44,8 +44,12 @@ footer {
 
 article {
   @apply max-w-full prose dark:prose-invert prose-img:mx-auto prose-img:my-auto;
-  @apply prose-headings:font-semibold prose-p:font-serif;
+  @apply prose-headings:font-mono prose-headings:font-semibold prose-p:font-serif;
   @apply prose-headings:text-black prose-headings:dark:text-white;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-mono;
 }
 
 @layer utilities {
