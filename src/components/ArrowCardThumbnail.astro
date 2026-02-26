@@ -11,14 +11,14 @@ const { entry } = Astro.props;
 <div class="shadow-ascii shadow-hover">
   <a
     href={`/${entry.collection}/${entry.slug}`}
-    class="arrow-card-thumb relative group flex flex-nowrap items-center bg-[#faf9f6] dark:bg-slate-950 border border-black/10 dark:border-white/10 transition-all duration-300 ease-in-out h-20 overflow-hidden"
+    class="arrow-card-thumb relative group flex flex-nowrap items-center bg-orange-50 dark:bg-slate-950 border border-black/10 dark:border-white/10 transition-all duration-300 ease-in-out h-20 overflow-hidden"
   >
   <div
     class="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-75 dark:group-hover:opacity-50 transition-opacity duration-300"
     aria-hidden="true"
   >
     <pre
-      class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-orange-500 dark:text-orange-500 absolute top-1/2 right-[26px] translate-x-1/2 -translate-y-1/2"
+      class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-accent-primary absolute top-1/2 right-[26px] translate-x-1/2 -translate-y-1/2"
       style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%);"
     ></pre>
   </div>
@@ -40,7 +40,7 @@ const { entry } = Astro.props;
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
-    class="absolute top-1/2 right-4 -translate-y-1/2 size-5 stroke-2 fill-none stroke-current group-hover:stroke-orange-500 transition-colors duration-300"
+    class="absolute top-1/2 right-4 -translate-y-1/2 size-5 stroke-2 fill-none stroke-current group-hover:stroke-accent-primary transition-colors duration-300"
   >
     <line
       x1="5"

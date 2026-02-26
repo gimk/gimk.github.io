@@ -16,7 +16,7 @@ After an initial brief and brainstorming from the CPO, I had to imagine, priorit
 
 ![Future of coach project page](/projectfiles/coach/home-app-page1.png)
 
-<div class="text-center md:mx-16 mb-16 border rounded-2xl bg-black/5 border-black/25 dark:border-white/25 p-4 gap-2">
+<div class="text-center md:mx-16 mb-16 border rounded-2xl bg-black/10 border-black/20 dark:border-white/20 p-4 gap-2">
     <svg class="inline-block" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_4021_23699)"> <path class="stroke-black/75 dark:stroke-white/75" d="M12 10L8 6L4 10" stroke="" stroke-linecap="round" stroke-linejoin="round"/></g><defs> <clipPath id="clip0_4021_23699"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
     <p class="mt-1">Above is the home page of the app. As you can see, the navigation is peculiar, with 3 buttons. The left one goes to Projects, and the right one goes to the Timeline. We'll see about the chat button later.</p>
 </div>

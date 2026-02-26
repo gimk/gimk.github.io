@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --color-accent: 249 115 22; /* orange-500 */
+  }
+
+  html.dark {
+    --color-accent: 56 189 248; /* sky-400 */
+  }
+}
+
 html {
   overflow-y: scroll;
   color-scheme: light;
@@ -19,7 +29,7 @@ body {
 body {
   @apply font-sans antialiased relative;
   @apply flex flex-col min-h-screen;
-  @apply bg-[#faf9f6] dark:bg-slate-950;
+  @apply bg-orange-50 dark:bg-slate-950;
   @apply text-black/85 dark:text-white/85;
 }
 
@@ -28,7 +38,7 @@ header {
   @apply backdrop-blur-md;
   @apply border-b border-black/10 dark:border-white/10;
   isolation: isolate;
-  background: linear-gradient(to bottom, #faf9f6 0%, rgba(250, 249, 246, 0.7) 100%);
+  background: linear-gradient(to bottom, #fff7ed 0%, rgba(255, 247, 237, 0.7) 100%);
 }
 
 html.dark header {
@@ -81,12 +91,12 @@ h1, h2, h3, h4, h5, h6 {
 @layer utilities {
   article a {
     @apply font-sans text-current underline underline-offset-2;
-    @apply decoration-black/15 dark:decoration-white/30;
+    @apply decoration-black/20 dark:decoration-white/20;
     @apply transition-colors duration-300 ease-in-out;
   }
   article a:hover {
     @apply text-black dark:text-white;
-    @apply decoration-black/25 dark:decoration-white/50;
+    @apply decoration-black/20 dark:decoration-white/40;
   }
 }
 
@@ -131,5 +141,5 @@ html.scrolled #back-to-top {
   top: 4px;
   left: 4px;
   background-image: radial-gradient(circle, currentColor 0.8px, transparent 0.8px);
-  @apply text-orange-500/40 dark:text-orange-500/40;
+  @apply text-accent-primary/40 dark:text-accent-primary/40;
 }

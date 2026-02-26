@@ -154,7 +154,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
     toggleTheme(isDark); // Apply the theme
     // Update the theme-color meta tag for browser UI consistency
     if (themeColorMeta) {
-      themeColorMeta.setAttribute("content", isDark ? "#020617" : "#ffedd5");
+      themeColorMeta.setAttribute("content", isDark ? "#020617" : "#fff7ed");
     }
   }
 
@@ -198,7 +198,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
         if (isDark) {
           // Switch to light theme
           localStorage.setItem("theme", "light");
-          themeColorMeta?.setAttribute("content", "#ffedd5");
+          themeColorMeta?.setAttribute("content", "#fff7ed");
           toggleTheme(false);
         } else {
           // Switch to dark theme
