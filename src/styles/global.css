@@ -71,6 +71,16 @@ footer {
   @apply border-t border-black/10 dark:border-white/10;
 }
 
+@layer components {
+  .hero-ascii-text {
+    @apply font-mono text-[10px] leading-[8px] tracking-[1px] text-accent-primary opacity-75 dark:opacity-50 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none;
+  }
+  
+  .section-title {
+    @apply font-semibold text-black dark:text-white text-xs uppercase tracking-widest;
+  }
+}
+
 @layer utilities {
 }
 

@@ -41,4 +41,4 @@ export const SOCIALS: Socials = [
     NAME: "unsplash",
     HREF: "https://unsplash.com/@gimmick/"
   }
-];
+] as const;
