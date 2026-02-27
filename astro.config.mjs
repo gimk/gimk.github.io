@@ -6,4 +6,7 @@ import tailwind from "@astrojs/tailwind";
 export default defineConfig({
   site: "https://www.pantoine.com",
   integrations: [mdx(), sitemap(), tailwind()],
+  server: {
+    port: 49155
+  }
 });
