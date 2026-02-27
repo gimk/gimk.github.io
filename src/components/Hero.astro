@@ -73,8 +73,7 @@ import ExperienceCounter from "@components/ExperienceCounter.astro";
     <pre
       id="hero-ascii"
       aria-hidden="true"
-      class="hero-ascii-text"
-      style="mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);">
+      class="hero-ascii-text">
     </pre>
   </div>
   </section>
@@ -212,7 +211,7 @@ import ExperienceCounter from "@components/ExperienceCounter.astro";
       for (let y = 0; y < rows; y++) {
         grid[y] = [];
         for (let x = 0; x < cols; x++) {
-          const dx = (x - cx) * 0.6;
+          const dx = (x - cx) * 0.875;
           const dy = y - cy;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
@@ -224,8 +223,8 @@ import ExperienceCounter from "@components/ExperienceCounter.astro";
           // Optimized trail influence
           let trailInfluence = 0;
           for (const point of trailPoints) {
-            const adx = Math.abs(x - point.x);
-            const ady = Math.abs(y - point.y) * 1.5;
+            const adx = Math.abs(x - point.x) * 0.875;
+            const ady = Math.abs(y - point.y);
             
             // Skip expensive sqrt if outside bounding box
             if (adx < 2.5 && ady < 2.5) {
