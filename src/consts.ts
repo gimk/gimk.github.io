@@ -42,3 +42,7 @@ export const SOCIALS: Socials = [
     HREF: "https://unsplash.com/@gimmick/"
   }
 ] as const;
+
+export const NEW_PROJECT = {
+  HREF: "https://photos.pantoine.com",
+} as const;

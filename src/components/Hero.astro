@@ -1,17 +1,55 @@
 ---
-import { SITE, SOCIALS } from "@consts";
+import { SITE, SOCIALS, NEW_PROJECT } from "@consts";
 import Link from "@components/Link.astro";
 import ExperienceCounter from "@components/ExperienceCounter.astro";
 ---
 
 <div class="shadow-ascii">
   <section
-    class="min-h-[600px] flex flex-col md:flex-row border border-black/10 dark:border-white/10 bg-orange-50 dark:bg-slate-950 relative overflow-hidden mb-24"
+    class="min-h-[600px] flex flex-col md:flex-row border border-black/10 dark:border-white/10 bg-orange-50 dark:bg-slate-950 relative mb-24"
   >
   <!-- Left Side: Intro Content -->
   <div
-    class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center z-10 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10"
+    class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center z-10 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10 relative items-start"
   >
+    <!-- Project Pill -->
+    <div class="mb-6 flex animate">
+      <div class="rounded-full bg-orange-50 dark:bg-slate-950 hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-300">
+        <a
+          href={NEW_PROJECT.HREF}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="relative flex flex-nowrap items-center justify-center gap-3 px-3 py-2 border border-black/10 dark:border-white/10 sm:hover:text-black dark:sm:hover:text-white transition-all duration-300 ease-in-out overflow-hidden rounded-full font-sans group"
+        >
+          <div class="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="12.7 17.8 37 37" xmlns="http://www.w3.org/2000/svg" class="text-accent-primary" fill="currentColor">
+              <path d="M 31.2344 54.7305 C 31.8438 54.7305 32.2891 54.2852 32.4062 53.6524 C 34.0703 40.8086 35.8750 38.8633 48.5781 37.4570 C 49.2344 37.3867 49.6797 36.8945 49.6797 36.2852 C 49.6797 35.6758 49.2344 35.2070 48.5781 35.1133 C 35.8750 33.7070 34.0703 31.7617 32.4062 18.9180 C 32.2891 18.2852 31.8438 17.8633 31.2344 17.8633 C 30.6250 17.8633 30.1797 18.2852 30.0860 18.9180 C 28.4219 31.7617 26.5938 33.7070 13.9140 35.1133 C 13.2344 35.2070 12.7891 35.6758 12.7891 36.2852 C 12.7891 36.8945 13.2344 37.3867 13.9140 37.4570 C 26.5703 39.1211 28.3281 40.8321 30.0860 53.6524 C 30.1797 54.2852 30.6250 54.7305 31.2344 54.7305 Z"/>
+            </svg>
+            <div class="font-regular text-sm whitespace-nowrap z-10">
+              Check out my last project
+            </div>
+          </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            class="size-5 stroke-2 fill-none stroke-current group-hover:stroke-accent-primary transition-colors duration-300 z-10"
+          >
+            <line
+              x1="5"
+              y1="12"
+              x2="19"
+              y2="12"
+              class="translate-x-3 sm:group-hover:translate-x-0 scale-x-0 sm:group-hover:scale-x-100 transition-transform duration-300 ease-in-out"
+            ></line>
+            <polyline
+              points="12 5 19 12 12 19"
+              class="-translate-x-1 sm:group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
+            ></polyline>
+          </svg>
+        </a>
+      </div>
+    </div>
+
     <div class="flex items-center">
       <h1
         class="animate font-semibold text-black dark:text-white tracking-wider text-3xl"
