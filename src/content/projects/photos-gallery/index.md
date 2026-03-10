@@ -1,7 +1,7 @@
 ---
 title: "Photos Gallery"
 description: "A personal photography gallery."
-date: "March 2026"
+date: "February 2026"
 thumbnail: "/projectfiles/thumbnails/camera-thumbnail.png"
 demoLabel: "visit gallery"
 demoURL: "https://photos.pantoine.com"
