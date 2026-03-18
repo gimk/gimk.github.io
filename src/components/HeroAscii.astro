@@ -1,0 +1,336 @@
+---
+---
+<div
+  id="hero-ascii-container"
+  class="w-full md:w-1/2 h-[400px] md:h-auto relative overflow-hidden bg-black/[0.02] dark:bg-white/[0.02] flex items-center justify-center cursor-crosshair"
+>
+  <pre id="hero-ascii" aria-hidden="true" class="hero-ascii-text"></pre>
+</div>
+
+<script>
+  let frameId: number;
+  let lastTime = 0;
+  const FPS_LIMIT = 24;
+  const FRAME_MIN_TIME = 1000 / FPS_LIMIT;
+  const SWITCH_INTERVAL = 20000; // Switch animation every 20 seconds
+
+  // Animation definitions
+  interface TrailPoint {
+    x: number;
+    y: number;
+    age: number;
+    char: string;
+    vx?: number;
+    vy?: number;
+  }
+
+  interface Animation {
+    name: string;
+    render: (x: number, y: number, time: number, dist: number, dx: number, dy: number, cols: number, rows: number) => number;
+    updatePoint: (point: TrailPoint, cx: number, cy: number) => void;
+    getClickParticles: (x: number, y: number) => Omit<TrailPoint, "char">[];
+  }
+
+  const ANIMATIONS: Animation[] = [
+    {
+      name: "wave",
+      render: (x, y, time, dist, dx, dy, cols, rows) => {
+        return (
+          Math.sin(dist * 0.12 - time) * 0.6 +
+          Math.cos(dx * 0.08 + time * 0.5) * 0.2 +
+          Math.sin(dy * 0.08 + time * 0.5) * 0.2
+        );
+      },
+      updatePoint: (p, cx, cy) => {
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 0) {
+          p.x += (dx / dist) * 0.15;
+          p.y += (dy / dist) * 0.15;
+        }
+        if (p.vx !== undefined && p.vy !== undefined) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.94;
+          p.vy *= 0.94;
+        }
+      },
+      getClickParticles: (x, y) => {
+        const particles = [];
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          particles.push({ x, y, age: 1.5, vx: Math.cos(angle) * 1.2, vy: Math.sin(angle) * 1.2 });
+        }
+        return particles;
+      }
+    },
+    {
+      name: "vortex",
+      render: (x, y, time, dist, dx, dy, cols, rows) => {
+        const angle = Math.atan2(dy, dx);
+        return (
+          Math.sin(dist * 0.15 - time * 2 + angle * 3) * 0.7 +
+          Math.cos(dx * 0.05 + time) * 0.3
+        );
+      },
+      updatePoint: (p, cx, cy) => {
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Reduced rotation (0.04) and slower inward drift (0.985)
+        const angle = Math.atan2(dy, dx) + 0.04;
+        const targetDist = dist * 0.985;
+        p.x = cx + Math.cos(angle) * targetDist;
+        p.y = cy + Math.sin(angle) * targetDist;
+        if (p.vx !== undefined && p.vy !== undefined) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.92;
+          p.vy *= 0.92;
+        }
+      },
+      getClickParticles: (x, y) => {
+        const particles = [];
+        for (let i = 0; i < 16; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          // Reduced initial speed for click particles
+          const speed = 0.3 + Math.random() * 0.7;
+          particles.push({ x, y, age: 1.8, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed });
+        }
+        return particles;
+      }
+    },
+    {
+      name: "grid",
+      render: (x, y, time, dist, dx, dy, cols, rows) => {
+        return (
+          Math.sin(x * 0.15 + time) * 0.4 +
+          Math.cos(y * 0.15 + time) * 0.4 +
+          Math.sin(dist * 0.05 - time) * 0.2
+        );
+      },
+      updatePoint: (p) => {
+        // Match the wave drift (approx -0.133 units per frame at 0.02 time step)
+        p.x -= 0.133;
+        p.y -= 0.133;
+
+        if (p.vx !== undefined && p.vy !== undefined) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.95;
+          p.vy *= 0.95;
+        }
+      },
+      getClickParticles: (x, y) => {
+        const particles = [];
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          particles.push({ x, y, age: 1.5, vx: Math.cos(angle) * 1.2, vy: Math.sin(angle) * 1.2 });
+        }
+        return particles;
+      }
+    },
+    {
+      name: "tunnel",
+      render: (x, y, time, dist, dx, dy, cols, rows) => {
+        return (
+          Math.sin(40 / (dist + 5) - time * 1.5) * 0.8 +
+          Math.sin(Math.atan2(dy, dx) * 5 + time * 0.5) * 0.2
+        );
+      },
+      updatePoint: (p, cx, cy) => {
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        // Move toward center (inward) - Quicker to match visual flow
+        const speed = 0.003 * Math.pow(dist + 5, 1.5);
+        if (dist > 1) {
+          p.x -= (dx / dist) * speed;
+          p.y -= (dy / dist) * speed;
+        } else {
+          p.age = 0; // Disappear at center
+        }
+
+        if (p.vx !== undefined && p.vy !== undefined) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.98;
+          p.vy *= 0.98;
+        }
+      },
+      getClickParticles: (x, y) => {
+        const particles = [];
+        for (let i = 0; i < 20; i++) {
+          const angle = (i / 20) * Math.PI * 2;
+          particles.push({ x, y, age: 1.5, vx: Math.cos(angle) * 1.5, vy: Math.sin(angle) * 1.5 });
+        }
+        return particles;
+      }
+    }
+  ];
+
+  function initHeroAscii() {
+    const canvas = document.getElementById(
+      "hero-ascii",
+    ) as HTMLPreElement | null;
+    const container = document.getElementById("hero-ascii-container");
+    if (!canvas || !container) return;
+
+    // Stop any existing animation
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+    }
+
+    const density = " .:-=+*#%@";
+    const cols = 200;
+    const rows = 100;
+    let time = 0;
+    let isVisible = true;
+    let currentAnimIndex = Math.floor(Math.random() * ANIMATIONS.length);
+    let lastSwitchTime = Date.now();
+
+    // Mouse tracking for trail
+    let mouseX = -1000;
+    let mouseY = -1000;
+    const trailPoints: TrailPoint[] = [];
+    const trailChars = "@#%*+=-:. ";
+
+    // Pause when not in view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+      },
+      { threshold: 0 },
+    );
+    observer.observe(container);
+
+    function addPoint(x: number, y: number, age = 1.0, vx = 0, vy = 0) {
+      trailPoints.push({
+        x,
+        y,
+        age,
+        char: trailChars[Math.floor(Math.random() * trailChars.length)],
+        vx,
+        vy,
+      });
+      if (trailPoints.length > 300) trailPoints.shift();
+    }
+
+    container.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = ((e.clientX - rect.left) / rect.width) * cols;
+      mouseY = ((e.clientY - rect.top) / rect.height) * rows;
+      addPoint(mouseX, mouseY);
+    });
+
+    container.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const cx = ((e.clientX - rect.left) / rect.width) * cols;
+      const cy = ((e.clientY - rect.top) / rect.height) * rows;
+
+      const currentAnim = ANIMATIONS[currentAnimIndex];
+      const particles = currentAnim.getClickParticles(cx, cy);
+      particles.forEach(p => addPoint(p.x, p.y, p.age, p.vx, p.vy));
+    });
+
+    container.addEventListener("mouseleave", () => {
+      mouseX = -1000;
+      mouseY = -1000;
+    });
+
+    function render(timestamp: number) {
+      if (!isVisible) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+
+      // Throttle FPS
+      const elapsed = timestamp - lastTime;
+      if (elapsed < FRAME_MIN_TIME) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+      lastTime = timestamp;
+
+      // Check if it's time to switch animation
+      if (Date.now() - lastSwitchTime > SWITCH_INTERVAL) {
+        currentAnimIndex = (currentAnimIndex + 1) % ANIMATIONS.length;
+        lastSwitchTime = Date.now();
+      }
+
+      const cx = cols / 2;
+      const cy = rows / 2;
+      const currentAnim = ANIMATIONS[currentAnimIndex];
+
+      // Update trail ages and positions using animation-specific logic
+      for (let i = 0; i < trailPoints.length; i++) {
+        const point = trailPoints[i];
+        point.age -= 0.02;
+        currentAnim.updatePoint(point, cx, cy);
+      }
+
+      while (trailPoints.length > 0 && trailPoints[0].age <= 0) {
+        trailPoints.shift();
+      }
+
+      const grid: string[][] = [];
+      const radiusSq = 2.5 * 2.5;
+
+      for (let y = 0; y < rows; y++) {
+        grid[y] = [];
+        for (let x = 0; x < cols; x++) {
+          const dx = (x - cx) * 0.875;
+          const dy = y - cy;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          const animValue = currentAnim.render(x, y, time, distance, dx, dy, cols, rows);
+
+          // Optimized trail influence
+          let trailInfluence = 0;
+          for (const point of trailPoints) {
+            const adx = Math.abs(x - point.x) * 0.875;
+            const ady = Math.abs(y - point.y);
+
+            if (adx < 2.5 && ady < 2.5) {
+              const tdistSq = adx * adx + ady * ady;
+              if (tdistSq < radiusSq) {
+                trailInfluence +=
+                  (1 - Math.sqrt(tdistSq) / 2.5) * point.age * 0.5;
+              }
+            }
+          }
+
+          const normalized = (animValue + 1) / 2 + trailInfluence;
+          let charIndex = Math.floor(normalized * density.length);
+          charIndex = Math.max(0, Math.min(density.length - 1, charIndex));
+          grid[y][x] = density[charIndex];
+        }
+      }
+
+      for (const point of trailPoints) {
+        const px = Math.floor(point.x);
+        const py = Math.floor(point.y);
+        if (px >= 0 && px < cols && py >= 0 && py < rows) {
+          if (Math.random() < point.age * 0.5) {
+            grid[py][px] = point.char;
+          }
+        }
+      }
+
+      const output = grid.map((row) => row.join("")).join("\n");
+      if (canvas) canvas.textContent = output;
+
+      time += 0.02;
+      frameId = requestAnimationFrame(render);
+    }
+
+    frameId = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(frameId);
+  }
+
+  // Initialize
+  initHeroAscii();
+  document.addEventListener("astro:after-swap", initHeroAscii);
+</script>
