@@ -21,6 +21,10 @@ To make each canvas feel more realistic and deeply integrated, I used the accent
 
 For this project, I used my knowledge of Astro and GitHub Pages, which I had recently acquired from working on my portfolio.
 
+One of the key features of the gallery is the dynamic background that adapts to each photograph. To achieve this, I implemented a build-time color extraction process using **node-vibrant**. During the Astro build process, the site fetches a small version of each image (400px for better accuracy than a simple thumbnail) and processes it to extract a primary "impactful" color. 
+
+The logic prioritizes the `Vibrant` swatch, falling back to `DarkVibrant`, `Muted`, or `LightVibrant` to ensure the background always complements the image perfectly without being too overwhelming. This pre-calculated color is then passed to the frontend, allowing for seamless transitions as the user scrolls through the gallery.
+
 However, the real accelerator was a heavy usage of **Vibe Coding**. By leveraging the Gemini CLI and Antigravity, alongside the Unsplash API, I was able to make my vision a reality incredibly fast. It took me only a few days—working just a few hours after work—to go from the initial idea straight to a production-ready website.
 
 ## Next Steps
