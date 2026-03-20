@@ -95,8 +95,8 @@
         const dx = p.x - cx;
         const dy = p.y - cy;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        // Reduced rotation (0.04) and slower inward drift (0.985)
-        const angle = Math.atan2(dy, dx) + 0.04;
+        // Synchronized rotation (0.0133 matches the 2/3 ratio in the render function)
+        const angle = Math.atan2(dy, dx) + 0.0133;
         const targetDist = dist * 0.985;
         p.x = cx + Math.cos(angle) * targetDist;
         p.y = cy + Math.sin(angle) * targetDist;
@@ -293,46 +293,95 @@
       },
     },
     {
-      name: "blobs",
+      name: "rings",
       render: (x, y, time, dist, dx, dy, cols, rows) => {
-        const b1x = Math.cos(time * 0.7) * 25;
-        const b1y = Math.sin(time * 0.8) * 15;
-        const b2x = Math.sin(time * 0.5) * -25;
-        const b2y = Math.cos(time * 0.6) * -15;
-        const b3x = Math.cos(time * 0.3) * 10;
-        const b3y = Math.sin(time * 0.4) * 20;
-
-        const d1 = Math.sqrt(Math.pow(dx - b1x, 2) + Math.pow(dy - b1y, 2));
-        const d2 = Math.sqrt(Math.pow(dx - b2x, 2) + Math.pow(dy - b2y, 2));
-        const d3 = Math.sqrt(Math.pow(dx - b3x, 2) + Math.pow(dy - b3y, 2));
-
-        const intensity = 15 / (d1 + 5) + 15 / (d2 + 5) + 15 / (d3 + 5);
-        return intensity - 1.2;
+        const centerIntensity = 12 / (dist + 3);
+        
+        // Rotating rings
+        const r1 = Math.abs(dist - (30 + Math.sin(time) * 5));
+        const r2 = Math.abs(dist - (45 + Math.cos(time * 0.5) * 8));
+        
+        const angle = Math.atan2(dy, dx);
+        const ring1 = (2 / (r1 + 1)) * (Math.sin(angle * 2 + time * 2) * 0.5 + 0.5);
+        const ring2 = (2 / (r2 + 1)) * (Math.cos(angle * 3 - time) * 0.5 + 0.5);
+        
+        return centerIntensity + ring1 + ring2 - 0.8;
       },
       updatePoint: (p, cx, cy) => {
-        // Find nearest blob center and drift toward it
-        const t = Date.now() * 0.001;
-        const centers = [
-          { x: cx + Math.cos(t * 0.7) * 25, y: cy + Math.sin(t * 0.8) * 15 },
-          { x: cx + Math.sin(t * 0.5) * -25, y: cy + Math.cos(t * 0.6) * -15 },
-        ];
-        let nearest = centers[0];
-        let minDist = Infinity;
-        centers.forEach((c) => {
-          const d = Math.pow(p.x - c.x, 2) + Math.pow(p.y - c.y, 2);
-          if (d < minDist) {
-            minDist = d;
-            nearest = c;
-          }
-        });
-
-        const ndx = nearest.x - p.x;
-        const ndy = nearest.y - p.y;
-        const ndist = Math.sqrt(ndx * ndx + ndy * ndy);
-        if (ndist > 0) {
-          p.x += (ndx / ndist) * 0.1;
-          p.y += (ndy / ndist) * 0.1;
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Synchronized with ring rotation (0.03 is a middle ground)
+        const angle = Math.atan2(dy, dx) + 0.03;
+        p.x = cx + Math.cos(angle) * dist;
+        p.y = cy + Math.sin(angle) * dist;
+        if (p.vx !== undefined && p.vy !== undefined) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.96;
+          p.vy *= 0.96;
         }
+      },
+      getClickParticles: (x, y) => {
+        const particles = [];
+        for (let i = 0; i < 20; i++) {
+          const angle = (i / 20) * Math.PI * 2;
+          particles.push({
+            x,
+            y,
+            age: 1.5,
+            vx: Math.cos(angle) * 2,
+            vy: Math.sin(angle) * 0.6,
+          });
+        }
+        return particles;
+      },
+    },
+    {
+      name: "solar",
+      render: (x, y, time, dist, dx, dy, cols, rows) => {
+        // Central Sun - pulse it slightly
+        const sunPulse = Math.sin(time * 2) * 2;
+        const sunIntensity = (12 + sunPulse) / (dist + 3);
+
+        // Planet 1 (Inner, fast)
+        const p1x = Math.cos(time * 1.5) * 20;
+        const p1y = Math.sin(time * 1.5) * 12;
+        const d1 = Math.sqrt(Math.pow(dx - p1x, 2) + Math.pow(dy - p1y, 2));
+        const p1Intensity = 8 / (d1 + 2);
+
+        // Planet 2 (Middle, has a tiny moon)
+        const p2x = Math.cos(time * 0.8) * 40;
+        const p2y = Math.sin(time * 0.8) * 24;
+        const d2 = Math.sqrt(Math.pow(dx - p2x, 2) + Math.pow(dy - p2y, 2));
+        
+        const m1x = p2x + Math.cos(time * 3) * 6;
+        const m1y = p2y + Math.sin(time * 3) * 4;
+        const dm1 = Math.sqrt(Math.pow(dx - m1x, 2) + Math.pow(dy - m1y, 2));
+        
+        const p2Intensity = 10 / (d2 + 3) + 5 / (dm1 + 1.5);
+
+        // Planet 3 (Outer, slow)
+        const p3x = Math.cos(time * 0.4 + 3) * 65;
+        const p3y = Math.sin(time * 0.4 + 3) * 38;
+        const d3 = Math.sqrt(Math.pow(dx - p3x, 2) + Math.pow(dy - p3y, 2));
+        const p3Intensity = 12 / (d3 + 4);
+
+        // Star field background - very subtle
+        const stars = Math.sin(x * 123.45) * Math.cos(y * 543.21) > 0.99 ? 0.15 : 0;
+
+        return sunIntensity + p2Intensity + p1Intensity + p3Intensity + stars - 1.1;
+      },
+      updatePoint: (p, cx, cy) => {
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        // Synchronized with planetary orbital rotation (0.02 is time increment)
+        const angle = Math.atan2(dy, dx) + 0.02;
+        const pull = 0.995; // Slightly less pull for a more stable circular feel
+        p.x = cx + Math.cos(angle) * dist * pull;
+        p.y = cy + Math.sin(angle) * dist * pull;
 
         if (p.vx !== undefined && p.vy !== undefined) {
           p.x += p.vx;
@@ -343,14 +392,15 @@
       },
       getClickParticles: (x, y) => {
         const particles = [];
-        for (let i = 0; i < 16; i++) {
-          const angle = (i / 16) * Math.PI * 2;
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          const speed = 1.0 + Math.random();
           particles.push({
             x,
             y,
             age: 1.8,
-            vx: Math.cos(angle) * 2,
-            vy: Math.sin(angle) * 2,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
           });
         }
         return particles;
@@ -377,6 +427,16 @@
     let isVisible = true;
     let currentAnimIndex = Math.floor(Math.random() * ANIMATIONS.length);
     let lastSwitchTime = Date.now();
+
+    async function logToTerminal(name: string) {
+      try {
+        await fetch(`/api/log-animation?name=${encodeURIComponent(name)}`);
+      } catch (e) {
+        // Silently fail if API is not available
+      }
+    }
+
+    logToTerminal(ANIMATIONS[currentAnimIndex].name);
 
     // Mouse tracking for trail
     let mouseX = -1000;
@@ -445,6 +505,7 @@
       if (Date.now() - lastSwitchTime > SWITCH_INTERVAL) {
         currentAnimIndex = (currentAnimIndex + 1) % ANIMATIONS.length;
         lastSwitchTime = Date.now();
+        logToTerminal(ANIMATIONS[currentAnimIndex].name);
       }
 
       const cx = cols / 2;
