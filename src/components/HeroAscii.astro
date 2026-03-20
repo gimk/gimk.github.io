@@ -28,6 +28,7 @@
 
   interface Animation {
     name: string;
+    prepare?: (time: number, cols: number, rows: number) => void;
     render: (
       x: number,
       y: number,
@@ -40,8 +41,8 @@
     ) => number;
     updatePoint: (point: TrailPoint, cx: number, cy: number) => void;
     getClickParticles: (x: number, y: number) => Omit<TrailPoint, "char">[];
-  }
-
+    _activeWaves?: { rx: number; ry: number; fade: number }[];
+    }
   const ANIMATIONS: Animation[] = [
     {
       name: "wave",
@@ -65,6 +66,72 @@
           p.y += p.vy;
           p.vx *= 0.94;
           p.vy *= 0.94;
+        }
+      },
+      getClickParticles: (x, y) => {
+        const particles = [];
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          particles.push({
+            x,
+            y,
+            age: 1.5,
+            vx: Math.cos(angle) * 1.2,
+            vy: Math.sin(angle) * 1.2,
+          });
+        }
+        return particles;
+      },
+    },
+    {
+      name: "cells",
+      _activeWaves: [] as { rx: number; ry: number; fade: number }[],
+      prepare(time, cols, rows) {
+        this._activeWaves = [];
+        const numWaves = 12; // More concurrent ripples
+        const cycle = 5.0;
+        for (let i = 0; i < numWaves; i++) {
+          const t = time * 0.5 + i * (cycle / numWaves);
+          const phase = t % cycle;
+          const cycleIdx = Math.floor(t / cycle);
+          const seed = i + cycleIdx * 987.65;
+          
+          const rx = Math.sin(seed * 7.4) * (cols * 0.45);
+          const ry = Math.cos(seed * 4.2) * (rows * 0.45);
+          // Smooth pulse in and out
+          const fade = Math.pow(Math.sin((phase / cycle) * Math.PI), 2);
+          
+          this._activeWaves.push({ rx, ry, fade });
+        }
+      },
+      render(x, y, time, dist, dx, dy, cols, rows) {
+        let val = 0;
+        if (!this._activeWaves) return 0;
+        
+        for (const w of this._activeWaves) {
+          const adx = dx - w.rx;
+          const ady = dy - w.ry;
+          const d = Math.sqrt(adx * adx + ady * ady);
+          // Tighter ripples (0.4) and faster movement (time * 4)
+          val += Math.sin(d * 0.4 - time * 4) * w.fade * 0.3;
+        }
+        
+        // Very subtle global movement
+        val += Math.cos(dx * 0.1 + time) * 0.1;
+        val += Math.sin(dy * 0.1 + time) * 0.1;
+        
+        return val - 0.1;
+      },
+      updatePoint: (p, cx, cy) => {
+        // Fluid, multi-directional drift
+        p.x += Math.sin(p.y * 0.1 + Date.now() * 0.001) * 0.1;
+        p.y += Math.cos(p.x * 0.1 + Date.now() * 0.001) * 0.1;
+
+        if (p.vx !== undefined && p.vy !== undefined) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.95;
+          p.vy *= 0.95;
         }
       },
       getClickParticles: (x, y) => {
@@ -428,16 +495,6 @@
     let currentAnimIndex = Math.floor(Math.random() * ANIMATIONS.length);
     let lastSwitchTime = Date.now();
 
-    async function logToTerminal(name: string) {
-      try {
-        await fetch(`/api/log-animation?name=${encodeURIComponent(name)}`);
-      } catch (e) {
-        // Silently fail if API is not available
-      }
-    }
-
-    logToTerminal(ANIMATIONS[currentAnimIndex].name);
-
     // Mouse tracking for trail
     let mouseX = -1000;
     let mouseY = -1000;
@@ -505,12 +562,15 @@
       if (Date.now() - lastSwitchTime > SWITCH_INTERVAL) {
         currentAnimIndex = (currentAnimIndex + 1) % ANIMATIONS.length;
         lastSwitchTime = Date.now();
-        logToTerminal(ANIMATIONS[currentAnimIndex].name);
       }
 
       const cx = cols / 2;
       const cy = rows / 2;
       const currentAnim = ANIMATIONS[currentAnimIndex];
+
+      if (currentAnim.prepare) {
+        currentAnim.prepare(time, cols, rows);
+      }
 
       // Update trail ages and positions using animation-specific logic
       for (let i = 0; i < trailPoints.length; i++) {
