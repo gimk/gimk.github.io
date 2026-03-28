@@ -45,7 +45,7 @@ The most technically interesting feature is the **dynamic background color syste
 
 ### recipes.pantoine.com
 
-The site uses **Astro Content Collections** with typed MDX frontmatter to structure every recipe. An embedded **React Island** handles interactive cooking timers. Styling uses **Tailwind CSS** with a custom dark, warm design system. AI was used heavily for schema wiring, component boilerplate, image generation, and CSS refactoring — the tedious scaffolding that would normally eat hours.
+The site uses **Astro Content Collections** with typed MDX frontmatter to structure every recipe. An embedded **React Island** handles interactive cooking timers. Styling uses **Tailwind CSS** with a custom light blue, CRT-style design system. AI was used heavily for schema wiring, component boilerplate, image generation, and CSS refactoring — the tedious scaffolding that would normally eat hours.
 
 ### fujisims.pantoine.com
 
@@ -76,6 +76,7 @@ The result is a zero-cost, zero-infrastructure CMS with full audit trail, spam p
 
 - The collection is small but growing. Many more recipes to document and share — this is just the foundation.
 - Thinking about adding a **lexicon page** for culinary techniques.
+- I would like to redo the design system from the ground up, to something more rounded, fancy, and warm. More in line with cooking actually.
 
 ### fujisims.pantoine.com
 
