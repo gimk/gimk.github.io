@@ -1,10 +1,16 @@
 const audioCache = new Map<string, HTMLAudioElement>();
 
+let isMuted = false;
+if (typeof localStorage !== "undefined") {
+  isMuted = localStorage.getItem("sound") === "muted";
+}
+
+
 /**
  * Play a sound by its name (wav file in /sounds/)
  */
 export function playSound(name: string, volume: number = 1.0) {
-  if (!name) return;
+  if (!name || isMuted) return;
   
   // Safety check for NaN or weird values
   const finalVolume = isNaN(volume) ? 1.0 : Math.max(0, Math.min(1, volume));
@@ -27,4 +33,19 @@ export function preloadSound(name: string) {
   const audio = new Audio(`/sounds/${name}.wav`);
   audio.load();
   audioCache.set(name, audio);
+}
+
+export function toggleMute() {
+  isMuted = !isMuted;
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem("sound", isMuted ? "muted" : "unmuted");
+  }
+  if (typeof document !== "undefined") {
+    if (isMuted) {
+      document.documentElement.classList.add("muted");
+    } else {
+      document.documentElement.classList.remove("muted");
+    }
+  }
+  return isMuted;
 }

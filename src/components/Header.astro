@@ -120,6 +120,31 @@ import InteractionSound from "./InteractionSound.astro";
             blog
           </a>
         </InteractionSound>
+        
+        <button
+          id="sound-button"
+          aria-label="Toggle sound button"
+          class="group px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary"
+        >
+          <svg
+            class="sound-icon sm:group-hover:stroke-accent-primary transition-colors duration-300 ease-in-out"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+            <path class="sound-waves" d="M15.54 8.46a5 5 0 0 1 0 7.07 M19.07 4.93a10 10 0 0 1 0 14.14" />
+            <line class="sound-cross-1" x1="15" y1="9" x2="21" y2="15" />
+            <line class="sound-cross-2" x1="21" y1="9" x2="15" y2="15" />
+          </svg>
+        </button>
+
         <InteractionSound
           id="theme-sound-wrapper"
           preset="toggle"
@@ -173,6 +198,26 @@ import InteractionSound from "./InteractionSound.astro";
   </Container>
 </header>
 
+<script>
+  import { toggleMute, playSound } from "@lib/audio-manager";
+  
+  function initSoundToggle() {
+    const btn = document.getElementById("sound-button");
+    if (btn && !btn.hasAttribute("data-listener-added")) {
+      btn.addEventListener("click", () => {
+        const isMuted = toggleMute();
+        if (!isMuted) {
+           playSound("toggle_on");
+        }
+      });
+      btn.setAttribute("data-listener-added", "true");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", initSoundToggle);
+  document.addEventListener("astro:after-swap", initSoundToggle);
+</script>
+
 <style>
   .sun-moon {
     --duration: 500ms;
@@ -205,5 +250,27 @@ import InteractionSound from "./InteractionSound.astro";
   :global(.dark) .sun-moon .sun-beams {
     transform: rotate(-45deg);
     opacity: 0;
+  }
+
+  /* Sound Toggle Animations */
+  .sound-icon .sound-waves {
+    transition: opacity var(--duration) ease-in-out, transform var(--duration) var(--ease-elastic);
+    transform-origin: center;
+  }
+  .sound-icon .sound-cross-1, .sound-icon .sound-cross-2 {
+    transition: opacity var(--duration) ease-in-out, transform var(--duration) var(--ease-elastic);
+    transform-origin: 18px 12px;
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+  }
+  
+  :global(.muted) .sound-icon .sound-waves {
+    opacity: 0;
+    transform: translateX(-5px) scale(0.5);
+  }
+  :global(.muted) .sound-icon .sound-cross-1,
+  :global(.muted) .sound-icon .sound-cross-2 {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
   }
 </style>
