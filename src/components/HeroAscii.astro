@@ -577,7 +577,7 @@
       const cx = ((e.clientX - rect.left) / rect.width) * cols;
       const cy = ((e.clientY - rect.top) / rect.height) * rows;
 
-      playSound("progress_loop");
+      playSound("progress_loop", 0.5);
 
       const currentAnim = ANIMATIONS[currentAnimIndex];
       const particles = currentAnim.getClickParticles(cx, cy);
