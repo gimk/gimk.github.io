@@ -10,6 +10,8 @@
 </div>
 
 <script>
+  import { playSound } from "@lib/audio-manager";
+
   let frameId: number;
   let lastTime = 0;
   const FPS_LIMIT = 24;
@@ -42,7 +44,7 @@
     updatePoint: (point: TrailPoint, cx: number, cy: number) => void;
     getClickParticles: (x: number, y: number) => Omit<TrailPoint, "char">[];
     _activeWaves?: { rx: number; ry: number; fade: number }[];
-    }
+  }
   const ANIMATIONS: Animation[] = [
     {
       name: "wave",
@@ -95,19 +97,19 @@
           const phase = t % cycle;
           const cycleIdx = Math.floor(t / cycle);
           const seed = i + cycleIdx * 987.65;
-          
+
           const rx = Math.sin(seed * 7.4) * (cols * 0.45);
           const ry = Math.cos(seed * 4.2) * (rows * 0.45);
           // Smooth pulse in and out
           const fade = Math.pow(Math.sin((phase / cycle) * Math.PI), 2);
-          
+
           this._activeWaves.push({ rx, ry, fade });
         }
       },
       render(x, y, time, dist, dx, dy, cols, rows) {
         let val = 0;
         if (!this._activeWaves) return 0;
-        
+
         for (const w of this._activeWaves) {
           const adx = dx - w.rx;
           const ady = dy - w.ry;
@@ -115,11 +117,11 @@
           // Tighter ripples (0.4) and faster movement (time * 4)
           val += Math.sin(d * 0.4 - time * 4) * w.fade * 0.3;
         }
-        
+
         // Very subtle global movement
         val += Math.cos(dx * 0.1 + time) * 0.1;
         val += Math.sin(dy * 0.1 + time) * 0.1;
-        
+
         return val - 0.1;
       },
       updatePoint: (p, cx, cy) => {
@@ -363,15 +365,16 @@
       name: "rings",
       render: (x, y, time, dist, dx, dy, cols, rows) => {
         const centerIntensity = 12 / (dist + 3);
-        
+
         // Rotating rings
         const r1 = Math.abs(dist - (30 + Math.sin(time) * 5));
         const r2 = Math.abs(dist - (45 + Math.cos(time * 0.5) * 8));
-        
+
         const angle = Math.atan2(dy, dx);
-        const ring1 = (2 / (r1 + 1)) * (Math.sin(angle * 2 + time * 2) * 0.5 + 0.5);
+        const ring1 =
+          (2 / (r1 + 1)) * (Math.sin(angle * 2 + time * 2) * 0.5 + 0.5);
         const ring2 = (2 / (r2 + 1)) * (Math.cos(angle * 3 - time) * 0.5 + 0.5);
-        
+
         return centerIntensity + ring1 + ring2 - 0.8;
       },
       updatePoint: (p, cx, cy) => {
@@ -421,11 +424,11 @@
         const p2x = Math.cos(time * 0.8) * 40;
         const p2y = Math.sin(time * 0.8) * 24;
         const d2 = Math.sqrt(Math.pow(dx - p2x, 2) + Math.pow(dy - p2y, 2));
-        
+
         const m1x = p2x + Math.cos(time * 3) * 6;
         const m1y = p2y + Math.sin(time * 3) * 4;
         const dm1 = Math.sqrt(Math.pow(dx - m1x, 2) + Math.pow(dy - m1y, 2));
-        
+
         const p2Intensity = 10 / (d2 + 3) + 5 / (dm1 + 1.5);
 
         // Planet 3 (Outer, slow)
@@ -435,15 +438,18 @@
         const p3Intensity = 12 / (d3 + 4);
 
         // Star field background - very subtle
-        const stars = Math.sin(x * 123.45) * Math.cos(y * 543.21) > 0.99 ? 0.15 : 0;
+        const stars =
+          Math.sin(x * 123.45) * Math.cos(y * 543.21) > 0.99 ? 0.15 : 0;
 
-        return sunIntensity + p2Intensity + p1Intensity + p3Intensity + stars - 1.1;
+        return (
+          sunIntensity + p2Intensity + p1Intensity + p3Intensity + stars - 1.1
+        );
       },
       updatePoint: (p, cx, cy) => {
         const dx = p.x - cx;
         const dy = p.y - cy;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        
+
         // Synchronized with planetary orbital rotation (0.02 is time increment)
         const angle = Math.atan2(dy, dx) + 0.02;
         const pull = 0.995; // Slightly less pull for a more stable circular feel
@@ -501,6 +507,13 @@
     const trailPoints: TrailPoint[] = [];
     const trailChars = "@#%*+=-:. ";
 
+    let lastClientX = -1;
+    let lastClientY = -1;
+    let accumulatedDist = 0;
+    const DIST_THRESHOLD = 15; // Lowered threshold to trigger more easily
+    let lastTypeSoundTime = 0;
+    const MIN_SOUND_INTERVAL = 35; // Allow faster triggering
+
     // Pause when not in view
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -527,12 +540,44 @@
       mouseX = ((e.clientX - rect.left) / rect.width) * cols;
       mouseY = ((e.clientY - rect.top) / rect.height) * rows;
       addPoint(mouseX, mouseY);
+
+      if (lastClientX !== -1 && lastClientY !== -1) {
+        const dist = Math.hypot(
+          e.clientX - lastClientX,
+          e.clientY - lastClientY,
+        );
+        accumulatedDist += dist;
+
+        const now = Date.now();
+        if (
+          accumulatedDist > DIST_THRESHOLD &&
+          now - lastTypeSoundTime > MIN_SOUND_INTERVAL
+        ) {
+          accumulatedDist = 0;
+          lastTypeSoundTime = now;
+          const typeSounds = [
+            "type_01",
+            "type_02",
+            "type_03",
+            "type_04",
+            "type_05",
+          ];
+          const sound =
+            typeSounds[Math.floor(Math.random() * typeSounds.length)];
+          // Increased volume slightly to 0.05 to ensure it's audible. Feel free to lower to 0.01 if 0.05 is too loud!
+          playSound(sound, 0.15);
+        }
+      }
+      lastClientX = e.clientX;
+      lastClientY = e.clientY;
     });
 
     container.addEventListener("mousedown", (e) => {
       const rect = canvas.getBoundingClientRect();
       const cx = ((e.clientX - rect.left) / rect.width) * cols;
       const cy = ((e.clientY - rect.top) / rect.height) * rows;
+
+      playSound("progress_loop");
 
       const currentAnim = ANIMATIONS[currentAnimIndex];
       const particles = currentAnim.getClickParticles(cx, cy);
@@ -542,6 +587,9 @@
     container.addEventListener("mouseleave", () => {
       mouseX = -1000;
       mouseY = -1000;
+      lastClientX = -1;
+      lastClientY = -1;
+      accumulatedDist = 0;
     });
 
     function render(timestamp: number) {
