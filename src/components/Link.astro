@@ -12,10 +12,7 @@ type Props = {
 const { href, external, underline = true, class: className, ...rest } = Astro.props;
 ---
 
-<InteractionSound 
-  click="tap_01" 
-  cursorIn="transition_up" cursorInVolume={0.05} 
->
+<InteractionSound preset="link">
   <a
     href={href}
     target={external ? "_blank" : "_self"}

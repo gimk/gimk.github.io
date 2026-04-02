@@ -1,6 +1,10 @@
+import { playSound } from "@lib/audio-manager";
+
 let blinkTimeoutId: number | null = null;
 let pigAnimationLoopId: number | null = null;
 let isWiggling = false;
+let wiggleSoundCounter = 0;
+const wiggleSoundInterval = 3; // Play every 3 frames (~100ms at 30fps)
 
 export function initPigAnimation() {
   const svg = document.querySelector(".cochon-svg") as SVGElement | null;
@@ -121,6 +125,15 @@ export function initPigAnimation() {
     let wiggleOffset = 0;
     if (isWiggling) {
       wiggleOffset = Math.sin(Date.now() * wiggleFrequency) * wiggleAmplitude;
+      
+      // Play eating sound in rapid succession
+      wiggleSoundCounter++;
+      if (wiggleSoundCounter >= wiggleSoundInterval) {
+        playSound("swipe_01", 0.02);
+        wiggleSoundCounter = 0;
+      }
+    } else {
+      wiggleSoundCounter = wiggleSoundInterval; // Reset to play immediately next time we wiggle
     }
 
     if (head && snoutGroup && leftEar && rightEar && leftEye && rightEye) {

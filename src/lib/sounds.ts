@@ -30,3 +30,23 @@ export const SOUNDS = [
 ] as const;
 
 export type SoundName = (typeof SOUNDS)[number];
+
+export const SOUND_PRESETS = {
+  card: {
+    click: "tap_01" as SoundName,
+    cursorIn: "transition_up" as SoundName,
+    cursorInVolume: 0.05,
+  },
+  button: {
+    click: "tap_01" as SoundName,
+  },
+  link: {
+    click: "tap_01" as SoundName,
+  },
+  toggle: {
+  },
+} as const;
+
+
+export type SoundPreset = keyof typeof SOUND_PRESETS;
+

@@ -1,8 +1,8 @@
 ---
-import type { SoundName } from "@lib/sounds";
-
+import { SOUND_PRESETS, type SoundPreset, type SoundName } from "@lib/sounds";
 
 interface Props {
+  preset?: SoundPreset;
   click?: SoundName;
   clickVolume?: number; // 0.0 to 1.0
   cursorIn?: SoundName;
@@ -16,12 +16,24 @@ interface Props {
 }
 
 const { 
-  click, clickVolume = 1.0, 
-  cursorIn, cursorInVolume = 1.0, 
-  cursorOut, cursorOutVolume = 1.0, 
-  focus, focusVolume = 1.0, 
+  preset,
+  click: clickProp, clickVolume: clickVolumeProp, 
+  cursorIn: cursorInProp, cursorInVolume: cursorInVolumeProp, 
+  cursorOut: cursorOutProp, cursorOutVolume: cursorOutVolumeProp, 
+  focus: focusProp, focusVolume: focusVolumeProp, 
   class: className, id 
 } = Astro.props;
+
+const presetData = (preset ? SOUND_PRESETS[preset] : {}) as any;
+
+const click = clickProp ?? presetData.click;
+const clickVolume = clickVolumeProp ?? presetData.clickVolume ?? 1.0;
+const cursorIn = cursorInProp ?? presetData.cursorIn;
+const cursorInVolume = cursorInVolumeProp ?? presetData.cursorInVolume ?? 1.0;
+const cursorOut = cursorOutProp ?? presetData.cursorOut;
+const cursorOutVolume = cursorOutVolumeProp ?? presetData.cursorOutVolume ?? 1.0;
+const focus = focusProp ?? presetData.focus;
+const focusVolume = focusVolumeProp ?? presetData.focusVolume ?? 1.0;
 ---
 
 <div
@@ -39,36 +51,9 @@ const {
   <slot />
 </div>
 
+
 <script>
-  /**
-   * Sound Manager for InteractionSounds
-   * This script runs once per page and handles all interactive sounds
-   */
-  const audioCache = new Map<string, HTMLAudioElement>();
-
-  function playSound(name: string, volume: number = 1.0) {
-    if (!name) return;
-    
-    // Safety check for NaN or weird values
-    const finalVolume = isNaN(volume) ? 1.0 : Math.max(0, Math.min(1, volume));
-    
-    const soundPath = `/sounds/${name}.wav`;
-    const audio = new Audio(soundPath);
-    
-    audio.volume = finalVolume;
-    
-    audio.play().catch((err) => {
-      if (err.name !== 'NotAllowedError') console.warn('Playback failed:', err);
-    });
-  }
-
-  // Preload sound
-  function preloadSound(name: string) {
-    if (!name || audioCache.has(name)) return;
-    const audio = new Audio(`/sounds/${name}.wav`);
-    audio.load();
-    audioCache.set(name, audio);
-  }
+  import { playSound, preloadSound } from "@lib/audio-manager";
 
   // Helper to get volume from data attributes
   function getVolume(target: HTMLElement, type: string) {
@@ -126,6 +111,7 @@ const {
     }
   }, { passive: true });
 </script>
+
 
 <style>
   .interaction-sound-wrapper {

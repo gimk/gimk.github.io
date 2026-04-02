@@ -147,6 +147,16 @@ const { title, description, image = "/nano.png" } = Astro.props;
     }
   }
 
+  // Update sound for theme toggle
+  function updateThemeSound(isDark) {
+    const soundWrapper = document.getElementById("theme-sound-wrapper");
+    if (soundWrapper) {
+      // If we are in dark mode, the next click will turn it ON (light)
+      // If we are in light mode, the next click will turn it OFF (dark)
+      soundWrapper.dataset.soundClick = isDark ? "toggle_on" : "toggle_off";
+    }
+  }
+
   // Function to apply the theme based on localStorage or system preference on initial load
   function preloadTheme() {
     const userTheme = localStorage.theme;
@@ -157,6 +167,7 @@ const { title, description, image = "/nano.png" } = Astro.props;
       (userTheme !== "light" && // Check if no explicit light theme is set
         window.matchMedia("(prefers-color-scheme: dark)").matches); // Check system preference
     toggleTheme(isDark); // Apply the theme
+    updateThemeSound(isDark); // Set initial click sound
     // Update the theme-color meta tag for browser UI consistency
     if (themeColorMeta) {
       themeColorMeta.setAttribute("content", isDark ? "#020617" : "#fff7ed");
@@ -205,11 +216,13 @@ const { title, description, image = "/nano.png" } = Astro.props;
           localStorage.setItem("theme", "light");
           themeColorMeta?.setAttribute("content", "#fff7ed");
           toggleTheme(false, true);
+          updateThemeSound(false);
         } else {
           // Switch to dark theme
           localStorage.setItem("theme", "dark");
           themeColorMeta?.setAttribute("content", "#020617");
           toggleTheme(true, true);
+          updateThemeSound(true);
         }
       });
       toggleThemeButton.setAttribute("data-listener-added", "true"); // Mark as added
