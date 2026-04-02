@@ -1,4 +1,5 @@
 ---
+import InteractionSound from "./InteractionSound.astro";
 import { cn } from "@lib/utils";
 
 type Props = {
@@ -11,15 +12,20 @@ type Props = {
 const { href, external, underline = true, class: className, ...rest } = Astro.props;
 ---
 
-<a
-  href={href}
-  target={external ? "_blank" : "_self"}
-  class={cn(
-    "inline-block decoration-black/20 dark:decoration-white/20 hover:decoration-accent-primary/50 text-current hover:text-accent-primary transition-colors duration-300 ease-in-out p-1 sm:p-0",
-    underline && "underline underline-offset-2",
-    className
-  )}
-  {...rest}
+<InteractionSound 
+  click="tap_01" 
+  cursorIn="transition_up" cursorInVolume={0.05} 
 >
-  <slot />
-</a>
+  <a
+    href={href}
+    target={external ? "_blank" : "_self"}
+    class={cn(
+      "inline-block decoration-black/20 dark:decoration-white/20 hover:decoration-accent-primary/50 text-current hover:text-accent-primary transition-colors duration-300 ease-in-out p-1 sm:p-0",
+      underline && "underline underline-offset-2",
+      className
+    )}
+    {...rest}
+  >
+    <slot />
+  </a>
+</InteractionSound>

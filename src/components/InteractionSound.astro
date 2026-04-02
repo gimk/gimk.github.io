@@ -1,0 +1,134 @@
+---
+import type { SoundName } from "@lib/sounds";
+
+
+interface Props {
+  click?: SoundName;
+  clickVolume?: number; // 0.0 to 1.0
+  cursorIn?: SoundName;
+  cursorInVolume?: number; // 0.0 to 1.0
+  cursorOut?: SoundName;
+  cursorOutVolume?: number; // 0.0 to 1.0
+  focus?: SoundName;
+  focusVolume?: number; // 0.0 to 1.0
+  class?: string;
+  id?: string;
+}
+
+const { 
+  click, clickVolume = 1.0, 
+  cursorIn, cursorInVolume = 1.0, 
+  cursorOut, cursorOutVolume = 1.0, 
+  focus, focusVolume = 1.0, 
+  class: className, id 
+} = Astro.props;
+---
+
+<div
+  id={id}
+  class:list={["interaction-sound-wrapper", className]}
+  data-sound-click={click}
+  data-sound-click-volume={clickVolume}
+  data-sound-cursor-in={cursorIn}
+  data-sound-cursor-in-volume={cursorInVolume}
+  data-sound-cursor-out={cursorOut}
+  data-sound-cursor-out-volume={cursorOutVolume}
+  data-sound-focus={focus}
+  data-sound-focus-volume={focusVolume}
+>
+  <slot />
+</div>
+
+<script>
+  /**
+   * Sound Manager for InteractionSounds
+   * This script runs once per page and handles all interactive sounds
+   */
+  const audioCache = new Map<string, HTMLAudioElement>();
+
+  function playSound(name: string, volume: number = 1.0) {
+    if (!name) return;
+    
+    // Safety check for NaN or weird values
+    const finalVolume = isNaN(volume) ? 1.0 : Math.max(0, Math.min(1, volume));
+    
+    const soundPath = `/sounds/${name}.wav`;
+    const audio = new Audio(soundPath);
+    
+    audio.volume = finalVolume;
+    
+    audio.play().catch((err) => {
+      if (err.name !== 'NotAllowedError') console.warn('Playback failed:', err);
+    });
+  }
+
+  // Preload sound
+  function preloadSound(name: string) {
+    if (!name || audioCache.has(name)) return;
+    const audio = new Audio(`/sounds/${name}.wav`);
+    audio.load();
+    audioCache.set(name, audio);
+  }
+
+  // Helper to get volume from data attributes
+  function getVolume(target: HTMLElement, type: string) {
+    // Construct attribute name (e.g., cursorIn -> data-sound-cursor-in-volume)
+    const attrSuffix = type.replace(/([A-Z])/g, "-$1").toLowerCase();
+    const attrName = `data-sound-${attrSuffix}-volume`;
+    
+    const vol = target.getAttribute(attrName);
+    const parsed = parseFloat(vol || "");
+    return isNaN(parsed) ? 1.0 : parsed;
+  }
+
+  // Event Delegation for Clicks
+  document.addEventListener("click", (event) => {
+    const target = (event.target as HTMLElement).closest("[data-sound-click]");
+    if (target instanceof HTMLElement && target.dataset.soundClick) {
+      playSound(target.dataset.soundClick, getVolume(target, 'click'));
+    }
+  }, { capture: true });
+
+  // Event Delegation for Cursor In
+  document.addEventListener("mouseover", (event) => {
+    const target = (event.target as HTMLElement).closest("[data-sound-cursor-in], [data-sound-cursor-out]");
+    if (target instanceof HTMLElement) {
+      // Logic for Cursor In
+      if (target.dataset.soundCursorIn && !target.classList.contains('is-cursor-active')) {
+        target.classList.add('is-cursor-active');
+        playSound(target.dataset.soundCursorIn, getVolume(target, 'cursorIn'));
+        
+        // Setup Logic for Cursor Out (since mouseleave doesn't bubble)
+        target.addEventListener('mouseleave', () => {
+          target.classList.remove('is-cursor-active');
+          if (target.dataset.soundCursorOut) {
+            playSound(target.dataset.soundCursorOut, getVolume(target, 'cursorOut'));
+          }
+        }, { once: true });
+      }
+    }
+  });
+
+  // Event Delegation for Focus
+  document.addEventListener("focusin", (event) => {
+    const target = (event.target as HTMLElement).closest("[data-sound-focus]");
+    if (target instanceof HTMLElement && target.dataset.soundFocus) {
+      playSound(target.dataset.soundFocus, getVolume(target, 'focus'));
+    }
+  });
+
+  // Preloading on mousemove over the parent container for even faster response
+  document.addEventListener("mousemove", (event) => {
+    const target = (event.target as HTMLElement).closest("[data-sound-click], [data-sound-cursor-in]");
+    if (target instanceof HTMLElement) {
+      if (target.dataset.soundClick) preloadSound(target.dataset.soundClick);
+      if (target.dataset.soundCursorIn) preloadSound(target.dataset.soundCursorIn);
+    }
+  }, { passive: true });
+</script>
+
+<style>
+  .interaction-sound-wrapper {
+    display: contents; /* Ensures the wrapper doesn't break flex/grid layouts */
+  }
+</style>
