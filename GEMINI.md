@@ -64,3 +64,35 @@ The site has transitioned to an ASCII/terminal aesthetic.
 ### Utilities
 - Use the `cn()` utility from `@lib/utils` for conditional class merging.
 - Use `dateRange()` for consistent formatting of work experience durations.
+
+---
+
+## CI/CD & Deployment Troubleshooting
+
+The site is deployed automatically to GitHub Pages via GitHub Actions (`.github/workflows/deploy.yml`).
+
+### Standard Deployment Workflow
+The workflow runs on every push to `main` using standard `npm` steps:
+1. `actions/checkout@v4`
+2. `actions/setup-node@v4` (Node.js 22 with `npm` cache)
+3. `npm ci`
+4. `npm run build` (`astro check && astro build` outputting to `./dist`)
+5. `actions/upload-pages-artifact@v3` & `actions/deploy-pages@v4`
+
+### What to do if the GitHub Build fails:
+
+1. **Local verification first:**
+   Run the build command locally without telemetry to see if it's a TypeScript/Astro content check error:
+   ```bash
+   ASTRO_TELEMETRY_DISABLED=1 npx astro check && ASTRO_TELEMETRY_DISABLED=1 npx astro build
+   ```
+
+2. **Package Manager Mismatches:**
+   - Always use **`npm`** (the project uses `package-lock.json`).
+   - Do **not** use `withastro/action` or `pnpm` setup actions — `withastro/action` auto-detects package managers incorrectly if orphan lockfiles exist and invokes buggy internal steps.
+   - Keep `.github/workflows/deploy.yml` explicitly using `npm ci` and `npm run build`.
+
+3. **Node.js Deprecation Warnings:**
+   - Warnings like `Node.js 20 is deprecated... forced to run on Node.js 24` are non-blocking notices emitted by GitHub Actions runners during platform runtime updates.
+   - Unless a step actually exits with a non-zero exit code, deprecation notices can be safely ignored.
+
