@@ -1,7 +1,7 @@
 ---
 title: "Older Projects"
 description: "A couple of projects that don't deserve a full article."
-date: "Before 2021"
+date: "2020"
 thumbnail: "/projectfiles/thumbnails/old-thumbnail.png"
 ---
 
