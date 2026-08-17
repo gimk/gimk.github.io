@@ -5,13 +5,21 @@ date: "March 2026"
 thumbnail: "/projectfiles/thumbnails/camera-thumbnail.png"
 ---
 
-Over the past few weeks, I built three personal websites using what I now think of as a new way of working: **Vibe Coding**. Each project started as a clear idea, and was brought to life in a few evenings using **Antigravity** and the **Gemini CLI** as accelerators. Here's a look at all three.
+Over the past few weeks, I built four personal websites using what I now think of as a new way of working: **Vibe Coding**. Each project started as a clear idea, and was brought to life in a few evenings using **Antigravity** and the **Gemini CLI** as accelerators. Here's a look at all four.
 
 ---
 
 ## The Projects
 
-### 📷 Photos Gallery — [photos.pantoine.com](https://photos.pantoine.com)
+### 👾 ASCII Animation Builder — <a href="https://ascii.pantoine.com" target="_blank" rel="noopener noreferrer">ascii.pantoine.com</a>
+
+![Preview of ascii.pantoine.com — an interactive ASCII animation builder with real-time green terminal canvas, presets, and code export tools](/projectfiles/vibe-coding-trilogy/ascii-cover.png)
+
+An interactive visual generator and synthesizer for real-time ASCII canvas animations. It lets you tweak wave harmonics, particle systems, noise flows, and character density presets in a retro-terminal interface, then directly export self-contained ready-to-use Astro and React components or canvas code.
+
+---
+
+### 📷 Photos Gallery — <a href="https://photos.pantoine.com" target="_blank" rel="noopener noreferrer">photos.pantoine.com</a>
 
 ![Preview of photos.pantoine.com — a minimalist digital exhibition with a disclaimer screen and subtle blue-tinted background](/projectfiles/vibe-coding-trilogy/photos-cover.png)
 
@@ -19,25 +27,36 @@ A personal photography gallery built as a digital exhibition for a slower viewin
 
 ---
 
-### 🍽️ Antoine's Kitchen — [recipes.pantoine.com](https://recipes.pantoine.com)
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-8">
+<div>
+
+### 🍽️ Antoine's Kitchen — <a href="https://recipes.pantoine.com" target="_blank" rel="noopener noreferrer">recipes.pantoine.com</a>
 
 ![Preview of Antoine's Kitchen — a structured recipe grid with monospaced typography, category filters, and monochrome food photography](/projectfiles/vibe-coding-trilogy/recipes-cover.png)
 
 A personal recipe website born from my background as a home cook with a cooking license. The recipes here are refined through repeated sessions and carry the kind of personal notes that never make it into a cookbook. Clean, structured, and grid-based — it's the technical side of cooking made visible.
 
----
+</div>
+<div>
 
-### 🎞️ Simulation Recipes — [fujisims.pantoine.com](https://fujisims.pantoine.com)
+### 🎞️ Simulation Recipes — <a href="https://fujisims.pantoine.com" target="_blank" rel="noopener noreferrer">fujisims.pantoine.com</a>
 
 ![Preview of fujisims.pantoine.com — a dark, cinematic film protocol archive with serif typography and film simulation recipe cards](/projectfiles/vibe-coding-trilogy/fujisims-cover.png)
 
 A Fujifilm X-System film simulation archive. Each entry is a custom recipe with specific in-camera settings that define a photographic look — from something close to classic Kodak tones to more modern, desaturated chrome aesthetics. The site presents them as a clean archive with a dark, film-protocol aesthetic.
 
+</div>
+</div>
+
 ---
 
 ## The Technical Side
 
-Each project was built with **[Astro](https://astro.build)** and deployed on **[GitHub Pages](https://pages.github.com)** with a custom domain — a stack I've now become very comfortable with.
+Each project was built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">**Astro**</a> and deployed on <a href="https://pages.github.com" target="_blank" rel="noopener noreferrer">**GitHub Pages**</a> with a custom domain — a stack I've now become very comfortable with.
+
+### ascii.pantoine.com
+
+Built as a lightweight, client-side visual synthesizer. It renders procedural math, trigonometric wave interference, and particle flows directly onto an HTML `<pre>` character grid at 60 FPS. A built-in code generator converts live parameter configurations into optimized, drop-in Astro and React components with zero external runtime dependencies.
 
 ### photos.pantoine.com
 
@@ -67,6 +86,12 @@ It gives me a free, serverless CMS setup with spam protection and git history fo
 
 ## What's Next
 
+### ascii.pantoine.com
+
+- Adding **image/video to ASCII conversion** with animated temporal dithering.
+- Introducing a **timeline/keyframes editor** for multi-stage animations.
+- Expanding export options to include standalone SVG animations and canvas shaders.
+
 ### photos.pantoine.com
 
 - A **collection system** is in the works, to group photographs by theme, trip, or mood.
@@ -87,7 +112,7 @@ It gives me a free, serverless CMS setup with spam protection and git history fo
 
 ## A Note on Vibe Coding
 
-All three projects were built in heavily AI-assisted sessions, using **Antigravity** and the **Gemini CLI**. The AI handled the scaffolding, the boilerplate, and the tedious back-and-forth with config and types. I handled the design decisions, the content, and the ideas.
+All four projects were built in heavily AI-assisted sessions, using **Antigravity** and the **Gemini CLI**. The AI handled the scaffolding, the boilerplate, and the tedious back-and-forth with config and types. I handled the design decisions, the content, and the ideas.
 
-What surprised me is how much more time I spent refining the feel and design of the sites rather than wrestling with wiring and setup. Each of these three sites came together in a few evenings of focused work. That wouldn't have been possible a year ago.
+What surprised me is how much more time I spent refining the feel and design of the sites rather than wrestling with wiring and setup. Each of these four sites came together in a few evenings of focused work. That wouldn't have been possible a year ago.
 
