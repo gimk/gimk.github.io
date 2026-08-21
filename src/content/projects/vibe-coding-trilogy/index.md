@@ -17,17 +17,18 @@ I quickly realized that 90% of a project gets done in 10% of the time — what t
 
 ## The Projects
 
-### 👾 ASCII Wave Generator — <a href="https://ascii.pantoine.com" target="_blank" rel="noopener noreferrer">ascii.pantoine.com</a>
+### 👾 ASCII Studio — <a href="https://ascii.pantoine.com" target="_blank" rel="noopener noreferrer">ascii.pantoine.com</a>
 
-![Preview of ascii.pantoine.com — an interactive ASCII wave generator with real-time green terminal canvas, presets, and code export tools](/projectfiles/vibe-coding-trilogy/ascii-cover.png)
+![Preview of ascii.pantoine.com — an interactive ASCII studio with real-time synthesizer, media rasterizer, 3D model viewer, and export tools](/projectfiles/vibe-coding-trilogy/ascii-cover.png)
 
-An interactive visual generator and synthesizer for real-time ASCII canvas animations. It lets you tweak wave harmonics, particle systems, noise flows, and character density presets in a retro-terminal interface.
+An interactive visual studio and synthesizer for real-time ASCII art. In addition to generating wave harmonics, particle physics simulations, and customizable formulas, you can now upload images, videos, and 3D files to rasterize and visualize them directly in dynamic ASCII character art.
 
 #### The Technical Side
 
 Unlike the other sites, this is built as a pure client-side web application using **[React 19](https://react.dev/)**, **[TypeScript 5](https://www.typescriptlang.org/)**, and **[Vite 6](https://vitejs.dev/)** ([view on GitHub](https://github.com/gimk/ascii.pantoine.com)):
 
-- **Parametric Wave & Particle Engine**: Evaluates 8-channel harmonic oscillators and finite-difference curl vector fields directly onto an HTML `<pre>` character grid at 60 FPS.
+- **Multi-Mode ASCII Engine**: Combines an 8-channel parametric wave synthesizer, curl vector-field particle simulator, image/video processor, and interactive 3D model rasterizer directly onto an HTML `<pre>` character grid at 60 FPS.
+- **Media & 3D File Visualization**: In-browser processing for user-uploaded images, video streams, and 3D meshes, mapping luminance, lighting, and depth into calibrated monospace character ramps.
 - **Live Bi-Directional Formula Sandbox**: Real-time JavaScript code editor with instant syntax compilation, bi-directionally synchronizing custom math equations with UI sliders without interrupting the animation loop.
 - **Client-Side Media & Code Exporter**: In-browser animated GIF encoding via `gifenc`, WebM/MP4 recording, text frame snapshots, and self-contained ready-to-use `.astro` and HTML components with zero external runtime dependencies.
 - **State Compression**: Compresses complete simulation states (formulas, physics, color gradients, and themes) directly into shareable URLs.
