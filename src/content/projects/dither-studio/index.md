@@ -3,9 +3,9 @@ title: "Dither Studio"
 description: "A brutalist dithering and raster studio in the browser."
 date: "August 28, 2026"
 thumbnail: "/projectfiles/thumbnails/dither-thumbnail.png"
-demoURL: "https://ascii.pantoine.com"
+demoURL: "https://studio.pantoine.com"
 demoLabel: "visit site"
-repoURL: "https://github.com/gimk/ascii.pantoine.com"
+repoURL: "https://github.com/gimk/studio.pantoine.com"
 repoLabel: "view on GitHub"
 ---
 
@@ -15,7 +15,7 @@ repoLabel: "view on GitHub"
 
 Today, it's a full-fledged in-browser dithering and raster studio. You feed it an image, a video, a 3D model, or a procedural wave, and it converts it into ASCII, Braille, halftone screens, classic 1-bit dithering, or an analog CRT beam scan. You can then export clean vector SVGs, PNGs, animated GIFs, MP4 videos, or print-ready color separation plates.
 
-No accounts, no backend, no tracking. Everything runs 100% locally in your browser: <a href="https://ascii.pantoine.com" target="_blank" rel="noopener noreferrer">**ascii.pantoine.com**</a>.
+No accounts, no backend, no tracking. Everything runs 100% locally in your browser: <a href="https://studio.pantoine.com" target="_blank" rel="noopener noreferrer">**studio.pantoine.com**</a>.
 
 ---
 
@@ -53,7 +53,7 @@ Because this is pure geometry rather than pixel quantization, it branches off th
 
 The app is built with React 19, TypeScript, Vite, Three.js for 3D scenes, Canvas 2D for rasterization, `gifenc` for GIF encoding, and `WebCodecs` for hardware-accelerated video exports.
 
-Every mode, effect, and export is driven by a single core function (`processRasterFrame`) in a zero-allocation render loop for smooth 60 FPS performance. The full architecture is documented in <a href="https://github.com/gimk/ascii.pantoine.com/blob/main/pipeline.md" target="_blank" rel="noopener noreferrer">`pipeline.md`</a> and <a href="https://github.com/gimk/ascii.pantoine.com/blob/main/vector-pipeline.md" target="_blank" rel="noopener noreferrer">`vector-pipeline.md`</a>.
+Every mode, effect, and export is driven by a single core function (`processRasterFrame`) in a zero-allocation render loop for smooth 60 FPS performance. The full architecture is documented in <a href="https://github.com/gimk/studio.pantoine.com/blob/main/pipeline.md" target="_blank" rel="noopener noreferrer">`pipeline.md`</a> and <a href="https://github.com/gimk/studio.pantoine.com/blob/main/vector-pipeline.md" target="_blank" rel="noopener noreferrer">`vector-pipeline.md`</a>.
 
 AI agents (Antigravity and Claude Code) handled the code scaffolding, boilerplate, and math implementations, allowing me to focus entirely on product design, UX flow, and visual tuning.
 
