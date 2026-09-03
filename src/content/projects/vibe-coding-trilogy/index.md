@@ -34,27 +34,29 @@ The main technical feature is the **dynamic background color system**. During th
 
 ---
 
-### 🎞️ Simulation Recipes — <a href="https://fujisims.pantoine.com" target="_blank" rel="noopener noreferrer">fujisims.pantoine.com</a>
+### 🎞️ Pixel Looks — <a href="https://pixelooks.pantoine.com" target="_blank" rel="noopener noreferrer">pixelooks.pantoine.com</a>
 
-![Preview of fujisims.pantoine.com — a dark, cinematic film protocol archive with serif typography and film simulation recipe cards](/projectfiles/vibe-coding-trilogy/fujisims-cover.png)
+![Preview of pixelooks.pantoine.com — a dark, cinematic look archive with serif typography and full-bleed photo cards](/projectfiles/vibe-coding-trilogy/fujisims-cover.png)
 
-A Fujifilm X-System film simulation archive. Each entry is a custom recipe with specific in-camera settings that define a photographic look — from something close to classic Kodak tones to more modern, desaturated chrome aesthetics. The site presents them as a clean archive with a dark, film-protocol aesthetic.
+A photographic look archive, built around the Pixel 11. Each entry is a *look*: a set of capture and grading settings that define a specific rendering, from a neon digital 90s feel to muted editorial monochrome or straight black-and-white. The site presents them as a numbered archive with a dark, protocol-like aesthetic.
+
+It started life as a Fujifilm X-System film simulation archive. I still have the X-T5, but there are already plenty of Fuji recipe sites out there and I wasn't adding anything to that. The Pixel looks are new and nobody is archiving them yet, so building the tool for those felt a lot more useful.
 
 #### The Technical Side
 
-Built around an Astro content collection for recipes, with a **dark, cinematic design system** built in vanilla CSS. Each recipe card is dynamically generated from a typed Markdown file defining the film base, in-camera adjustments, and a set of sample photographs. EXIF data is extracted at build time using **exifr** and displayed on each photo card within the recipe detail page.
+Built around an Astro content collection for looks, with a **dark, cinematic design system** built in vanilla CSS. Each look card is dynamically generated from a typed Markdown file defining the base rendering, the adjustments, and a set of sample photographs. EXIF data is extracted at build time using **exifr** and displayed on each photo card within the look detail page.
 
 It also features a **full serverless community submission flow**:
 
-1. **Public `/submit` page** — an anonymous form covering recipe parameters and photo uploads without requiring an account.
-2. **Client-side image compression** — canvas-based resizing down from ~25MB camera JPEGs to 1–3MB at 85% quality.
+1. **Public `/submit` page** — an anonymous form covering look parameters and photo uploads without requiring an account.
+2. **Client-side image compression** — canvas-based resizing of large uploads down to 1–3MB at 85% quality.
 3. **Cloudflare Worker** — verifies Cloudflare Turnstile CAPTCHA and automatically opens a GitHub Pull Request with the Markdown and image assets.
 4. **GitHub PR as admin panel** — review and merge directly on GitHub to trigger CI/CD deployment.
 
 #### What's Next
 
-- The community submission system is now live — anyone can submit a recipe without an account.
-- Considering adding a **comparison mode** to show the same scene with different simulations side by side.
+- The community submission system is now live — anyone can submit a look without an account.
+- Considering adding a **comparison mode** to show the same scene with different looks side by side.
 
 ---
 
