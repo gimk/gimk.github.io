@@ -11,7 +11,7 @@ const projects = (await getCollection("projects"))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const lastProject = projects[0];
 const projectURL = lastProject
-  ? `/projects/${lastProject.slug}`
+  ? `/projects/${lastProject.id}`
   : NEW_PROJECT.HREF;
 ---
 
