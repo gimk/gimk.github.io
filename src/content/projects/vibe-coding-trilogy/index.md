@@ -19,18 +19,20 @@ I quickly realized that 90% of a project gets done in 10% of the time — what t
 
 ### 📷 Photos Gallery — <a href="https://photos.pantoine.com" target="_blank" rel="noopener noreferrer">photos.pantoine.com</a>
 
-![Preview of photos.pantoine.com — a minimalist digital exhibition with a disclaimer screen and subtle blue-tinted background](/projectfiles/vibe-coding-trilogy/photos-cover.png)
+![Preview of photos.pantoine.com — a black index page showing a grid of photographs, with a serif header, an image count, a scrolling marquee, and About and Collections links](/projectfiles/vibe-coding-trilogy/photos-cover.png)
 
-A personal photography gallery built as a digital exhibition for a slower viewing experience. The interface is minimal: a centered disclaimer appears first, suggesting a slower pace. Navigation is scroll or keyboard-based, and each photograph fills the screen.
+A personal photography gallery, redesigned from the ground up. It used to be a one-photo-at-a-time exhibition. It now opens on a **black index of every photograph** (144 so far) laid out as a loose grid. A thin serif header carries the image count, a scrolling marquee, an About page and a **Collections** menu. Click any photo to open it full screen, then move through it with the arrow keys and close it with Escape.
 
 #### The Technical Side
 
-The main technical feature is the **dynamic background color system**. During the Astro build, the site fetches a small version of each image (400px) and runs it through **node-vibrant** to extract a primary color. The logic prioritizes the `Vibrant` swatch, falling back to `DarkVibrant`, `Muted`, or `LightVibrant`. This pre-computed color sets a subtle background for each photograph without runtime processing.
+The collection system I had planned is now live. Photographs are grouped into **25 dated collections**, from trips to single evenings, going back to 2020. Each one can be browsed on its own and linked to directly, down to a single image (e.g. `#Eclipse/1`). The zoom view also shows each photo's **EXIF data** on demand.
+
+The **build-time color extraction** from the first version is still there. During the Astro build, a small version of each image goes through **node-vibrant** to pull out a primary color. That color is stored with the photo, so no processing happens in the browser.
 
 #### What's Next
 
-- A **collection system** is in the works, to group photographs by theme, trip, or mood.
-- A **new navigation pattern** to move between photographs in a more expressive way.
+- Keep adding collections as I shoot. The new index makes the archive feel like it can grow indefinitely.
+- Find a new use for the **extracted colors**. They're still computed for every photo, but the new design doesn't use them yet.
 
 ---
 
