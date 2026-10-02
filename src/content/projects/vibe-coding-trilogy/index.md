@@ -1,79 +1,83 @@
 ---
-title: "Vibe Coding projects"
-description: "Some small websites I built recently"
+title: "Photo Portfolio"
+description: "photos.pantoine.com, a home I designed and built for my photographs"
 date: "June 12, 2026"
 thumbnail: "/projectfiles/thumbnails/camera-thumbnail.png"
+demoURL: "https://photos.pantoine.com"
+demoLabel: "visit site"
+repoURL: "https://github.com/gimk/photos.pantoine.com"
+repoLabel: "view on GitHub"
 ---
 
-Over the past few weeks, I built a number of websites, apps, and projects using what I now think of as a new way of working: **Vibe Coding**. Each project started as a clear idea, and was brought to life in a few evenings using mostly **Antigravity** and a sprinkle of **Claude Code** as accelerators. Most projects were built with <a href="https://astro.build" target="_blank" rel="noopener noreferrer">**Astro**</a> or <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">**React + Vite**</a> and deployed on <a href="https://pages.github.com" target="_blank" rel="noopener noreferrer">**GitHub Pages**</a> with custom domains — a stack I've now become very comfortable with.
+![The index of photos.pantoine.com: every photograph as a small thumbnail on a black page, under a thin serif header with the image count, a scrolling marquee, About and Collections](/projectfiles/vibe-coding-trilogy/photos-index.jpg)
 
-## A Note on Vibe Coding
+<a href="https://photos.pantoine.com" target="_blank" rel="noopener noreferrer">**photos.pantoine.com**</a> is where my photographs live, grouped in collections going back to 2020. Trips, single evenings, people, places.
 
-All of these projects were built in heavily AI-assisted sessions. The AI handled the scaffolding, the boilerplate, and the tedious back-and-forth with config and types. I handled the design decisions, the content, and the ideas.
-
-I quickly realized that 90% of a project gets done in 10% of the time — what truly takes effort is the refinement. Fortunately, it's something I love doing, and it feels seamless now: working with AI agents is like pairing with a senior engineer who has infinite patience.
+The first version was a slow, one-photo-at-a-time exhibition. It worked for a handful of images, but not for an archive that keeps growing. So I rebuilt it from the ground up around a simple idea: see everything at once, then look at one photo properly.
 
 ---
 
-## The Projects
+## Two Ways In
 
-### 📷 Photos Gallery — <a href="https://photos.pantoine.com" target="_blank" rel="noopener noreferrer">photos.pantoine.com</a>
+**The index** is the home page: every photograph as a small thumbnail on a black page, newest collection first. Hovering a thumbnail shows its collection's name in the top-left corner. There's also a hidden extra: dragging the marquee in the header changes the number of columns, fewer for bigger photos, more to see the whole archive. Double-click it to go back.
 
-![Preview of photos.pantoine.com — a black index page showing a grid of photographs, with a serif header, an image count, a scrolling marquee, and About and Collections links](/projectfiles/vibe-coding-trilogy/photos-cover.png)
+![The collections view: a white page where each collection gets one large cover photo, with its title, date and image count](/projectfiles/vibe-coding-trilogy/photos-feed.jpg)
 
-A personal photography gallery, redesigned from the ground up. It used to be a one-photo-at-a-time exhibition. It now opens on a **black index of every photograph** (144 so far) laid out as a loose grid. A thin serif header carries the image count, a scrolling marquee, an About page and a **Collections** menu. Click any photo to open it full screen, then move through it with the arrow keys and close it with Escape.
+**The collections** view flips to a white page, where each collection is a single large cover with its title, date and number of images. The `I` key switches between the two.
 
-#### The Technical Side
-
-The collection system I had planned is now live. Photographs are grouped into **25 dated collections**, from trips to single evenings, going back to 2020. Each one can be browsed on its own and linked to directly, down to a single image (e.g. `#Eclipse/1`). The zoom view also shows each photo's **EXIF data** on demand.
-
-The **build-time color extraction** from the first version is still there. During the Astro build, a small version of each image goes through **node-vibrant** to pull out a primary color. That color is stored with the photo, so no processing happens in the browser.
-
-#### What's Next
-
-- Keep adding collections as I shoot. The new index makes the archive feel like it can grow indefinitely.
-- Find a new use for the **extracted colors**. They're still computed for every photo, but the new design doesn't use them yet.
+The collections view also has a **timeline** on the right edge of the screen: one small line per collection, grouped under year headings. It stays discreet until you hover it, then spreads out to show every name. Clicking one scrolls straight to it.
 
 ---
+
+## The Viewer
+
+![The full-screen viewer on two collections side by side: a snowy mountain on a slightly blue background, and a portrait with eclipse glasses on a warm brown one, each with its EXIF line at the bottom](/projectfiles/vibe-coding-trilogy/photos-viewer.jpg)
+
+Clicking a photo makes it fly from its thumbnail to the centre of the screen and grow to full size. Closing sends it back to its place on the page, scrolling the page if needed. The photo should always feel like the same object, never a new page loading.
+
+Once open, the left half of the photo goes back, the right half goes forward, and clicking above or below closes it. A small label follows the cursor to say which. Arrow keys and Escape work too. Each photo shows its camera, lens and exposure settings, and has its own link (like `#Eclipse/3`), so the back button and shared links both land on the right image.
+
+On a phone, the photo follows your finger. Swipe sideways to move to the next one, which is already waiting just off the edge, or swipe up or down to send it back to its thumbnail.
+
+I spent a significant amount of time making these interactions fluid, responsive and up to today's standards. That's why the site has touch gestures, loading placeholders, large tap targets and a press effect on phones, among other things. A photo gallery lives or dies by how it feels to browse.
+
+---
+
+## Colour
+
+Each photograph gets one colour at build time, the most present swatch picked by **node-vibrant**. In the first version it tinted the background behind each photo. Now it's used in quieter places:
+
+- **Loading:** a photo that takes a moment to load shows its colour in its place, then comes in out of a blur.
+- **Viewer background:** the black takes an 8% tint of the collection's colour, and eases from one collection's to the next as you browse. In the image above, the same black turns blue for the snow and warm for the eclipse portraits.
+- **Phone toolbar:** the browser's toolbar follows the background, black on the index, white on the collections, tinted in the viewer.
+- **About palette:** every photo appears as a dot of its colour, in order. Clicking a dot opens its photo.
+
+![The About overlay: a short description, a contact line for prints, links elsewhere, keyboard shortcuts, and a palette of small coloured dots, one per photograph](/projectfiles/vibe-coding-trilogy/photos-about.jpg)
+
+---
+
+## Under the Hood
+
+Built with **Astro**, TypeScript and plain CSS, with **Fraunces** as the only typeface, and deployed on GitHub Pages. It's a single page: the index, collections, viewer and About are all states of it, kept in the URL so links and the back button work.
+
+Adding photos takes one command. I drop the camera files into a folder, and a script writes a 3000px web master for each one, keeping the camera data. It also creates a small `series.json` per collection, where I can set a title, alt text, captions or a different colour. At build time, Astro generates the WebP versions the site shows and strips their metadata, so no GPS location ever ends up online. **exifr** reads the camera settings shown in the viewer.
+
+Like my other recent projects, it was built in AI-assisted sessions: the agents handled the boilerplate, while I spent my time on the movement, the details and the photos themselves.
+
+---
+
+## Side Projects From the Same Time
+
+I started these two sites alongside the first version of the photo portfolio. They still work, but I haven't kept them up to date.
 
 ### 🎞️ Pixel Looks — <a href="https://pixelooks.pantoine.com" target="_blank" rel="noopener noreferrer">pixelooks.pantoine.com</a>
 
 ![Preview of pixelooks.pantoine.com — a dark, cinematic look archive with serif typography and full-bleed photo cards](/projectfiles/vibe-coding-trilogy/fujisims-cover.png)
 
-A photographic look archive, built around the Pixel 11. Each entry is a *look*: a set of capture and grading settings that define a specific rendering, from a neon digital 90s feel to muted editorial monochrome or straight black-and-white. The site presents them as a numbered archive with a dark, protocol-like aesthetic.
-
-It started life as a Fujifilm X-System film simulation archive. I still have the X-T5, but there are already plenty of Fuji recipe sites out there and I wasn't adding anything to that. The Pixel looks are new and nobody is archiving them yet, so building the tool for those felt a lot more useful.
-
-#### The Technical Side
-
-Built around an Astro content collection for looks, with a **dark, cinematic design system** built in vanilla CSS. Each look card is dynamically generated from a typed Markdown file defining the base rendering, the adjustments, and a set of sample photographs. EXIF data is extracted at build time using **exifr** and displayed on each photo card within the look detail page.
-
-It also features a **full serverless community submission flow**:
-
-1. **Public `/submit` page** — an anonymous form covering look parameters and photo uploads without requiring an account.
-2. **Client-side image compression** — canvas-based resizing of large uploads down to 1–3MB at 85% quality.
-3. **Cloudflare Worker** — verifies Cloudflare Turnstile CAPTCHA and automatically opens a GitHub Pull Request with the Markdown and image assets.
-4. **GitHub PR as admin panel** — review and merge directly on GitHub to trigger CI/CD deployment.
-
-#### What's Next
-
-- The community submission system is now live — anyone can submit a look without an account.
-- Considering adding a **comparison mode** to show the same scene with different looks side by side.
-
----
+An archive of photographic looks for the Pixel 11: sets of capture and grading settings, each shown with sample photos and their EXIF data. Anyone can submit a look without an account, and each submission becomes a GitHub pull request I can review and merge.
 
 ### 🍽️ Antoine's Kitchen — <a href="https://recipes.pantoine.com" target="_blank" rel="noopener noreferrer">recipes.pantoine.com</a>
 
 ![Preview of Antoine's Kitchen — a structured recipe grid with monospaced typography, category filters, and monochrome food photography](/projectfiles/vibe-coding-trilogy/recipes-cover.png)
 
-A personal recipe website born from my background as a home cook with a cooking license. The recipes here are refined through repeated sessions and carry the kind of personal notes that never make it into a cookbook. Clean, structured, and grid-based — it's the technical side of cooking made visible.
-
-#### The Technical Side
-
-The site uses **Astro Content Collections** with typed MDX frontmatter to structure every recipe. An embedded **React Island** handles interactive cooking timers. Styling uses **Tailwind CSS** with a custom light blue, CRT-style design system. AI handled schema wiring, component boilerplate, image generation, and CSS refactoring — the repetitive setup work that usually takes hours.
-
-#### What's Next
-
-- The collection is small but growing. Many more recipes to document and share — this is just the foundation.
-- Thinking about adding a **lexicon page** for culinary techniques.
-- I would like to redo the design system from the ground up, to something more rounded, fancy, and warm. More in line with cooking actually.
+My recipes, refined over many sessions at home, with the personal notes that never make it into a cookbook. It has a structured grid, category filters and built-in cooking timers. The collection is still small.
