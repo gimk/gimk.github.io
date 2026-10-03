@@ -50,7 +50,7 @@ export const NEW_PROJECT = {
 export const APPS = [
   {
     NAME: "Comp",
-    DESCRIPTION: "Node-based compositing",
+    DESCRIPTION: "Modular compositing",
     HREF: "https://comp.pantoine.com",
     ICON: "nodes",
   },
