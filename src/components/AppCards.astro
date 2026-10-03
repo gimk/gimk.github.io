@@ -7,7 +7,7 @@ import InteractionSound from "./InteractionSound.astro";
   <div class="h-16 flex items-center">
     <h5 class="section-title">Try my latest apps</h5>
   </div>
-  <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 m-0 p-0 list-none">
+  <ul class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 m-0 p-0 list-none">
     {
       APPS.map((app) => (
         <li class="animate">
@@ -71,17 +71,6 @@ import InteractionSound from "./InteractionSound.astro";
                       <g>
                         <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
                         <circle cx="12" cy="13" r="3" />
-                      </g>
-                    )}
-                    {app.ICON === "aperture" && (
-                      <g>
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="m14.31 8 5.74 9.94" />
-                        <path d="M9.69 8h11.48" />
-                        <path d="m7.38 12 5.74-9.94" />
-                        <path d="M9.69 16 3.95 6.06" />
-                        <path d="M14.31 16H2.83" />
-                        <path d="m16.62 12-5.74 9.94" />
                       </g>
                     )}
                   </svg>

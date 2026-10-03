@@ -72,10 +72,4 @@ export const APPS = [
     HREF: "https://photos.pantoine.com",
     ICON: "camera",
   },
-  {
-    NAME: "Pixel Looks",
-    DESCRIPTION: "Pixel camera looks archive",
-    HREF: "https://pixelooks.pantoine.com",
-    ICON: "aperture",
-  },
 ] as const;
