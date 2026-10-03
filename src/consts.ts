@@ -49,6 +49,12 @@ export const NEW_PROJECT = {
 
 export const APPS = [
   {
+    NAME: "Comp",
+    DESCRIPTION: "Node-based compositing",
+    HREF: "https://comp.pantoine.com",
+    ICON: "nodes",
+  },
+  {
     NAME: "Colors",
     DESCRIPTION: "OKLCH palette builder",
     HREF: "https://colors.pantoine.com",

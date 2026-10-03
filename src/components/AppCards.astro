@@ -7,7 +7,7 @@ import InteractionSound from "./InteractionSound.astro";
   <div class="h-16 flex items-center">
     <h5 class="section-title">Try my latest apps</h5>
   </div>
-  <ul class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 m-0 p-0 list-none">
+  <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 m-0 p-0 list-none">
     {
       APPS.map((app) => (
         <li class="animate">
@@ -38,6 +38,13 @@ import InteractionSound from "./InteractionSound.astro";
                     stroke-linejoin="round"
                     aria-hidden="true"
                   >
+                    {app.ICON === "nodes" && (
+                      <g>
+                        <rect width="8" height="8" x="3" y="3" rx="2" />
+                        <path d="M7 11v4a2 2 0 0 0 2 2h4" />
+                        <rect width="8" height="8" x="13" y="13" rx="2" />
+                      </g>
+                    )}
                     {app.ICON === "palette" && (
                       <g>
                         <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
