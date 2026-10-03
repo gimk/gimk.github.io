@@ -34,8 +34,8 @@ export const SOCIALS: Socials = [
     HREF: "https://www.linkedin.com/in/antoine-pouligny/",
   },
   { 
-    NAME: "instagram",
-    HREF: "https://www.instagram.com/antoinepoups/",
+    NAME: "github",
+    HREF: "https://github.com/gimk",
   },
   {
     NAME: "unsplash",
