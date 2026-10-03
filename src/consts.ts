@@ -46,3 +46,30 @@ export const SOCIALS: Socials = [
 export const NEW_PROJECT = {
   HREF: "https://photos.pantoine.com",
 } as const;
+
+export const APPS = [
+  {
+    NAME: "Colors",
+    DESCRIPTION: "OKLCH palette builder",
+    HREF: "https://colors.pantoine.com",
+    ICON: "palette",
+  },
+  {
+    NAME: "Dither Studio",
+    DESCRIPTION: "Dithering in the browser",
+    HREF: "https://studio.pantoine.com",
+    ICON: "dither",
+  },
+  {
+    NAME: "Photos",
+    DESCRIPTION: "My photography portfolio",
+    HREF: "https://photos.pantoine.com",
+    ICON: "camera",
+  },
+  {
+    NAME: "Pixel Looks",
+    DESCRIPTION: "Pixel camera looks archive",
+    HREF: "https://pixelooks.pantoine.com",
+    ICON: "aperture",
+  },
+] as const;

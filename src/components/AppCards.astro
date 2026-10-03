@@ -1,0 +1,198 @@
+---
+import { APPS } from "@consts";
+import InteractionSound from "./InteractionSound.astro";
+---
+
+<section class="animate mb-8">
+  <div class="h-16 flex items-center">
+    <h5 class="section-title">Try my latest apps</h5>
+  </div>
+  <ul class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 m-0 p-0 list-none">
+    {
+      APPS.map((app) => (
+        <li class="animate">
+          <div class="shadow-ascii shadow-hover h-full">
+            <InteractionSound preset="card" class="h-full">
+              <a
+                href={app.HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${app.NAME} (${app.HREF.replace("https://", "")})`}
+                class="app-card relative group h-full flex flex-col gap-4 p-4 md:p-5 bg-orange-50 dark:bg-slate-950 border border-black/10 dark:border-white/10 transition-colors duration-300 overflow-hidden"
+              >
+                <div
+                  class="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-75 dark:group-hover:opacity-50 transition-opacity duration-300"
+                  aria-hidden="true"
+                >
+                  <pre
+                    class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-accent-primary absolute top-[26px] right-[26px] md:top-[30px] md:right-[30px] translate-x-1/2 -translate-y-1/2"
+                    style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%);">
+                  </pre>
+                </div>
+                <div class="relative z-10 flex items-start justify-between">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    class="size-8 stroke-[1.5] fill-none stroke-current text-black dark:text-white group-hover:text-accent-primary transition-colors duration-300"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    {app.ICON === "palette" && (
+                      <g>
+                        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+                        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+                        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+                        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+                        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+                      </g>
+                    )}
+                    {app.ICON === "dither" && (
+                      <g fill="currentColor" stroke="none">
+                        <rect x="3" y="3" width="4" height="4" />
+                        <rect x="11" y="3" width="4" height="4" />
+                        <rect x="19" y="3" width="2" height="4" />
+                        <rect x="7" y="7" width="4" height="4" />
+                        <rect x="15" y="7" width="4" height="4" />
+                        <rect x="3" y="11" width="4" height="4" />
+                        <rect x="11" y="11" width="4" height="4" />
+                        <rect x="7" y="15" width="4" height="4" />
+                        <rect x="3" y="19" width="4" height="2" />
+                      </g>
+                    )}
+                    {app.ICON === "camera" && (
+                      <g>
+                        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+                        <circle cx="12" cy="13" r="3" />
+                      </g>
+                    )}
+                    {app.ICON === "aperture" && (
+                      <g>
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m14.31 8 5.74 9.94" />
+                        <path d="M9.69 8h11.48" />
+                        <path d="m7.38 12 5.74-9.94" />
+                        <path d="M9.69 16 3.95 6.06" />
+                        <path d="M14.31 16H2.83" />
+                        <path d="m16.62 12-5.74 9.94" />
+                      </g>
+                    )}
+                  </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    class="size-5 -rotate-45 stroke-2 fill-none stroke-current group-hover:stroke-accent-primary transition-colors duration-300"
+                    aria-hidden="true"
+                  >
+                    <line
+                      x1="5"
+                      y1="12"
+                      x2="19"
+                      y2="12"
+                      class="translate-x-3 sm:group-hover:translate-x-0 scale-x-0 sm:group-hover:scale-x-100 transition-transform duration-300 ease-in-out"
+                    />
+                    <polyline
+                      points="12 5 19 12 12 19"
+                      class="-translate-x-1 sm:group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
+                    />
+                  </svg>
+                </div>
+                <div class="relative z-10 flex flex-col gap-1 mt-auto">
+                  <div class="font-semibold text-black dark:text-white">
+                    {app.NAME}
+                  </div>
+                  <div class="text-sm opacity-60 font-serif leading-snug">
+                    {app.DESCRIPTION}
+                  </div>
+                </div>
+              </a>
+            </InteractionSound>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+<script>
+  function initAppCardAscii() {
+    const cards = document.querySelectorAll(".app-card");
+
+    cards.forEach((card) => {
+      const canvas = card.querySelector(".ascii-canvas") as HTMLPreElement;
+      if (!canvas) return;
+
+      let frameId: number;
+      let time = 0;
+      let lastTime = 0;
+      const FPS_LIMIT = 24;
+      const FRAME_MIN_TIME = 1000 / FPS_LIMIT;
+      const density = " .:-=+*#%@";
+      const cols = 200; // Restored original density
+      const rows = 40; // Restored original density
+      let isVisible = true;
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          isVisible = entry.isIntersecting;
+        },
+        { threshold: 0 },
+      );
+      observer.observe(card);
+
+      function render(timestamp: number) {
+        if (!isVisible) {
+          frameId = requestAnimationFrame(render);
+          return;
+        }
+
+        // Throttle FPS
+        const elapsed = timestamp - lastTime;
+        if (elapsed < FRAME_MIN_TIME) {
+          frameId = requestAnimationFrame(render);
+          return;
+        }
+        lastTime = timestamp;
+
+        let output = "";
+        const cx = cols / 2;
+        const cy = rows / 2;
+
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const dx = (x - cx) * 0.6;
+            const dy = y - cy;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            const wave =
+              Math.sin(distance * 0.3 - time) * 0.6 +
+              Math.cos(dx * 0.15 + time * 0.8) * 0.2 +
+              Math.sin(dy * 0.15 + time * 0.8) * 0.2;
+
+            const normalized = (wave + 1) / 2;
+            let charIndex = Math.floor(normalized * density.length);
+            charIndex = Math.max(0, Math.min(density.length - 1, charIndex));
+            output += density[charIndex];
+          }
+          output += "\n";
+        }
+
+        canvas.textContent = output;
+        time += 0.05; // Adjusted for lower FPS
+        frameId = requestAnimationFrame(render);
+      }
+
+      card.addEventListener("mouseenter", () => {
+        frameId = requestAnimationFrame(render);
+      });
+
+      card.addEventListener("mouseleave", () => {
+        cancelAnimationFrame(frameId);
+      });
+    });
+  }
+
+  // Initialize on load
+  initAppCardAscii();
+  // Initialize after view transitions
+  document.addEventListener("astro:after-swap", initAppCardAscii);
+</script>
