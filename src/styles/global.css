@@ -147,6 +147,20 @@ html.scrolled #back-to-top {
   transition: top 0.3s ease, left 0.3s ease, color 0.3s ease;
 }
 
+/* Featured card: the dotted shadow is tinted with the accent at rest */
+.shadow-featured::after {
+  @apply text-accent-primary/30 dark:text-accent-primary/30;
+}
+
+/* Dotted canvas behind the featured app's animation, faded at the edges */
+.featured-canvas {
+  background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+  background-size: 8px 8px;
+  background-position: center;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
+}
+
 .shadow-hover:hover::after {
   top: 4px;
   left: 4px;

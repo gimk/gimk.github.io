@@ -1,16 +1,98 @@
 ---
 import { APPS } from "@consts";
 import InteractionSound from "./InteractionSound.astro";
+import CompMotion from "./CompMotion.astro";
+
+// The featured app spans two columns. On the 2-column mobile grid, an odd
+// number of other cards would leave the last one alone, so it goes full width.
+const isFeatured = (app: (typeof APPS)[number]) => "FEATURED" in app && app.FEATURED;
+const others = APPS.filter((app) => !isFeatured(app));
+const lastOther = others.length % 2 === 1 ? others[others.length - 1] : undefined;
 ---
 
-<section class="animate mb-8">
+<section class="animate pt-6 md:pt-10 mb-16 md:mb-24">
   <div class="h-16 flex items-center">
     <h5 class="section-title">Try my latest apps</h5>
   </div>
-  <ul class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 m-0 p-0 list-none">
+  <ul class="grid grid-cols-2 lg:grid-cols-5 gap-6 md:gap-8 m-0 p-0 list-none">
     {
       APPS.map((app) => (
-        <li class="animate">
+        <li
+          class:list={[
+            "animate",
+            isFeatured(app) && "col-span-2",
+            app === lastOther && "col-span-2 lg:col-span-1",
+          ]}
+        >
+          {isFeatured(app) ? (
+          <div class="shadow-ascii shadow-hover shadow-featured h-full">
+            <InteractionSound preset="card" class="h-full">
+              <a
+                href={app.HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${app.NAME} (${app.HREF.replace("https://", "")})`}
+                class="app-card relative group h-full flex flex-col md:flex-row bg-orange-50 dark:bg-slate-950 border border-black/15 dark:border-white/15 transition-colors duration-300 overflow-hidden"
+              >
+                <div
+                  class="absolute inset-0 pointer-events-none overflow-hidden opacity-0 group-hover:opacity-75 dark:group-hover:opacity-50 transition-opacity duration-300"
+                  aria-hidden="true"
+                >
+                  <pre
+                    class="ascii-canvas font-mono text-[8px] leading-[6px] tracking-[1px] text-accent-primary absolute top-[26px] right-[26px] md:top-[30px] md:right-[30px] translate-x-1/2 -translate-y-1/2"
+                    style="mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%); -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 50%);">
+                  </pre>
+                </div>
+
+                <!-- Visual: the Comp flow on a dotted canvas, like the app's own -->
+                <div class="relative md:basis-[55%] shrink-0 flex items-center justify-center px-6 py-7 md:py-6 border-b md:border-b-0 md:border-r border-black/10 dark:border-white/10">
+                  <div class="featured-canvas absolute inset-0 text-black/[.09] dark:text-white/[.09]" aria-hidden="true" />
+                  {"MOTION" in app && app.MOTION === "comp" && (
+                    <CompMotion class="relative w-full max-w-[20rem]" />
+                  )}
+                </div>
+
+                <div class="relative z-10 flex-1 flex flex-col gap-5 p-4 md:p-5">
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-1.5 font-mono text-[10px] leading-none uppercase tracking-widest text-accent-primary border border-accent-primary/40 px-1.5 py-1">
+                      <span class="size-1.5 bg-accent-primary motion-safe:animate-pulse" aria-hidden="true" />
+                      New
+                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      class="size-5 -rotate-45 stroke-2 fill-none stroke-current group-hover:stroke-accent-primary transition-colors duration-300"
+                      aria-hidden="true"
+                    >
+                      <line
+                        x1="5"
+                        y1="12"
+                        x2="19"
+                        y2="12"
+                        class="translate-x-3 sm:group-hover:translate-x-0 scale-x-0 sm:group-hover:scale-x-100 transition-transform duration-300 ease-in-out"
+                      />
+                      <polyline
+                        points="12 5 19 12 12 19"
+                        class="-translate-x-1 sm:group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
+                      />
+                    </svg>
+                  </div>
+                  <div class="flex flex-col gap-1.5 mt-auto">
+                    <div class="text-xl md:text-2xl leading-tight font-semibold text-black dark:text-white">
+                      {app.NAME}
+                    </div>
+                    <div class="text-sm opacity-60 font-serif leading-snug">
+                      {"TAGLINE" in app ? app.TAGLINE : app.DESCRIPTION}
+                    </div>
+                    <div class="mt-1 font-mono text-xs opacity-50 group-hover:opacity-100 group-hover:text-accent-primary transition duration-300">
+                      {app.HREF.replace("https://", "")}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </InteractionSound>
+          </div>
+          ) : (
           <div class="shadow-ascii shadow-hover h-full">
             <InteractionSound preset="card" class="h-full">
               <a
@@ -104,6 +186,7 @@ import InteractionSound from "./InteractionSound.astro";
               </a>
             </InteractionSound>
           </div>
+          )}
         </li>
       ))
     }

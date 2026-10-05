@@ -51,8 +51,11 @@ export const APPS = [
   {
     NAME: "Comp",
     DESCRIPTION: "Modular compositing",
+    TAGLINE: "Wire pictures and video through effect modules, live in the browser.",
     HREF: "https://comp.pantoine.com",
     ICON: "nodes",
+    MOTION: "comp",
+    FEATURED: true,
   },
   {
     NAME: "Colors",

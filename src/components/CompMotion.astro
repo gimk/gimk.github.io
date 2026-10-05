@@ -1,0 +1,379 @@
+---
+// A tiny Comp flow, looping: an image is wired into a Halftone effect, a knob
+// gets tweaked, the viewer fills with dots, then signals run down the wires.
+// Pure SVG + CSS, all on one 7.5s timeline (see the keyframes below).
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+// The scene both the Image node and the Viewer show: sky, sun and hills,
+// sampled as darkness (0 = paper, 1 = ink) on a unit square.
+const hill = (u: number) => 0.62 + 0.1 * Math.sin(u * 5.2 + 0.6) + 0.04 * Math.sin(u * 11);
+const SUN = { u: 0.7, v: 0.32, r: 0.14 };
+
+function darkness(u: number, v: number) {
+  const h = hill(u);
+  if (v > h) return 0.7 + 0.25 * ((v - h) / (1 - h));
+  const d = Math.hypot((u - SUN.u) * 1.15, v - SUN.v);
+  if (d < SUN.r) return 0;
+  const sky = 0.08 + 0.3 * (1 - v);
+  return d < SUN.r * 2.2 ? sky * ((d - SUN.r) / (SUN.r * 1.2)) : sky;
+}
+
+// Picture area inside the Image and Viewer nodes
+const PIC = { y: 17.5, w: 38, h: 33 };
+const IMG_X = 4.5;
+const VIEW_X = 157.5;
+
+const COLS = 12;
+const ROWS = 11;
+const sx = PIC.w / COLS;
+const sy = PIC.h / ROWS;
+
+const columns = Array.from({ length: COLS }, (_, i) =>
+  Array.from({ length: ROWS }, (_, j) => {
+    const u = (i + 0.5) / COLS;
+    const v = (j + 0.5) / ROWS;
+    return {
+      cx: +(VIEW_X + (i + 0.5) * sx).toFixed(2),
+      cy: +(PIC.y + (j + 0.5) * sy).toFixed(2),
+      r: +(1.5 * Math.sqrt(darkness(u, v))).toFixed(2),
+    };
+  }).filter((dot) => dot.r > 0.3),
+);
+
+// Hill outline for the line-art picture in the Image node
+const hillPoints = Array.from({ length: 21 }, (_, k) => {
+  const u = k / 20;
+  return `${(IMG_X + u * PIC.w).toFixed(2)} ${(PIC.y + hill(u) * PIC.h).toFixed(2)}`;
+});
+const hillLine = `M${hillPoints.join(" L")}`;
+const hillFill = `${hillLine} L${IMG_X + PIC.w} ${PIC.y + PIC.h} L${IMG_X} ${PIC.y + PIC.h} Z`;
+
+const WIRE_1 = "M46.5 38 C62 38 61 26 77 26";
+const WIRE_2 = "M123 40 C138.5 40 138 28 153.5 28";
+
+const nodeClass =
+  "fill-orange-50 dark:fill-slate-950 stroke-current [stroke-opacity:.28] group-hover:stroke-accent-primary group-hover:[stroke-opacity:.7] transition-[stroke,stroke-opacity] duration-300";
+---
+
+<svg
+  viewBox="0 0 200 60"
+  xmlns="http://www.w3.org/2000/svg"
+  class:list={["comp-motion text-black dark:text-white overflow-visible", className]}
+  aria-hidden="true"
+>
+  <defs>
+    <pattern id="comp-motion-grid" width={sx} height={sy} patternUnits="userSpaceOnUse" x={VIEW_X} y={PIC.y}>
+      <circle cx={sx / 2} cy={sy / 2} r=".3" fill="currentColor" fill-opacity=".18"></circle>
+    </pattern>
+    <clipPath id="comp-motion-view">
+      <rect x={VIEW_X} y={PIC.y} width={PIC.w} height={PIC.h}></rect>
+    </clipPath>
+  </defs>
+
+  <!-- Wires: a dotted ghost route, the drawn wire, and a travelling signal -->
+  <g fill="none" stroke-width="1.1">
+    <path d={WIRE_1} stroke="currentColor" stroke-opacity=".2" stroke-dasharray="1 1.6"></path>
+    <path d={WIRE_2} stroke="currentColor" stroke-opacity=".2" stroke-dasharray="1 1.6"></path>
+    <path d={WIRE_1} pathLength="1" class="wire wire-1"></path>
+    <path d={WIRE_2} pathLength="1" class="wire wire-2"></path>
+    <path d={WIRE_1} pathLength="1" class="pulse pulse-1"></path>
+    <path d={WIRE_2} pathLength="1" class="pulse pulse-2"></path>
+  </g>
+
+  <!-- Image node -->
+  <g>
+    <rect x=".5" y="6" width="46" height="48" class={nodeClass}></rect>
+    <line x1=".5" y1="14" x2="46.5" y2="14" class="stroke-current [stroke-opacity:.15]"></line>
+    <rect x="4.5" y="9" width="12" height="2" fill="currentColor" fill-opacity=".4"></rect>
+    <path d={hillFill} fill="currentColor" fill-opacity=".07"></path>
+    <path d={hillLine} fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width=".8"></path>
+    <circle
+      cx={IMG_X + SUN.u * PIC.w}
+      cy={PIC.y + SUN.v * PIC.h}
+      r={SUN.r * PIC.h}
+      fill="none"
+      stroke="currentColor"
+      stroke-opacity=".45"
+      stroke-width=".8"></circle>
+  </g>
+
+  <!-- Halftone effect node -->
+  <g>
+    <rect x="77" y="6" width="46" height="48" class={nodeClass}></rect>
+    <line x1="77" y1="14" x2="123" y2="14" class="stroke-current [stroke-opacity:.15]"></line>
+    <rect x="81" y="9" width="17" height="2" fill="currentColor" fill-opacity=".4"></rect>
+
+    <line x1="82" y1="22" x2="118" y2="22" stroke="currentColor" stroke-opacity=".18" stroke-width="1.2"></line>
+    <line x1="82" y1="22" x2="92" y2="22" class="knob-fill knob-fill-1"></line>
+    <rect x="90.5" y="19.5" width="3" height="5" class="knob knob-1"></rect>
+
+    <line x1="82" y1="31" x2="118" y2="31" stroke="currentColor" stroke-opacity=".18" stroke-width="1.2"></line>
+    <line x1="82" y1="31" x2="108" y2="31" class="knob-fill knob-fill-2"></line>
+    <rect x="106.5" y="28.5" width="3" height="5" class="knob knob-2"></rect>
+
+    <g fill="currentColor" fill-opacity=".45">
+      <circle cx="84" cy="44" r=".6"></circle>
+      <circle cx="88.5" cy="44" r=".9"></circle>
+      <circle cx="93.5" cy="44" r="1.2"></circle>
+      <circle cx="99" cy="44" r="1.5"></circle>
+      <circle cx="105" cy="44" r="1.8"></circle>
+    </g>
+  </g>
+
+  <!-- Viewer node -->
+  <g>
+    <rect x="153.5" y="6" width="46" height="48" class={nodeClass}></rect>
+    <line x1="153.5" y1="14" x2="199.5" y2="14" class="stroke-current [stroke-opacity:.15]"></line>
+    <rect x="157.5" y="9" width="10" height="2" fill="currentColor" fill-opacity=".4"></rect>
+    <rect x={VIEW_X} y={PIC.y} width={PIC.w} height={PIC.h} fill="url(#comp-motion-grid)"></rect>
+    <g clip-path="url(#comp-motion-view)" class="fill-accent-primary">
+      {
+        columns.map((dots, i) => (
+          <g class="dot-col" style={`--i: ${i}`}>
+            {dots.map((dot) => (
+              <circle cx={dot.cx} cy={dot.cy} r={dot.r} />
+            ))}
+          </g>
+        ))
+      }
+      <line x1={VIEW_X} y1={PIC.y} x2={VIEW_X} y2={PIC.y + PIC.h} class="scanline"></line>
+    </g>
+  </g>
+
+  <!-- Ports: a neutral square with an accent square on top that lights up -->
+  {
+    [
+      { x: 46.5, y: 38, key: "a" },
+      { x: 77, y: 26, key: "b-in" },
+      { x: 123, y: 40, key: "b-out" },
+      { x: 153.5, y: 28, key: "c" },
+    ].map((port) => (
+      <g>
+        <rect
+          x={port.x - 2}
+          y={port.y - 2}
+          width="4"
+          height="4"
+          class="fill-orange-50 dark:fill-slate-950 stroke-current [stroke-opacity:.45]"
+          stroke-width=".8"
+        />
+        <rect
+          x={port.x - 2}
+          y={port.y - 2}
+          width="4"
+          height="4"
+          class={`port-lit port-${port.key} fill-accent-primary`}
+        />
+      </g>
+    ))
+  }
+</svg>
+
+<style>
+  /*
+   * Everything is timed in percent of --comp-loop, so changing it rescales
+   * the whole animation. At 7.5s:
+   * 0% port A lights · 3–17% wire 1 draws · 17% Halftone lights up
+   * 20–33% wire 2 draws · 33% viewer lights · 34–46% dots sweep in
+   * 33–53% knobs get tweaked · 55–75% one signal runs down the wires
+   * 77–92% everything fades out · 92–100% rest
+   */
+  .comp-motion {
+    --comp-loop: 7.5s;
+  }
+
+  .wire {
+    stroke: rgb(var(--color-accent));
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    animation: comp-wire-1 var(--comp-loop) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
+  .wire-2 {
+    animation-name: comp-wire-2;
+  }
+
+  .pulse {
+    stroke: rgb(var(--color-accent));
+    stroke-width: 2.4;
+    stroke-linecap: butt;
+    stroke-dasharray: 0.2 1.2;
+    stroke-dashoffset: 0.2;
+    filter: drop-shadow(0 0 1.5px rgb(var(--color-accent)));
+    animation: comp-pulse-1 var(--comp-loop) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  .pulse-2 {
+    animation-name: comp-pulse-2;
+  }
+
+  .port-lit {
+    opacity: 0;
+    animation: comp-port-a var(--comp-loop) ease-out infinite;
+  }
+
+  .port-b-in {
+    animation-name: comp-port-b-in;
+  }
+
+  .port-b-out {
+    animation-name: comp-port-b-out;
+  }
+
+  .port-c {
+    animation-name: comp-port-c;
+  }
+
+  .knob {
+    fill: currentColor;
+    animation: comp-knob-1 var(--comp-loop) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
+  .knob-2 {
+    animation-name: comp-knob-2;
+  }
+
+  .knob-fill {
+    stroke: rgb(var(--color-accent));
+    stroke-width: 1.2;
+    transform-box: fill-box;
+    transform-origin: left center;
+    animation: comp-knob-fill-1 var(--comp-loop) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
+  .knob-fill-2 {
+    animation-name: comp-knob-fill-2;
+  }
+
+  .dot-col {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: comp-dot-col var(--comp-loop) cubic-bezier(0.34, 1.56, 0.64, 1) infinite both;
+    /* 34.17% of the loop, plus 1% per column */
+    animation-delay: calc(var(--comp-loop) * (0.3417 + var(--i) * 0.01));
+  }
+
+  .scanline {
+    stroke: rgb(var(--color-accent));
+    stroke-width: 0.8;
+    opacity: 0;
+    animation: comp-scanline var(--comp-loop) linear infinite;
+  }
+
+  /* Wires draw in along their path, then fade out in place, so the signal
+     pass is the only thing that travels along them. The dash resets while
+     invisible, just before the loop. */
+  @keyframes comp-wire-1 {
+    0%, 3.33% { stroke-dashoffset: 1; opacity: 1; }
+    16.67%, 76.67% { stroke-dashoffset: 0; opacity: 1; }
+    83.33%, 99% { stroke-dashoffset: 0; opacity: 0; }
+    100% { stroke-dashoffset: 1; opacity: 0; }
+  }
+
+  @keyframes comp-wire-2 {
+    0%, 20% { stroke-dashoffset: 1; opacity: 1; }
+    33.33%, 80% { stroke-dashoffset: 0; opacity: 1; }
+    86.67%, 99% { stroke-dashoffset: 0; opacity: 0; }
+    100% { stroke-dashoffset: 1; opacity: 0; }
+  }
+
+  /* One pass per wire. At both ends of the move the dash sits off the ends
+     of the wire, so the jump back at the loop is invisible. */
+  @keyframes comp-pulse-1 {
+    0%, 55% { stroke-dashoffset: 0.2; }
+    65%, 100% { stroke-dashoffset: -1; }
+  }
+
+  @keyframes comp-pulse-2 {
+    0%, 65% { stroke-dashoffset: 0.2; }
+    75%, 100% { stroke-dashoffset: -1; }
+  }
+
+  @keyframes comp-port-a {
+    0% { opacity: 0; }
+    2.33%, 78.33% { opacity: 1; }
+    80.75%, 100% { opacity: 0; }
+  }
+
+  @keyframes comp-port-b-in {
+    0%, 16.33% { opacity: 0; }
+    18.08%, 83.33% { opacity: 1; }
+    85.42%, 100% { opacity: 0; }
+  }
+
+  @keyframes comp-port-b-out {
+    0%, 19.17% { opacity: 0; }
+    21%, 83.33% { opacity: 1; }
+    85.42%, 100% { opacity: 0; }
+  }
+
+  @keyframes comp-port-c {
+    0%, 33% { opacity: 0; }
+    34.77%, 88.33% { opacity: 1; }
+    90.67%, 100% { opacity: 0; }
+  }
+
+  @keyframes comp-knob-1 {
+    0%, 33.33% { transform: translateX(0); }
+    46.67%, 76.67% { transform: translateX(14px); }
+    90%, 100% { transform: translateX(0); }
+  }
+
+  @keyframes comp-knob-fill-1 {
+    0%, 33.33% { transform: scaleX(1); }
+    46.67%, 76.67% { transform: scaleX(2.4); }
+    90%, 100% { transform: scaleX(1); }
+  }
+
+  @keyframes comp-knob-2 {
+    0%, 40% { transform: translateX(0); }
+    53.33%, 80% { transform: translateX(-12px); }
+    90%, 100% { transform: translateX(0); }
+  }
+
+  @keyframes comp-knob-fill-2 {
+    0%, 40% { transform: scaleX(1); }
+    53.33%, 80% { transform: scaleX(0.5385); }
+    90%, 100% { transform: scaleX(1); }
+  }
+
+  /* Relative to each column's own delay (see .dot-col) */
+  @keyframes comp-dot-col {
+    0% { opacity: 0; transform: scale(0.2); }
+    4.17%, 47.5% { opacity: 1; transform: scale(1); }
+    51.67%, 100% { opacity: 0; transform: scale(0.2); }
+  }
+
+  @keyframes comp-scanline {
+    0%, 33.83% { opacity: 0; transform: translateX(0); }
+    34.42% { opacity: 1; transform: translateX(0); }
+    46.67% { opacity: 1; transform: translateX(38px); }
+    48.42%, 100% { opacity: 0; transform: translateX(38px); }
+  }
+
+  /* Reduced motion: hold the finished flow, no movement */
+  @media (prefers-reduced-motion: reduce) {
+    .wire,
+    .pulse,
+    .port-lit,
+    .knob,
+    .knob-fill,
+    .dot-col,
+    .scanline {
+      animation: none;
+    }
+
+    .wire {
+      stroke-dashoffset: 0;
+    }
+
+    .port-lit {
+      opacity: 1;
+    }
+  }
+</style>
