@@ -9,7 +9,7 @@ repoURL: "https://github.com/gimk/comp.pantoine.com"
 repoLabel: "view on GitHub"
 ---
 
-<video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the halftoned house appears in it" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the transformed house appears in it" style="width: 100%;"></video>
 
 **Comp** is a modular compositing tool that runs in the browser. You bring in an image or a video, or generate one, wire it through effect modules, drive their knobs with modulators, and watch the result update live. When it looks right, you render it out to a file.
 
