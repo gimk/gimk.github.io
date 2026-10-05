@@ -9,7 +9,7 @@ repoURL: "https://github.com/gimk/comp.pantoine.com"
 repoLabel: "view on GitHub"
 ---
 
-![Comp's welcome tour on a first visit: a clip of a photo wired through Halftone and Chromatic Aberration into a viewer, next to the "Welcome to Comp" introduction](/projectfiles/comp-studio/comp-welcome.webp)
+<video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the halftoned house appears in it" style="width: 100%;"></video>
 
 **Comp** is a modular compositing tool that runs in the browser. You bring in an image or a video, or generate one, wire it through effect modules, drive their knobs with modulators, and watch the result update live. When it looks right, you render it out to a file.
 
@@ -19,29 +19,45 @@ No accounts, no backend. Your work is saved in your browser and the pictures nev
 
 ---
 
-## A First Flow in Four Steps
+## Designing the First Experience
 
-An empty canvas full of wires can be intimidating, so first-time visitors get a short welcome tour. Each step comes with a clip recorded from the app itself.
+I spent a lot of time fine-tuning the first few minutes. Most people have never heard the word compositing, and a canvas full of boxes and wires can look like a tool for engineers. So before asking anything of you, Comp shows what it does.
 
-### 1. Every step is a module
+### An opening that builds itself
+
+The opening screen, in the video above, is a working flow in miniature: an input picture, a module titled with the app's name, and an output. A cursor builds it the way a person would:
+
+1. It plugs the picture into the module.
+2. It drags the output in from the edge of the screen and wires it up.
+3. The transformed picture appears, rendered live by the same engine as the canvas.
+
+A picture goes in on the left and comes out changed on the right. In a few seconds you've understood what the app does, before you even click Get started.
+
+### A tour in four steps
+
+Once you're in, first-time visitors get a short welcome tour. Each step comes with a clip recorded from the app itself.
+
+![Comp's welcome tour on a first visit: a clip of a photo wired through Halftone and Chromatic Aberration into a viewer, next to the "Welcome to Comp" introduction](/projectfiles/comp-studio/comp-welcome.webp)
+
+#### 1. Every step is a module
 
 You start with a picture, pass it through a few effects, and watch the result update live. Each step is a module, and wires connect them from left to right.
 
 <video src="/projectfiles/comp-studio/comp-step-1.mp4" autoplay loop muted playsinline aria-label="A small graph: an image wired through two effects into a viewer" style="width: 100%;"></video>
 
-### 2. Bring in an image
+#### 2. Bring in an image
 
 Drop an image or a video straight onto the canvas, paste one from the clipboard, or pick Image from the Input menu.
 
 <video src="/projectfiles/comp-studio/comp-step-2.mp4" autoplay loop muted playsinline aria-label="An image node on the canvas showing a photo" style="width: 100%;"></video>
 
-### 3. Connect your first modules
+#### 3. Connect your first modules
 
 Add an effect from the Module menu, or press Shift+A anywhere on the canvas. Then drag a wire from the image into the effect, and from the effect into a Viewer.
 
 <video src="/projectfiles/comp-studio/comp-step-3.mp4" autoplay loop muted playsinline aria-label="An image wired into an effect, then into a viewer showing the result" style="width: 100%;"></video>
 
-### 4. Export your work
+#### 4. Export your work
 
 Wire the chain into a Render module, choose a format and render. An Exporter then downloads the file.
 
