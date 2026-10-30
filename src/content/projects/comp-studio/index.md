@@ -3,19 +3,19 @@ title: "Comp"
 description: "A modular compositing tool for pictures and video, in the browser."
 date: "October 3, 2026"
 thumbnail: "/projectfiles/thumbnails/comp-thumbnail.png"
-demoURL: "https://comp.pantoine.com"
+demoURL: "https://www.compstud.io"
 demoLabel: "visit site"
 repoURL: "https://github.com/gimk/comp.pantoine.com"
 repoLabel: "view on GitHub"
 ---
 
-<video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the transformed house appears in it" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-loop.mp4" autoplay loop muted playsinline aria-label="A looping tour of Comp: images, video, noise, text and sound feeding a Blend module; a module palette with over 130 effects; a Depth Relight module running on device; keyframes animating a Halftone on a timeline; and a Renderer exporting to MP4, WebM, GIF, PNG and JPG" style="width: 100%; max-width: 480px; margin: 0 auto; display: block;"></video>
 
 **Comp** is a modular compositing tool that runs in the browser. You bring in an image or a video, or generate one, wire it through effect modules, drive their knobs with modulators, and watch the result update live. When it looks right, you render it out to a file.
 
 It follows <a href="/projects/dither-studio">Dither Studio</a>. Dither Studio taught me that a single pipeline with forty controls in a sidebar only goes so far. Comp drops the sidebar and puts every step on a canvas, where you can see it, reorder it and branch it.
 
-No accounts, no backend. Your work is saved in your browser and the pictures never leave your machine: <a href="https://comp.pantoine.com" target="_blank" rel="noopener noreferrer">**comp.pantoine.com**</a>.
+No accounts, no backend. Your work is saved in your browser and the pictures never leave your machine: <a href="https://www.compstud.io" target="_blank" rel="noopener noreferrer">**compstud.io**</a>.
 
 ---
 
@@ -25,7 +25,9 @@ I spent a lot of time fine-tuning the first few minutes. Most people have never 
 
 ### An opening that builds itself
 
-The opening screen, in the video above, is a working flow in miniature: an input picture, a module titled with the app's name, and an output. A cursor builds it the way a person would:
+The opening screen is a working flow in miniature: an input picture, a module titled with the app's name, and an output. A cursor builds it the way a person would:
+
+<video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the transformed house appears in it" style="width: 100%;"></video>
 
 1. It plugs the picture into the module.
 2. It drags the output in from the edge of the screen and wires it up.

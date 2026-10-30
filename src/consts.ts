@@ -9,7 +9,7 @@ export const SITE: Site = {
 };
 
 export const HOME: Metadata = {
-  TITLE: "Home",
+  TITLE: "Antoine Pouligny, Senior Product Designer",
   DESCRIPTION: "Hey I'm Antoine Pouligny, a Product Designer, welcome to my portfolio.",
 };
 
@@ -52,7 +52,7 @@ export const APPS = [
     NAME: "Comp",
     DESCRIPTION: "Modular compositing",
     TAGLINE: "Wire pictures and video through effect modules, live in the browser.",
-    HREF: "https://comp.pantoine.com",
+    HREF: "https://www.compstud.io",
     ICON: "nodes",
     MOTION: "comp",
     FEATURED: true,
