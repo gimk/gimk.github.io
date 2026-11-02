@@ -5,121 +5,123 @@ date: "October 3, 2026"
 thumbnail: "/projectfiles/thumbnails/comp-thumbnail.png"
 demoURL: "https://www.compstud.io"
 demoLabel: "visit site"
-repoURL: "https://github.com/gimk/comp.pantoine.com"
+repoURL: "https://github.com/gimk/compstudio"
 repoLabel: "view on GitHub"
 ---
 
-<video src="/projectfiles/comp-studio/comp-loop.mp4" autoplay loop muted playsinline aria-label="A looping tour of Comp: images, video, noise, text and sound feeding a Blend module; a module palette with over 130 effects; a Depth Relight module running on device; keyframes animating a Halftone on a timeline; and a Renderer exporting to MP4, WebM, GIF, PNG and JPG" style="width: 100%; max-width: 480px; margin: 0 auto; display: block;"></video>
+<video src="/projectfiles/comp-studio/comp-loop.mp4" autoplay loop muted playsinline aria-label="A looping tour of Comp: images, video, noise, text and sound feeding a Layers module; a module palette with over 130 modules; a Depth Relight module running on device; keyframes animating a Halftone on a timeline; and a Renderer exporting to MP4, WebM, GIF, PNG and JPG" style="width: 100%;"></video>
 
-**Comp** is a modular compositing tool that runs in the browser. You bring in an image or a video, or generate one, wire it through effect modules, drive their knobs with modulators, and watch the result update live. When it looks right, you render it out to a file.
+**Comp** is a node-based image and video editor in the browser. You drop in a photo or a video (or generate one), wire it through effects, animate the sliders with modulators, and watch the result update live. When you're happy with it, you export a file.
 
-It follows <a href="/projects/dither-studio">Dither Studio</a>. Dither Studio taught me that a single pipeline with forty controls in a sidebar only goes so far. Comp drops the sidebar and puts every step on a canvas, where you can see it, reorder it and branch it.
+It comes right after <a href="/projects/dither-studio">Dither Studio</a>. Working on Dither Studio made me realize that a single fixed pipeline with forty controls in a sidebar only gets you so far. Comp ditches the sidebar and puts every step on an open canvas, so you can see the whole chain, reorder effects, and branch them off.
 
-No accounts, no backend. Your work is saved in your browser and the pictures never leave your machine: <a href="https://www.compstud.io" target="_blank" rel="noopener noreferrer">**compstud.io**</a>.
+No accounts. Your projects save locally in your browser and your files stay on your machine (except if you use the AI Image node with your own API key): <a href="https://www.compstud.io" target="_blank" rel="noopener noreferrer">**compstud.io**</a>.
 
 ---
 
-## Designing the First Experience
+## Onboarding
 
-I spent a lot of time fine-tuning the first few minutes. Most people have never heard the word compositing, and a canvas full of boxes and wires can look like a tool for engineers. So before asking anything of you, Comp shows what it does.
+I spent a lot of time on the first few minutes. Most people don't know what "compositing" means, and a blank canvas full of boxes and wires looks intimidating. So before dropping you in, Comp shows you how it works.
 
-### An opening that builds itself
+### An interactive intro
 
-The opening screen is a working flow in miniature: an input picture, a module titled with the app's name, and an output. A cursor builds it the way a person would:
+The landing screen is a small working graph: an input photo, an effect node, and an output. An animated cursor wires it together right in front of you:
 
 <video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the transformed house appears in it" style="width: 100%;"></video>
 
-1. It plugs the picture into the module.
-2. It drags the output in from the edge of the screen and wires it up.
-3. The transformed picture appears, rendered live by the same engine as the canvas.
+A picture goes in on the left and comes out changed on the right. You get the idea in a few seconds, before even clicking Get started.
 
-A picture goes in on the left and comes out changed on the right. In a few seconds you've understood what the app does, before you even click Get started.
+### Quick tour
 
-### A tour in four steps
-
-Once you're in, first-time visitors get a short welcome tour. Each step comes with a clip recorded from the app itself.
+First-time visitors also get a short four-step walkthrough, using short clips recorded straight from the app.
 
 ![Comp's welcome tour on a first visit: a clip of a photo wired through Halftone and Chromatic Aberration into a viewer, next to the "Welcome to Comp" introduction](/projectfiles/comp-studio/comp-welcome.webp)
 
-#### 1. Every step is a module
+#### 1. Everything is a module
 
-You start with a picture, pass it through a few effects, and watch the result update live. Each step is a module, and wires connect them from left to right.
+Start with a picture, run it through a couple of effects, and see the result live. Wires connect each step from left to right.
 
 <video src="/projectfiles/comp-studio/comp-step-1.mp4" autoplay loop muted playsinline aria-label="A small graph: an image wired through two effects into a viewer" style="width: 100%;"></video>
 
 #### 2. Bring in an image
 
-Drop an image or a video straight onto the canvas, paste one from the clipboard, or pick Image from the Input menu.
+Drag and drop an image or video onto the canvas, paste from your clipboard, or pick Image from the Input menu.
 
 <video src="/projectfiles/comp-studio/comp-step-2.mp4" autoplay loop muted playsinline aria-label="An image node on the canvas showing a photo" style="width: 100%;"></video>
 
-#### 3. Connect your first modules
+#### 3. Connect your modules
 
-Add an effect from the Module menu, or press Shift+A anywhere on the canvas. Then drag a wire from the image into the effect, and from the effect into a Viewer.
+Add an effect from the menu (or press `Shift+A` anywhere on the canvas), then drag a wire from your image to the effect, and into a Viewer.
 
 <video src="/projectfiles/comp-studio/comp-step-3.mp4" autoplay loop muted playsinline aria-label="An image wired into an effect, then into a viewer showing the result" style="width: 100%;"></video>
 
-#### 4. Export your work
+#### 4. Export
 
-Wire the chain into a Render module, choose a format and render. An Exporter then downloads the file.
+Connect your chain to a Render module, pick a format (PNG, JPG, GIF, MP4, or WebM), and hit Render.
 
-<video src="/projectfiles/comp-studio/comp-step-4.mp4" autoplay loop muted playsinline aria-label="A Render node wired into an Exporter with a finished file ready to download" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-step-4.mp4" autoplay loop muted playsinline aria-label="A Renderer with a finished file ready to download" style="width: 100%;"></video>
 
 ---
 
 ## How It Works
 
-Everything on the canvas is a module, and wires run from left to right. There are four kinds:
+Everything on the canvas is a module, and wires flow from left to right:
 
-- **Inputs**: an image, a video, or one of five generators: Ramp, Noise, Plasma, Cellular and Pattern.
-- **Effects**: nearly eighty of them, sorted into nine groups:
-  - **Color & Tone:** the basic photo edits, like Exposure, White Balance, Curves and Selective Color.
-  - **Optics & Blur:** Bokeh, Tilt-Shift, God Rays and Lens Flare, among others.
-  - **Transform & Warp:** Kaleidoscope, Ripple and Corner Pin, among others.
-  - **CRT & Display**, **Tape & Glitch** and **Temporal:** effects that play out over time, like Feedback, Frame Hold and Datamosh.
-- **Modulators**: LFO, Noise, Pulse, Value and a Step Sequencer produce a signal. Math, Map Range, Sample & Hold, Smooth and Envelope reshape it. Wire one into any knob and the knob moves on its own: a Pulse into an Envelope, for example, flashes on the beat.
-- **Outputs**: a Viewer, a full-screen Background, and a Render module that bakes PNG, JPG, GIF, MP4 or WebM files for an Exporter to download.
+- **Inputs**: images, image batches, video, audio, text, 3D models, or procedural generators like Noise, Plasma, and Gradients.
+- **Effects**: around 120 of them across ten categories — from standard photo adjustments (Exposure, Curves, Bokeh) to heavy stylization (Halftone, Risograph, CRT scanlines, Datamosh, fluid simulation).
+- **Modulators**: LFOs, envelopes, audio reactivity, step sequencers, or point trackers. Plug one into any slider and it animates on its own — like pulsing an effect to the beat of a song.
+- **AI & Code**: local AI models for masking, depth, or background removal, plus a custom shader node if you want to write your own GLSL.
+- **Outputs**: a standard Viewer, a fullscreen canvas background, a second-screen Projector, video scopes, or a Render node to export files.
 
-Wires are colour coded, so you can tell how a flow is built from far away: blue for pictures, amber for modulation, purple for rendered files.
+Wires are color-coded so you can read a graph from zoomed out: blue for images, amber for modulation signals, purple for rendered outputs.
 
 ---
 
 ## Design Decisions
 
-The rule I kept coming back to was **small modules, chained**. A retro CRT look isn't one module with forty sliders. It's Scanlines, then Shadow Mask, then Lens, and you can swap their order to see what changes. It makes the menu longer, so each category is sorted alphabetically, but each card stays short enough to read at a glance.
+The main rule I stuck to was **small modules that you chain together**. A CRT look isn't one giant node with forty sliders — it's Scanlines, plugged into Shadow Mask, plugged into Lens Distortion. You can swap their order anytime to see how the image reacts. It makes the menu longer, but each node stays small and readable.
 
-The cards themselves are generated from each effect's definition. Every module gets the same layout, the same sliders you can type into, drag or reset, and the same port beside each knob. Adding an effect to the app takes one file and one line, and its controls follow automatically.
+I obsessed over how the canvas feels to use: alignment snapping, undo/redo, deleting a node and having the wire heal itself automatically, or dropping a new node directly onto an existing wire to insert it. If you press `Shift+A` while dragging a wire, the search menu pops up and auto-connects whatever node you pick. Sliders look thin, but have wide invisible hitboxes so you don't accidentally drag the whole card when reaching for a value. At the bottom of the screen, a small hint bar quietly shows shortcuts for whatever you're currently selecting or dragging.
 
-I spent a lot of time on the feel of the canvas: alignment snapping, undo, deleting a module and having the chain close the gap behind it, dropping a module on a wire to splice it in. Press Shift+A while dragging a wire and the add menu opens with the wire still attached, ready to plug into whatever you pick. Sliders keep their thin look but accept a press across a much wider band, so a near miss no longer drags the whole card. And a quiet caption at the bottom of the canvas suggests the few shortcuts that apply to what you're holding. None of it shows in a screenshot. You notice it when it's missing.
-
-The interface is a set of frosted glass panels, with three typefaces: Bricolage Grotesque for titles, Instrument Sans for the interface and DM Mono for numbers. It follows your system into dark mode, or you can pin a theme. The only colours that don't change between themes are the ports, since they carry meaning.
+Visually, the UI uses frosted glass panels with Bricolage Grotesque for headers, Instrument Sans for UI labels, and DM Mono for numbers. It supports light and dark mode, while port colors stay fixed so they always mean the same thing.
 
 ---
 
-## Pictures as Parameters
+## Images as Parameters
 
-This is my favourite part, and it is borrowed from Blender.
+This is my favorite feature, borrowed straight from Blender's shader editor.
 
-A knob with a diamond-shaped port also accepts a picture. The knob then has a different value at every pixel. Wire a radial gradient through a Map Range into a Blur's radius, and you get a picture that is sharp in the centre and soft at the edges, with no mask module in sight.
+Any slider with a diamond-shaped port can take an image as an input instead of a single number. The slider then gets a different value for every pixel. For example, if you plug a radial gradient into a Blur's radius, the center stays sharp while the edges blur out — no mask node needed.
 
-The wire turns dashed to show it carries a picture, and the knob greys out and locks, since a picture now drives it. Types convert the way Blender converts them: a colour knob takes the RGB, a number takes the luminance, a toggle switches on where the picture is bright.
-
-It works the other way too. Image Statistic reads a picture's mean, min or max back out as a signal, and now keeps a short history of its readings. Feed it into Smooth and a knob can follow the brightness of a video without jittering on every frame.
+When an image is plugged in, the wire turns dashed and the slider locks. It also works in reverse: an Image Statistic node can read the average brightness of a video and turn it into a number signal to drive other sliders.
 
 ---
 
-## Groups, Presets and the Background
+## Groups & Presets
 
-Once a chain works, you can collapse it into one card, choose which of its knobs show on the front, and drop the whole group on a wire like a single module. Save it as a preset and it comes back as a group in any other flow. Two presets are built in: **Toon**, a cel-shaded look with ink outlines, and **Slit-Scan**, which spreads time across the picture.
+Once you've built a chain you like, you can collapse it into a single Group node, pick which sliders stay visible on the front, and save it as a reusable preset. Comp ships with a dozen built-in presets (like **Toon** shading or **Slit-Scan** time displacement) as well as full project templates to help you get started.
 
-A Viewer can float over the screen while you work. The Background output goes further and puts the result behind the whole canvas.
+If you need to process a lot of files at once, the Image Set node runs your entire graph across a batch of photos automatically.
+
+---
+
+## Local AI
+
+I wanted AI tools in Comp without server costs or subscriptions, so almost all of them run locally in your browser.
+
+Small models from Hugging Face handle specific jobs as regular nodes:
+- **Depth** estimates a depth map so you can relight a flat photo in 3D.
+- **Cut Out**, **Magic Mask**, and **Text Mask** remove backgrounds or isolate objects from clicks or text prompts.
+- **Describe** generates captions from an image, and **Fill** erases marked areas.
+
+Each model downloads once and stays cached in your browser. Because a model's output is just an image (like a black-and-white mask or depth map), you can plug it into any effect or slider just like everything else.
+
+The only exception is the **AI Image** generator, which calls OpenRouter or Google AI Studio using your own API key. Comp also exposes a read-only MCP server (`compstud.io/mcp`) and an agent skill, so AI coding tools can generate valid `.comp` project files from a prompt or reference image.
 
 ---
 
 ## Under the Hood
 
-Built with React 19, TypeScript and Vite. The canvas is <a href="https://reactflow.dev" target="_blank" rel="noopener noreferrer">React Flow</a>, the state lives in Zustand, and every effect is a WebGL2 fragment shader. Effects chain through framebuffers at the source's own resolution, and the renderer walks back from each output, so a branch that reaches no output costs nothing. It only redraws continuously when something actually moves. Exports use `gifenc` for GIFs and `mediabunny` for video.
+Comp is built with React, TypeScript, and React Flow for the node canvas. Every effect runs on the GPU as a WebGL2 fragment shader, so changes happen in real time at full resolution, and inactive branches aren't calculated until they're connected to an output.
 
-Pictures and videos stay outside the app's state on purpose. The state is small enough to save on every change and to undo, and dragging a slider never pushes pixels through React. Modulators that look back in time, like Smooth or Sample & Hold, are still pure functions of time, so a render replays them exactly as the preview did. The build also compiles every shader before shipping, so a broken effect fails there, not in front of a visitor.
-
-Like my other recent projects, it was built in AI-assisted sessions, over about seventy commits in two weeks. The agents wrote most of the shader maths and boilerplate, while I spent my time on the interaction design and on tuning each effect until it looked right.
+Like my other recent projects, I built this with the help of AI coding agents over about six weeks. They handled the shader math and plumbing, while I focused on the product design, canvas interactions, and tuning the effects.
