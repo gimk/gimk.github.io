@@ -78,6 +78,15 @@ export interface AsciiState {
   id: string;
   /** Motion field name (see fields.ts). */
   field: string;
+  /**
+   * Optional playlist: the state cycles through these fields over time,
+   * blending each into the next (overrides `field`).
+   */
+  fields?: string[];
+  /** Seconds per field in a playlist (default 7). */
+  period?: number;
+  /** 0..1 how much of the field's dense peaks are drawn in accent ink (default 0). */
+  accent?: number;
   /** Shape key registered with the engine, or null for a free field. */
   shape: string | null;
   /** Where the shape sits on screen. Resolved each frame (may follow a DOM element). */
