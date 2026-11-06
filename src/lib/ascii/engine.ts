@@ -14,7 +14,20 @@ const NB = 2 * NA;
 const CLOCK = 0.62;
 /** How quickly `progress` chases `target` (higher = snappier). */
 const SPRING = 4.5;
+/** Contour strength above which an edge glyph replaces the density glyph. */
+const EDGE_T = 0.55;
 const LENS_RADIUS = 170;
+
+/** Glyph for a contour whose intensity gradient points along (gx, gy) (screen space, y down). */
+function edgeGlyph(gx: number, gy: number): string {
+  // The contour runs perpendicular to the gradient.
+  let a = Math.atan2(-gx, gy); // direction of the line
+  if (a < 0) a += Math.PI;
+  const d = (a / Math.PI) * 4; // 0..4 in 45° steps
+  const s = Math.round(d) % 4;
+  // s: 0 = horizontal, 1 = rising to the left (\), 2 = vertical, 3 = rising right (/)
+  return s === 0 ? "-" : s === 1 ? "\\" : s === 2 ? "|" : "/";
+}
 const LENS_STRENGTH = 0.55;
 
 export interface EngineOptions {
@@ -267,6 +280,12 @@ export class AsciiEngine {
     const intensity = lerp(A.intensity, B.intensity, k);
     const ambient = lerp(A.ambient, B.ambient, k);
     const shapeScale = lerp(A.shapeScale ?? 0.8, B.shapeScale ?? 0.8, k);
+    const warpAmt = this.reduced ? 0 : lerp(A.warp ?? 1, B.warp ?? 1, k);
+    const texture = lerp(A.texture ?? 1, B.texture ?? 1, k);
+    const shA = sA?.shade;
+    const shB = sB?.shade;
+    const edA = sA?.edge ? sA : undefined;
+    const edB = sB?.edge ? sB : undefined;
 
     const side = Math.min(r.w, r.h) * shapeScale;
     const sqX = r.x + (r.w - side) / 2;
@@ -308,7 +327,7 @@ export class AsciiEngine {
     const ly0 = this.pointer.y;
     const lr2 = LENS_RADIUS * LENS_RADIUS;
 
-    const warp = this.reduced ? 0 : 0.01;
+    const warp = 0.01 * warpAmt;
     const scat = scatter * 0.075;
 
     const ctx = this.ctx;
@@ -362,12 +381,17 @@ export class AsciiEngine {
         f = clamp01((f + 1) / 2);
 
         let m = 0;
+        let eg = "";
+        let eStrength = 0;
         if (hasShape) {
-          let u = (sx - sqX) / side;
-          let v = (sy - sqY) / side;
+          // The lens only bends the shape as much as the state allows.
+          let u = (px + (sx - px) * warpAmt - sqX) / side;
+          let v = (py + (sy - py) * warpAmt - sqY) / side;
           // Living shape: the field gently pushes the sampling point around.
-          u += warp * Math.sin(v * 9 + t * 2.1) + (f - 0.5) * 0.022;
-          v += warp * Math.cos(u * 8 - t * 1.6);
+          if (warp > 0) {
+            u += warp * Math.sin(v * 9 + t * 2.1) + (f - 0.5) * 0.022 * warpAmt;
+            v += warp * Math.cos(u * 8 - t * 1.6);
+          }
           if (scat > 0) {
             u += scat * Math.sin(cy * 0.31 + t * 5.1) * Math.cos(cx * 0.17 - t * 2.9);
             v += scat * Math.cos(cx * 0.23 + t * 4.3) * Math.sin(cy * 0.19 + t * 2.2);
@@ -376,15 +400,31 @@ export class AsciiEngine {
             const d = lerp(sample(sA!.sdf!, sA!.size, u, v, 64), sample(sB!.sdf!, sB!.size, u, v, 64), ks);
             const e = clamp01((1.4 - d) / 2.8);
             m = e * e * (3 - 2 * e);
+            if (shA || shB) {
+              const a = shA ? sample(shA, sA!.size, u, v, 0) : 1;
+              const b = shB ? sample(shB, sB!.size, u, v, 0) : 1;
+              m *= lerp(a, b, ks);
+            }
           } else {
             if (sA && wA > 0) m += sample(sA.tone, sA.size, u, v, 0) * wA;
             if (sB && wB > 0) m += sample(sB.tone, sB.size, u, v, 0) * wB;
           }
           m *= 1 - 0.5 * scatter;
+
+          // Contours: whichever side dominates the shape blend draws its edges.
+          const ed = ks < 0.5 ? edA : edB;
+          if (ed && scatter < 0.6) {
+            const e = sample(ed.edge!, ed.size, u, v, 0) * (1 - scatter / 0.6);
+            if (e > EDGE_T) {
+              eStrength = e;
+              eg = edgeGlyph(sample(ed.gx!, ed.size, u, v, 0), sample(ed.gy!, ed.size, u, v, 0));
+            }
+          }
         }
 
         const light = f * ambient * 0.5;
-        const dense = 0.5 + 0.5 * f;
+        // Low texture: the image's own shading drives the ink, the field only grains it.
+        const dense = 0.5 + 0.5 * (0.7 + (f - 0.7) * texture);
         let val = ell * (light + (dense - light) * m) * intensity + lens * ell * 0.35;
         let ink = m > 0.28 ? 1 : 0;
         if (front > 0) {
@@ -395,6 +435,12 @@ export class AsciiEngine {
           }
         }
 
+        if (eg && ell > 0.25) {
+          const b = NA + (eStrength > 0.8 ? 2 : 1);
+          buckets[b][x] = eg;
+          used[b] = 1;
+          continue;
+        }
         if (val <= 0) continue;
         const q = (val >= 1 ? 0.9999 : val) * DLEN;
         const gi = q | 0;

@@ -20,8 +20,10 @@ const projects = FEATURED.map((f) => {
   return { ...f, entry };
 });
 const pad = (n: number) => String(n).padStart(2, "0");
-/** Scene height: one viewport of scroll per project, plus a little hold at the end. */
-const sceneHeight = (projects.length - 1 + 1.6) * 100;
+/** Scroll per project inside the pinned scene, in viewport heights. */
+const STEP = 1.5;
+/** Scene height: STEP per project, plus a hold at the end. */
+const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
 ---
 
 <PageLayout title="Lab" description="ASCII stage prototype" asciiBackground={false} bareHeader>
@@ -63,12 +65,19 @@ const sceneHeight = (projects.length - 1 + 1.6) * 100;
     </section>
 
     <!-- Projects: one pinned scene; text and icon change together -->
-    <section id="scene" class="relative" style={`height: ${sceneHeight}svh`} aria-label="Selected projects">
+    <section id="scene" class="relative" style={`height: ${sceneHeight}svh`} data-step={STEP} aria-label="Selected projects">
+      <!-- Snap points: proximity snapping helps you land exactly on a project. -->
+      {projects.map((_, i) => <div class="scene-snap" style={`top: ${i * STEP * 100}svh`} aria-hidden="true" />)}
       <div class="sticky top-0 h-[100svh] flex items-center">
         <div class="relative w-full md:w-1/2 h-[70svh]">
           {
             projects.map(({ entry, kind }, i) => (
-              <div data-project class="scene-project absolute inset-0 flex flex-col justify-center" style="--d:1;--o:0">
+              <div
+                data-project
+                data-thumb={entry.data.thumbnail}
+                class="scene-project absolute inset-0 flex flex-col justify-center"
+                style="--d:1;--o:0"
+              >
                 <span class="sp-mask">
                   <span class="sp-line font-mono text-xs uppercase tracking-[0.2em] opacity-50" style="--i:0">
                     {pad(i + 1)} — {entry.data.date.getFullYear()} — {kind}
@@ -115,6 +124,16 @@ const sceneHeight = (projects.length - 1 + 1.6) * 100;
 </PageLayout>
 
 <style is:global>
+  html:has(#scene) {
+    scroll-snap-type: y proximity;
+  }
+  .scene-snap {
+    position: absolute;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    scroll-snap-align: start;
+  }
   #ascii-stage {
     position: fixed;
     inset: 0;
@@ -220,15 +239,8 @@ const sceneHeight = (projects.length - 1 + 1.6) * 100;
   import { iconShape, imageSample, imageShape, placeholderPortrait, type ImageSample } from "@lib/ascii/shapes";
   import type { AsciiState, Rect } from "@lib/ascii/types";
 
-  /** Icon + motion field per featured project, same order as the markup. */
-  const LOOKS: { icon: string; field: string }[] = [
-    { icon: "comp", field: "interference" },
-    { icon: "dither", field: "grid" },
-    { icon: "colors", field: "plasma" },
-    { icon: "photo", field: "vortex" },
-    { icon: "bankin", field: "rings" },
-    { icon: "coach", field: "cells" },
-  ];
+  /** Motion field per featured project, same order as the markup. */
+  const FIELDS_BY_PROJECT = ["interference", "grid", "plasma", "vortex", "rings", "cells"];
 
   const root = document.documentElement;
   const canvas = document.getElementById("ascii-stage") as HTMLCanvasElement;
@@ -240,12 +252,13 @@ const sceneHeight = (projects.length - 1 + 1.6) * 100;
   const experience = document.querySelector<HTMLElement>('[data-anchor="experience"]')!;
   const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
   const booting = root.dataset.boot === "1";
-  const looks = LOOKS.slice(0, projectEls.length);
+  const STEP = Number(scene.dataset.step) || 1.5;
 
   const engine = new AsciiEngine({ canvas, fontSize: 10 });
 
   // ---- Theme / inks: muted field, accent shape ----
   let portrait: ImageSample | null = null;
+  const projectImages: (ImageSample | null)[] = projectEls.map(() => null);
   const isDark = () => root.classList.contains("dark");
   function applyTheme() {
     const accent = getComputedStyle(root).getPropertyValue("--color-accent").trim().split(/\s+/).map(Number);
@@ -254,11 +267,26 @@ const sceneHeight = (projects.length - 1 + 1.6) * 100;
     const shapeInk: Rgba = [accent[0], accent[1], accent[2], dark ? 0.95 : 1];
     engine.setInks(fieldInk, shapeInk);
     if (portrait) engine.setShape("portrait", imageShape(portrait, { lightInk: dark }));
+    projectImages.forEach((img, i) => {
+      if (img) engine.setShape(`project-${i}`, imageShape(img, { lightInk: dark, contrast: 1.3, floor: 0.35, fadeBottom: 0 }));
+    });
   }
   new MutationObserver(applyTheme).observe(root, { attributes: true, attributeFilter: ["class"] });
 
   // ---- Shapes ----
-  for (const [key, draw] of Object.entries(ICONS)) engine.setShape(key, iconShape(draw));
+  // Project illustrations: each project's 3D thumbnail, shaded in ASCII like the portrait.
+  // The flat icon set is the fallback while an image loads or if it fails.
+  const FALLBACK_ICONS = ["comp", "dither", "colors", "photo", "bankin", "coach"];
+  projectEls.forEach((el, i) => {
+    const key = `project-${i}`;
+    engine.setShape(key, iconShape(ICONS[FALLBACK_ICONS[i]] ?? ICONS.blank));
+    const img = new Image();
+    img.onload = () => {
+      projectImages[i] = imageSample(img);
+      applyTheme();
+    };
+    img.src = el.dataset.thumb ?? "";
+  });
   const portraitImg = new Image();
   portraitImg.onload = () => {
     // Head-and-shoulders crop (fractions of the photo's width/height).
@@ -290,8 +318,19 @@ const sceneHeight = (projects.length - 1 + 1.6) * 100;
   // ---- States ----
   const states: AsciiState[] = [
     { id: "boot", field: "wave", shape: null, frame: viewport, intensity: 0.9, ambient: 1 },
-    { id: "portrait", field: "wave", shape: "portrait", frame: heroSide, intensity: 1, ambient: 0.6, shapeScale: 0.85 },
-    ...looks.map((l) => ({ id: l.icon, field: l.field, shape: l.icon, frame: side, intensity: 1, ambient: 0.8, shapeScale: 0.6 })),
+    // Faces don't survive distortion: no warp, and the photo's shading wins over the field.
+    { id: "portrait", field: "wave", shape: "portrait", frame: heroSide, intensity: 1, ambient: 0.6, shapeScale: 0.85, warp: 0, texture: 0.3 },
+    ...projectEls.map((_, i) => ({
+      id: `project-${i}`,
+      field: FIELDS_BY_PROJECT[i % FIELDS_BY_PROJECT.length],
+      shape: `project-${i}`,
+      frame: side,
+      intensity: 1,
+      ambient: 0.75,
+      shapeScale: 0.72,
+      warp: 0.35,
+      texture: 0.5,
+    })),
     { id: "experience", field: "calm", shape: null, frame: side, intensity: 0.7, ambient: 0.9 },
     { id: "closing", field: "rings", shape: null, frame: centre, intensity: 0.85, ambient: 1 },
   ];
@@ -314,9 +353,10 @@ const sceneHeight = (projects.length - 1 + 1.6) * 100;
     const last = projectEls.length - 1;
     anchors = [
       { y: 0, win: [0.15, 0.95] },
+      // Long holds, a short morph in the middle of each gap.
       ...projectEls.map((_, i) => ({
-        y: sceneTop + i * vh,
-        win: (i === last ? [0.15, 0.7] : [0.25, 0.75]) as [number, number],
+        y: sceneTop + i * STEP * vh,
+        win: (i === last ? [0.15, 0.7] : [0.36, 0.64]) as [number, number],
       })),
       { y: docTop(experience) - vh * 0.1, win: [0.55, 1] },
       { y: docTop(closing), win: [0, 1] },
