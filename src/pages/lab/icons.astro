@@ -1,0 +1,22 @@
+---
+---
+<html>
+  <head><title>icons lab</title></head>
+  <body style="background:#222;color:#fff;font:14px monospace;margin:16px">
+    <div id="grid" style="display:flex;flex-wrap:wrap;gap:16px"></div>
+    <script>
+      import { ICONS } from "../../lib/ascii/icons";
+      const grid = document.getElementById("grid")!;
+      for (const [name, draw] of Object.entries(ICONS)) {
+        const wrap = document.createElement("div");
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 256;
+        cv.style.cssText = "background:#000;outline:1px solid #444;display:block";
+        const ctx = cv.getContext("2d")!;
+        draw(ctx, 256);
+        wrap.append(cv, name);
+        grid.append(wrap);
+      }
+    </script>
+  </body>
+</html>

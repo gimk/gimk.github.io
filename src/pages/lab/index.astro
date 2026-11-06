@@ -1,0 +1,312 @@
+---
+import { getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+
+/** Featured projects, in scroll order, with the icon + motion field each one morphs into. */
+const FEATURED = [
+  { id: "comp-studio", icon: "comp", field: "interference" },
+  { id: "dither-studio", icon: "dither", field: "grid" },
+  { id: "colors-studio", icon: "colors", field: "plasma" },
+  { id: "vibe-coding-trilogy", icon: "photo", field: "vortex" },
+  { id: "Bankin-year-2", icon: "bankin", field: "rings" },
+  { id: "Future-of-coach", icon: "coach", field: "cells" },
+];
+
+const all = await getCollection("projects");
+const projects = FEATURED.map((f) => {
+  const entry = all.find((p) => p.id.toLowerCase() === f.id.toLowerCase());
+  if (!entry) throw new Error(`Missing project ${f.id}`);
+  return { ...f, entry };
+});
+const pad = (n: number) => String(n).padStart(2, "0");
+---
+
+<PageLayout title="Lab" description="ASCII stage prototype" asciiBackground={false}>
+  <script is:inline>
+    try {
+      const force = new URLSearchParams(location.search).has("boot");
+      if (force || !localStorage.getItem("gimk:booted")) document.documentElement.dataset.boot = "1";
+    } catch (e) {}
+  </script>
+
+  <canvas id="ascii-stage" aria-hidden="true"></canvas>
+
+  <div class="mx-auto max-w-screen-xl px-5">
+    <!-- Hero: real text left, portrait frame right -->
+    <section class="min-h-[calc(100svh-8rem)] grid md:grid-cols-2 items-center gap-8">
+      <div class="flex flex-col gap-6 relative z-10">
+        <p class="font-mono text-sm text-accent-primary" id="boot-line">
+          <span id="boot-text">&gt; init gimk.portfolio</span><span id="boot-caret" class="boot-caret">▍</span>
+        </p>
+        <h1 data-intro class="text-4xl md:text-6xl font-semibold tracking-tight text-black dark:text-white">
+          Antoine Pouligny
+        </h1>
+        <p data-intro class="text-lg md:text-xl">
+          Creative Engineer &amp; Senior Product Designer
+        </p>
+        <p data-intro class="max-w-md text-sm opacity-80 font-serif leading-relaxed">
+          Merging design and engineering to build clear, simple and meaningful user systems.
+        </p>
+        <p data-intro class="font-mono text-xs uppercase tracking-widest opacity-50 pt-10">↓ scroll</p>
+      </div>
+      <div id="hero-frame" class="h-[60vh] md:h-[75vh]" aria-hidden="true"></div>
+    </section>
+
+    <div class="h-[30vh]"></div>
+
+    <!-- Projects: text scrolls on the left, the stage pins an icon on the right -->
+    <section class="grid md:grid-cols-2 gap-8">
+      <div>
+        {
+          projects.map(({ entry }, i) => (
+            <article data-anchor class="min-h-[100svh] flex flex-col justify-center gap-5 py-24">
+              <p class="font-mono text-xs uppercase tracking-widest opacity-50">
+                {pad(i + 1)} / {pad(projects.length)} — Projects
+              </p>
+              <h2 class="text-3xl md:text-5xl font-semibold tracking-tight text-black dark:text-white">
+                {entry.data.title}
+              </h2>
+              <p class="font-serif text-lg opacity-80 max-w-md">{entry.data.description}</p>
+              <img
+                src={entry.data.thumbnail}
+                alt=""
+                class="w-full max-w-md aspect-video object-cover border border-black/10 dark:border-white/10 bg-orange-50 dark:bg-slate-950"
+                loading="lazy"
+              />
+              <a href={`/projects/${entry.id}`} class="font-mono text-sm text-accent-primary">Read case study →</a>
+            </article>
+          ))
+        }
+      </div>
+      <div class="hidden md:block">
+        <div id="project-frame" class="sticky top-[15vh] h-[70vh]" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section data-anchor class="min-h-[100svh] flex flex-col justify-center gap-4 max-w-xl">
+      <p class="font-mono text-xs uppercase tracking-widest opacity-50">Experience</p>
+      <p class="font-serif text-2xl leading-relaxed">
+        Here the stage calms down behind reading text. Experience and writing come next in the plan.
+      </p>
+    </section>
+  </div>
+</PageLayout>
+
+<style is:global>
+  #ascii-stage {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    pointer-events: none;
+  }
+  .boot-caret {
+    animation: caret 1s steps(1) infinite;
+  }
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  [data-intro] {
+    transition:
+      opacity 0.9s ease,
+      transform 0.9s ease;
+  }
+  html[data-boot] [data-intro]:not(.in) {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-intro] {
+      transition: none;
+    }
+    .boot-caret {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { AsciiEngine } from "@lib/ascii/engine";
+  import { ICONS } from "@lib/ascii/icons";
+  import { iconShape, imageLuminance, imageShape, placeholderPortrait } from "@lib/ascii/shapes";
+  import type { AsciiState, Rect } from "@lib/ascii/types";
+
+  const projectCount = document.querySelectorAll("article[data-anchor]").length;
+  const FEATURED: { icon: string; field: string }[] = [
+    { icon: "comp", field: "interference" },
+    { icon: "dither", field: "grid" },
+    { icon: "colors", field: "plasma" },
+    { icon: "photo", field: "vortex" },
+    { icon: "bankin", field: "rings" },
+    { icon: "coach", field: "cells" },
+  ].slice(0, projectCount);
+
+  const canvas = document.getElementById("ascii-stage") as HTMLCanvasElement;
+  const heroFrame = document.getElementById("hero-frame")!;
+  const projectFrame = document.getElementById("project-frame");
+  const root = document.documentElement;
+  const booting = root.dataset.boot === "1";
+
+  const engine = new AsciiEngine({ canvas, fontSize: 10, fps: 24 });
+
+  // ---- Theme ----
+  let portraitLum: Float32Array | null = null;
+  const isDark = () => root.classList.contains("dark");
+  function applyTheme() {
+    const rgb = getComputedStyle(root).getPropertyValue("--color-accent").trim().split(/\s+/).join(",");
+    engine.setColor(`rgba(${rgb},${isDark() ? 0.55 : 0.8})`);
+    if (portraitLum) engine.setShape("portrait", imageShape(portraitLum, { lightInk: isDark() }));
+  }
+  new MutationObserver(applyTheme).observe(root, { attributes: true, attributeFilter: ["class"] });
+
+  // ---- Shapes ----
+  for (const [key, draw] of Object.entries(ICONS)) engine.setShape(key, iconShape(draw));
+  const portraitImg = new Image();
+  portraitImg.onload = () => {
+    portraitLum = imageLuminance(portraitImg);
+    applyTheme();
+  };
+  portraitImg.onerror = () => {
+    portraitLum = imageLuminance(placeholderPortrait());
+    applyTheme();
+  };
+  portraitImg.src = "/portrait.jpg";
+  applyTheme();
+
+  // ---- States ----
+  const rectOf = (el: Element): Rect => {
+    const r = el.getBoundingClientRect();
+    return { x: r.left, y: r.top, w: r.width, h: r.height };
+  };
+  const viewport = (): Rect => ({ x: 0, y: 0, w: innerWidth, h: innerHeight });
+  const sideFrame = (): Rect => {
+    if (projectFrame && projectFrame.offsetWidth) return rectOf(projectFrame);
+    // Mobile: a band under the header (placeholder until the mobile pass).
+    return { x: 0, y: innerHeight * 0.08, w: innerWidth, h: innerHeight * 0.3 };
+  };
+
+  const states: AsciiState[] = [
+    { id: "boot", field: "wave", shape: null, frame: viewport, intensity: 0.75, ambient: 1 },
+    { id: "portrait", field: "wave", shape: "portrait", frame: () => rectOf(heroFrame), intensity: 1, ambient: 0.1 },
+    ...FEATURED.map((f) => ({
+      id: f.icon,
+      field: f.field,
+      shape: f.icon,
+      frame: sideFrame,
+      intensity: 0.95,
+      ambient: 0.06,
+    })),
+    { id: "calm", field: "calm", shape: null, frame: viewport, intensity: 0.35, ambient: 0.5 },
+  ];
+  engine.setStates(states);
+
+  // ---- Scroll → progress ----
+  // Anchors map to states[1..]: hero, each project, the calm section.
+  const anchors: Element[] = [heroFrame.closest("section")!, ...document.querySelectorAll("[data-anchor]")];
+  function scrollProgress(): number {
+    const c = innerHeight / 2;
+    const centers = anchors.map((el) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2;
+    });
+    if (c <= centers[0]) return 1;
+    for (let j = 0; j < centers.length - 1; j++) {
+      if (c < centers[j + 1]) {
+        const f = (c - centers[j]) / (centers[j + 1] - centers[j]);
+        // Dwell: hold each state fully formed, morph in the middle of the gap.
+        const held = Math.min(1, Math.max(0, (f - 0.25) / 0.5));
+        return 1 + j + held;
+      }
+    }
+    return anchors.length;
+  }
+
+  // ---- Intro ----
+  let introP = booting ? 0 : 1;
+  let introDone = !booting;
+  const intros = [...document.querySelectorAll<HTMLElement>("[data-intro]")];
+
+  function frameLoop() {
+    const sp = scrollProgress();
+    if (!introDone && sp > 1.02) finishIntro();
+    engine.progress = introDone ? sp : introP;
+    requestAnimationFrame(frameLoop);
+  }
+
+  function showText(stagger: number) {
+    intros.forEach((el, i) => setTimeout(() => el.classList.add("in"), i * stagger));
+  }
+
+  function caretPoint() {
+    const r = document.getElementById("boot-caret")!.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  let introTween = 0;
+  function tweenIntro(duration: number) {
+    const t0 = performance.now();
+    const step = (now: number) => {
+      introP = Math.min(1, (now - t0) / duration);
+      if (introP < 1) introTween = requestAnimationFrame(step);
+      else introDone = true;
+    };
+    introTween = requestAnimationFrame(step);
+  }
+
+  function finishIntro() {
+    cancelAnimationFrame(introTween);
+    introP = 1;
+    introDone = true;
+    typing = false;
+    bootText.textContent = FULL;
+    if (!revealStarted) {
+      revealStarted = true;
+      const { x, y } = caretPoint();
+      engine.startReveal(x, y, 3000, 80);
+    }
+    showText(0);
+  }
+
+  const bootText = document.getElementById("boot-text")!;
+  const FULL = bootText.textContent ?? "";
+  let typing = false;
+  let revealStarted = !booting;
+
+  async function boot() {
+    try {
+      localStorage.setItem("gimk:booted", "1");
+    } catch {}
+    if (engine.reducedMotion) return finishIntro();
+    addEventListener("keydown", finishIntro, { once: true });
+    addEventListener("pointerdown", finishIntro, { once: true });
+    addEventListener("wheel", finishIntro, { once: true, passive: true });
+
+    bootText.textContent = "";
+    typing = true;
+    for (let i = 1; i <= FULL.length && typing; i++) {
+      bootText.textContent = FULL.slice(0, i);
+      await new Promise((r) => setTimeout(r, 45 + Math.random() * 40));
+    }
+    if (introDone) return;
+    await new Promise((r) => setTimeout(r, 350));
+    const { x, y } = caretPoint();
+    revealStarted = true;
+    engine.startReveal(x, y, 1100, 120);
+    setTimeout(() => !introDone && tweenIntro(2200), 500);
+    setTimeout(() => !introDone && showText(160), 900);
+  }
+
+  engine.start();
+  requestAnimationFrame(frameLoop);
+  if (booting) {
+    // Start empty: nothing drawn until the reveal wave passes.
+    const { x, y } = caretPoint();
+    engine.startReveal(x, y, 0.0001, 0);
+    boot();
+  } else {
+    const { x, y } = caretPoint();
+    engine.startReveal(x, y, 2600, 80);
+    showText(0);
+  }
+</script>

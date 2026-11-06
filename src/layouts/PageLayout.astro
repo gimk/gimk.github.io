@@ -11,9 +11,11 @@ type Props = {
   description: string;
   image?: string;
   type?: "website" | "article";
+  /** Set false on pages that run their own full-viewport ASCII stage. */
+  asciiBackground?: boolean;
 };
 
-const { title, description, image, type } = Astro.props;
+const { title, description, image, type, asciiBackground = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -27,7 +29,7 @@ const { title, description, image, type } = Astro.props;
       <slot />
     </main>
     <Footer />
-    <AsciiBackground />
+    {asciiBackground && <AsciiBackground />}
     <Lightbox />
   </body>
 </html>
