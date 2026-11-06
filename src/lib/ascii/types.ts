@@ -57,14 +57,6 @@ export interface ShapeBuffer {
    * an SDF, blends melt the silhouette via the SDF and crossfade the shading.
    */
   shade?: Float32Array;
-  /**
-   * Images only: contour strength 0..1 and its gradient direction (gx, gy).
-   * Strong contours are drawn with direction-matched glyphs (- / | \) so
-   * features stay crisp at ASCII resolution.
-   */
-  edge?: Float32Array;
-  gx?: Float32Array;
-  gy?: Float32Array;
 }
 
 /**
