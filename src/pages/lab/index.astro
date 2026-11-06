@@ -293,11 +293,17 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     const r = el.getBoundingClientRect();
     return { x: r.left, y: r.top, w: r.width, h: r.height };
   };
-  /** Right side of the screen, overscanned so the ellipse bleeds off the edge. */
+  /**
+   * Right side: the ellipse is much larger than the screen's right half and
+   * runs off the top, bottom and right edges; only its left curve shows.
+   */
   const side = (): Rect =>
     wide()
-      ? { x: innerWidth * 0.46, y: -innerHeight * 0.04, w: innerWidth * 0.6, h: innerHeight * 1.08 }
+      ? { x: innerWidth * 0.44, y: -innerHeight * 0.35, w: innerWidth * 0.95, h: innerHeight * 1.7 }
       : { x: -innerWidth * 0.1, y: innerHeight * 0.02, w: innerWidth * 1.2, h: innerHeight * 0.42 };
+  /** The visible right half, where images and the field's centre sit. */
+  const sideFocus = (): Rect =>
+    wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
   const heroSide = (): Rect => (wide() ? side() : rectOf(heroFrame));
   const centre = (): Rect => ({ x: innerWidth * 0.08, y: innerHeight * 0.04, w: innerWidth * 0.84, h: innerHeight * 0.92 });
 
@@ -314,19 +320,20 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   const states: AsciiState[] = [
     { id: "seed", field: "wave", shape: null, frame: seed, intensity: 1, ambient: 1, accent: 0.8 },
     { id: "bloom", field: "wave", shape: null, frame: bloom, intensity: 0.9, ambient: 1, accent: 0.6 },
-    { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: heroSide, intensity: 1, ambient: 1, accent: 1 },
+    { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: heroSide, focus: () => (wide() ? sideFocus() : heroSide()), intensity: 1, ambient: 1, accent: 1 },
     ...projectEls.map((_, i) => ({
       id: `project-${i}`,
       field: FIELDS_BY_PROJECT[i % FIELDS_BY_PROJECT.length],
       shape: `project-${i}`,
       frame: side,
+      focus: sideFocus,
       intensity: 1,
       ambient: 0.75,
       shapeScale: 0.72,
       warp: 0.35,
       texture: 0.5,
     })),
-    { id: "experience", field: "calm", shape: null, frame: side, intensity: 0.5, ambient: 0.9 },
+    { id: "experience", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.5, ambient: 0.9 },
     { id: "closing", field: "rings", shape: null, frame: centre, intensity: 0.85, ambient: 1, accent: 0.5 },
   ];
   engine.setStates(states);
