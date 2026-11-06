@@ -9,8 +9,8 @@ export const SITE: Site = {
 };
 
 export const HOME: Metadata = {
-  TITLE: "Antoine Pouligny, Senior Product Designer",
-  DESCRIPTION: "Hey I'm Antoine Pouligny, a Product Designer, welcome to my portfolio.",
+  TITLE: "Antoine Pouligny, Creative Engineer & Senior Product Designer",
+  DESCRIPTION: "Hey I'm Antoine Pouligny, a Creative Engineer and Product Designer, welcome to my portfolio.",
 };
 
 export const BLOG: Metadata = {
