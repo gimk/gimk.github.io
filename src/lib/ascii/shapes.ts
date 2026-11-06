@@ -253,44 +253,9 @@ export function imageShape(img: ImageSample, opts: ImageShapeOptions): ShapeBuff
   // Shading outside the matte = nearest-ish interior value, so the SDF edge
   // can move outward during a melt without sampling zero shade.
   for (let i = 0; i < shade.length; i++) if (alpha[i] <= 0.5 && shade[i] === 0) shade[i] = floor * 0.8;
-  const { edge, gx, gy } = contours(tone, size);
-  return { size, tone, sdf, shade, edge, gx, gy };
+  return { size, tone, sdf, shade };
 }
 
-/** Sobel contours of a tone buffer, normalised so the strongest ~6% reach 1. */
-function contours(tone: Float32Array, size: number) {
-  const n = size * size;
-  const gx = new Float32Array(n);
-  const gy = new Float32Array(n);
-  const mag = new Float32Array(n);
-  const at = (x: number, y: number) =>
-    tone[Math.min(size - 1, Math.max(0, y)) * size + Math.min(size - 1, Math.max(0, x))];
-  const mags: number[] = [];
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const a = at(x - 1, y - 1), b = at(x, y - 1), c = at(x + 1, y - 1);
-      const d = at(x - 1, y), f = at(x + 1, y);
-      const g = at(x - 1, y + 1), h = at(x, y + 1), k = at(x + 1, y + 1);
-      const sx = c + 2 * f + k - (a + 2 * d + g);
-      const sy = g + 2 * h + k - (a + 2 * b + c);
-      const i = y * size + x;
-      gx[i] = sx;
-      gy[i] = sy;
-      mag[i] = Math.sqrt(sx * sx + sy * sy);
-      if (mag[i] > 0.02) mags.push(mag[i]);
-    }
-  }
-  mags.sort((p, q) => p - q);
-  const ref = mags.length ? mags[Math.floor(mags.length * 0.94)] : 1;
-  const edge = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    edge[i] = Math.min(1, mag[i] / (ref || 1));
-    const m = mag[i] || 1;
-    gx[i] /= m;
-    gy[i] /= m;
-  }
-  return { edge, gx, gy };
-}
 
 /**
  * Stand-in portrait until a real photo exists at /portrait.jpg:

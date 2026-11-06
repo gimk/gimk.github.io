@@ -14,20 +14,7 @@ const NB = 2 * NA;
 const CLOCK = 0.62;
 /** How quickly `progress` chases `target` (higher = snappier). */
 const SPRING = 4.5;
-/** Contour strength above which an edge glyph replaces the density glyph. */
-const EDGE_T = 0.55;
 const LENS_RADIUS = 170;
-
-/** Glyph for a contour whose intensity gradient points along (gx, gy) (screen space, y down). */
-function edgeGlyph(gx: number, gy: number): string {
-  // The contour runs perpendicular to the gradient.
-  let a = Math.atan2(-gx, gy); // direction of the line
-  if (a < 0) a += Math.PI;
-  const d = (a / Math.PI) * 4; // 0..4 in 45° steps
-  const s = Math.round(d) % 4;
-  // s: 0 = horizontal, 1 = rising to the left (\), 2 = vertical, 3 = rising right (/)
-  return s === 0 ? "-" : s === 1 ? "\\" : s === 2 ? "|" : "/";
-}
 const LENS_STRENGTH = 0.55;
 
 export interface EngineOptions {
@@ -260,7 +247,9 @@ export class AsciiEngine {
     // The shape switches in a narrow window mid-transition, hidden by the
     // scatter; everything else (field, frame, ink) blends across all of it.
     const ks = smooth(clamp01((k - 0.3) / 0.4));
-    const scatter = A === B || this.reduced ? 0 : Math.sin(Math.PI * k);
+    // States with warp 0 (the portrait) never morph: they crossfade cleanly.
+    const rigid = (A.warp ?? 1) === 0 || (B.warp ?? 1) === 0;
+    const scatter = A === B || this.reduced || rigid ? 0 : Math.sin(Math.PI * k);
     const t = this.t;
 
     const fA = this.field(A.field);
@@ -272,6 +261,7 @@ export class AsciiEngine {
     const sA = A.shape ? this.shapes.get(A.shape) : undefined;
     const sB = B.shape ? this.shapes.get(B.shape) : undefined;
     const sdfBlend = !!(sA?.sdf && sB?.sdf);
+    const melt = sdfBlend && !((A.warp ?? 1) === 0 || (B.warp ?? 1) === 0);
     const wA = sA ? 1 - ks : 0;
     const wB = sB ? ks : 0;
     const hasShape = wA + wB > 0;
@@ -284,8 +274,6 @@ export class AsciiEngine {
     const texture = lerp(A.texture ?? 1, B.texture ?? 1, k);
     const shA = sA?.shade;
     const shB = sB?.shade;
-    const edA = sA?.edge ? sA : undefined;
-    const edB = sB?.edge ? sB : undefined;
 
     const side = Math.min(r.w, r.h) * shapeScale;
     const sqX = r.x + (r.w - side) / 2;
@@ -381,8 +369,6 @@ export class AsciiEngine {
         f = clamp01((f + 1) / 2);
 
         let m = 0;
-        let eg = "";
-        let eStrength = 0;
         if (hasShape) {
           // The lens only bends the shape as much as the state allows.
           let u = (px + (sx - px) * warpAmt - sqX) / side;
@@ -396,7 +382,7 @@ export class AsciiEngine {
             u += scat * Math.sin(cy * 0.31 + t * 5.1) * Math.cos(cx * 0.17 - t * 2.9);
             v += scat * Math.cos(cx * 0.23 + t * 4.3) * Math.sin(cy * 0.19 + t * 2.2);
           }
-          if (sdfBlend) {
+          if (melt) {
             const d = lerp(sample(sA!.sdf!, sA!.size, u, v, 64), sample(sB!.sdf!, sB!.size, u, v, 64), ks);
             const e = clamp01((1.4 - d) / 2.8);
             m = e * e * (3 - 2 * e);
@@ -410,16 +396,6 @@ export class AsciiEngine {
             if (sB && wB > 0) m += sample(sB.tone, sB.size, u, v, 0) * wB;
           }
           m *= 1 - 0.5 * scatter;
-
-          // Contours: whichever side dominates the shape blend draws its edges.
-          const ed = ks < 0.5 ? edA : edB;
-          if (ed && scatter < 0.6) {
-            const e = sample(ed.edge!, ed.size, u, v, 0) * (1 - scatter / 0.6);
-            if (e > EDGE_T) {
-              eStrength = e;
-              eg = edgeGlyph(sample(ed.gx!, ed.size, u, v, 0), sample(ed.gy!, ed.size, u, v, 0));
-            }
-          }
         }
 
         const light = f * ambient * 0.5;
@@ -435,12 +411,6 @@ export class AsciiEngine {
           }
         }
 
-        if (eg && ell > 0.25) {
-          const b = NA + (eStrength > 0.8 ? 2 : 1);
-          buckets[b][x] = eg;
-          used[b] = 1;
-          continue;
-        }
         if (val <= 0) continue;
         const q = (val >= 1 ? 0.9999 : val) * DLEN;
         const gi = q | 0;
