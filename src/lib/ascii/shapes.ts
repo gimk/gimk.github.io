@@ -98,49 +98,148 @@ export interface ImageShapeOptions {
   vignette?: number;
 }
 
-/** Luminance (0..1) of an image, cover-fitted into a square buffer. */
-export function imageLuminance(src: CanvasImageSource & { width: number; height: number }, size = SHAPE_SIZE): Float32Array {
+/** Luminance + subject matte of an image, cover-fitted into a square buffer. */
+export interface ImageSample {
+  size: number;
+  /** 0..1 luminance. */
+  lum: Float32Array;
+  /** 0..1 subject coverage: 0 on the keyed-out backdrop. */
+  alpha: Float32Array;
+}
+
+/**
+ * Sample an image into a square buffer. The backdrop colour is estimated from
+ * the top edge and keyed out by colour distance, so a plain studio backdrop
+ * (of any brightness) gets no ink and only the subject is drawn.
+ */
+export function imageSample(
+  src: CanvasImageSource & { width: number; height: number },
+  opts: { crop?: { x: number; y: number; w: number } } = {},
+  size = SHAPE_SIZE,
+): ImageSample {
   const { ctx } = makeCanvas(size);
   const w = (src as HTMLImageElement).naturalWidth || src.width;
   const h = (src as HTMLImageElement).naturalHeight || src.height;
-  const s = Math.max(size / w, size / h);
-  const dw = w * s;
-  const dh = h * s;
-  // Bias crop upward a little: portraits keep the face, lose the bottom.
-  ctx.drawImage(src, (size - dw) / 2, Math.min(0, (size - dh) * 0.3), dw, dh);
-  const px = ctx.getImageData(0, 0, size, size).data;
-  const lum = new Float32Array(size * size);
-  for (let i = 0; i < lum.length; i++) {
-    const a = px[i * 4 + 3] / 255;
-    const l = (0.2126 * px[i * 4] + 0.7152 * px[i * 4 + 1] + 0.0722 * px[i * 4 + 2]) / 255;
-    // Transparent pixels count as background: no ink in either theme.
-    lum[i] = a < 0.01 ? -1 : l;
+  if (opts.crop) {
+    // Square crop, in fractions of the source width (x, w) and height (y).
+    const cw = opts.crop.w * w;
+    ctx.drawImage(src, opts.crop.x * w, opts.crop.y * h, cw, cw, 0, 0, size, size);
+  } else {
+    const s = Math.max(size / w, size / h);
+    const dw = w * s;
+    const dh = h * s;
+    // Bias the crop upward: portraits keep the face, lose the bottom.
+    ctx.drawImage(src, (size - dw) / 2, Math.min(0, (size - dh) * 0.3), dw, dh);
   }
-  return lum;
-}
+  const px = ctx.getImageData(0, 0, size, size).data;
+  const n = size * size;
 
-export function imageShape(lum: Float32Array, opts: ImageShapeOptions, size = SHAPE_SIZE): ShapeBuffer {
-  const { lightInk, contrast = 1.4, gamma = 1, vignette = 0.35 } = opts;
-  const tone = new Float32Array(size * size);
+  // Backdrop: median-ish average of the top row and the top of both sides.
+  let br = 0, bg = 0, bb = 0, cnt = 0;
+  const addPx = (i: number) => {
+    if (px[i * 4 + 3] < 10) return;
+    br += px[i * 4];
+    bg += px[i * 4 + 1];
+    bb += px[i * 4 + 2];
+    cnt++;
+  };
+  for (let x = 0; x < size; x++) addPx(x);
+  for (let y = 0; y < size * 0.5; y++) {
+    addPx(y * size);
+    addPx(y * size + size - 1);
+  }
+  const keyed = cnt > 0;
+  let kr = 0, kg = 0, kb = 0;
+  if (keyed) {
+    const bs = br + bg + bb + 1;
+    kr = br / bs;
+    kg = bg / bs;
+    kb = bb / bs;
+  }
+
+  const lum = new Float32Array(n);
+  const alpha = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2];
+    const a = px[i * 4 + 3] / 255;
+    lum[i] = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    let k = 1;
+    if (keyed) {
+      // Compare chromaticity, not raw colour, so the backdrop's light falloff
+      // doesn't matter. Very dark pixels have unreliable hue: keep them.
+      const sum = r + g + b + 1;
+      const dr = r / sum - kr, dg = g / sum - kg, db = b / sum - kb;
+      const d = Math.sqrt(dr * dr + dg * dg + db * db);
+      const t = Math.min(1, Math.max(0, (d - 0.035) / 0.05));
+      k = t * t * (3 - 2 * t);
+      if (lum[i] < 0.12) k = 1;
+    }
+    alpha[i] = a * k;
+  }
+  // Clean the matte: a 3×3 blur removes speckle along the edges.
+  const out = new Float32Array(n);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
+      let sum = 0, c = 0;
+      for (let oy = -1; oy <= 1; oy++) {
+        const yy = y + oy;
+        if (yy < 0 || yy >= size) continue;
+        for (let ox = -1; ox <= 1; ox++) {
+          const xx = x + ox;
+          if (xx < 0 || xx >= size) continue;
+          sum += alpha[yy * size + xx];
+          c++;
+        }
+      }
+      out[y * size + x] = sum / c;
+    }
+  }
+  // Equalise luminance over the subject so features use the full glyph range.
+  const vals: number[] = [];
+  for (let i = 0; i < n; i++) if (out[i] > 0.5) vals.push(lum[i]);
+  if (vals.length > 32) {
+    vals.sort((a, b) => a - b);
+    const last = vals.length - 1;
+    for (let i = 0; i < n; i++) {
+      let lo = 0, hi = last;
+      const v = lum[i];
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (vals[mid] < v) lo = mid + 1;
+        else hi = mid;
+      }
+      lum[i] = lo / last;
+    }
+  }
+  return { size, lum, alpha: out };
+}
+
+export interface ImageShapeOptions {
+  /** true when glyphs are light on dark (dark theme): bright pixels get dense glyphs. */
+  lightInk: boolean;
+  /** Contrast around mid-grey, 1 = unchanged. */
+  contrast?: number;
+  /** Minimum ink anywhere on the subject, so light areas keep the silhouette. */
+  floor?: number;
+  /** Feather the bottom edge so the bust melts into the field. */
+  fadeBottom?: number;
+}
+
+export function imageShape(img: ImageSample, opts: ImageShapeOptions): ShapeBuffer {
+  const { lightInk, contrast = 1.15, floor = 0.15, fadeBottom = 0.22 } = opts;
+  const { size, lum, alpha } = img;
+  const tone = new Float32Array(size * size);
+  for (let y = 0; y < size; y++) {
+    const ny = (y + 0.5) / size;
+    const fb = fadeBottom > 0 ? Math.min(1, Math.max(0, (1 - ny) / fadeBottom)) : 1;
+    const bottom = fb * fb * (3 - 2 * fb);
+    for (let x = 0; x < size; x++) {
       const i = y * size + x;
-      if (lum[i] < 0) {
-        tone[i] = 0;
-        continue;
-      }
+      const a = alpha[i];
+      if (a < 0.01) continue;
       let v = lightInk ? lum[i] : 1 - lum[i];
-      v = (v - 0.5) * contrast + 0.5;
-      v = Math.min(1, Math.max(0, v));
-      if (gamma !== 1) v = Math.pow(v, gamma);
-      if (vignette > 0) {
-        const nx = (x + 0.5) / size - 0.5;
-        const ny = (y + 0.5) / size - 0.5;
-        const r = Math.sqrt(nx * nx * 1.3 + ny * ny) * 2; // 0 centre, ~1 edge
-        const edge = Math.min(1, Math.max(0, (1 - r) / vignette));
-        v *= edge * edge * (3 - 2 * edge);
-      }
-      tone[i] = v;
+      v = Math.min(1, Math.max(0, (v - 0.5) * contrast + 0.5));
+      tone[i] = a * bottom * (floor + (1 - floor) * v);
     }
   }
   return { size, tone };
