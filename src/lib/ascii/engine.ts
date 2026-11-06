@@ -299,6 +299,7 @@ export class AsciiEngine {
     const hasShape = wA + wB > 0;
 
     const r = lerpRect(A.frame(), B.frame(), k);
+    const fo = lerpRect((A.focus ?? A.frame)(), (B.focus ?? B.frame)(), k);
     const intensity = lerp(A.intensity, B.intensity, k);
     const ambient = lerp(A.ambient, B.ambient, k);
     const shapeScale = lerp(A.shapeScale ?? 0.8, B.shapeScale ?? 0.8, k);
@@ -307,13 +308,13 @@ export class AsciiEngine {
     const shA = sA?.shade;
     const shB = sB?.shade;
 
-    const side = Math.min(r.w, r.h) * shapeScale;
-    const sqX = r.x + (r.w - side) / 2;
-    const sqY = r.y + (r.h - side) / 2;
+    const side = Math.min(fo.w, fo.h) * shapeScale;
+    const sqX = fo.x + (fo.w - side) / 2;
+    const sqY = fo.y + (fo.h - side) / 2;
     const cw = this.cellW;
     const ch = this.cellH;
-    const fcx = (r.x + r.w / 2) / cw;
-    const fcy = (r.y + r.h / 2) / ch;
+    const fcx = (fo.x + fo.w / 2) / cw;
+    const fcy = (fo.y + fo.h / 2) / ch;
 
     // Ellipse: breathes slowly, stretches vertically with scroll speed.
     const breathe = this.reduced ? 1 : 1 + 0.025 * Math.sin(t * 1.4);

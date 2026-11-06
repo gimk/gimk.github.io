@@ -89,8 +89,13 @@ export interface AsciiState {
   accent?: number;
   /** Shape key registered with the engine, or null for a free field. */
   shape: string | null;
-  /** Where the shape sits on screen. Resolved each frame (may follow a DOM element). */
+  /** The ellipse's bounding box on screen. Resolved each frame; may extend past the viewport. */
   frame: () => Rect;
+  /**
+   * The visible area the shape and the field's centre sit in (default: `frame`).
+   * Lets the ellipse overscan the screen edges while images stay fully on screen.
+   */
+  focus?: () => Rect;
   /** 0..1 overall ink. Lower it behind reading text. */
   intensity: number;
   /** 0..1 strength of the field around the shape, inside the ellipse. */
