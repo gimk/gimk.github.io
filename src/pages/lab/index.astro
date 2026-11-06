@@ -113,7 +113,24 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
             ))
           }
         </div>
-        <div id="rail" class="absolute left-0 md:left-[calc(50%+3rem)] bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
+        <!-- Index: jump straight to a project (desktop). -->
+        <nav
+          id="project-index"
+          class="hidden md:flex absolute left-[calc(50%+3rem)] bottom-[7svh] flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.2em]"
+          aria-label="Projects"
+        >
+          {
+            projects.map(({ entry }, i) => (
+              <button type="button" data-index={i} class="pi-item flex items-center gap-3 text-left">
+                <span class="pi-bar" aria-hidden="true" />
+                <span class="opacity-60">{pad(i + 1)}</span>
+                <span>{entry.data.title}</span>
+              </button>
+            ))
+          }
+        </nav>
+        <!-- Compact rail on phones. -->
+        <div id="rail" class="md:hidden absolute left-0 bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
           <span id="rail-index" class="text-accent-primary">01</span>
           <span class="relative block w-32 h-px bg-black/15 dark:bg-white/15 overflow-hidden">
             <span id="rail-fill" class="absolute inset-0 bg-accent-primary origin-left" style="transform: scaleX(0)"></span>
@@ -192,6 +209,30 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   }
 
   /* Pinned project scene. --d: -1 upcoming, 0 active, 1 gone (from the stage's smoothed progress). */
+  .pi-item {
+    opacity: 0.4;
+    transition:
+      opacity 0.4s ease,
+      color 0.4s ease;
+  }
+  .pi-item:hover,
+  .pi-item:focus-visible {
+    opacity: 0.85;
+  }
+  .pi-item.is-current {
+    opacity: 1;
+    color: rgb(var(--color-accent));
+  }
+  .pi-bar {
+    display: block;
+    height: 1px;
+    width: 0.75rem;
+    background: currentColor;
+    transition: width 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .pi-item.is-current .pi-bar {
+    width: 2.25rem;
+  }
   .scene-project {
     pointer-events: none;
     opacity: var(--o);
@@ -359,7 +400,8 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       // Long holds, a short morph in the middle of each gap.
       ...projectEls.map((_, i) => ({
         y: sceneTop + i * STEP * vh,
-        win: (i === last ? [0.15, 0.7] : [0.36, 0.64]) as [number, number],
+        // Hold ~80% of the way, morph in the middle 20%.
+        win: (i === last ? [0.15, 0.7] : [0.4, 0.6]) as [number, number],
       })),
       { y: docTop(experience) - vh * 0.1, win: [0.55, 1] },
       { y: docTop(closing), win: [0, 1] },
@@ -384,15 +426,29 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     return HERO + anchors.length - 1;
   }
 
+  // ---- Project index: smooth-scroll to a project ----
+  const indexItems = [...document.querySelectorAll<HTMLButtonElement>(".pi-item")];
+  indexItems.forEach((b) =>
+    b.addEventListener("click", () => {
+      const i = Number(b.dataset.index);
+      scrollTo({ top: anchors[1 + i].y, behavior: engine.reducedMotion ? "auto" : "smooth" });
+    }),
+  );
+
   // ---- Per-frame sync ----
   let lastY = scrollY;
   let lastT = performance.now();
   let vel = 0;
   let introDone = false;
   let introP = 0;
+  let lastMove = 0;
+  /** States from the hero to the experience heading settle on a whole state when scrolling stops. */
+  const SETTLE_END = FIRST_PROJECT + projectEls.length;
+  const SETTLE_AFTER_MS = 140;
 
   function frame(now: number) {
     const dt = Math.max(1, now - lastT) / 1000;
+    if (scrollY !== lastY) lastMove = now;
     vel += ((scrollY - lastY) / dt - vel) * 0.15;
     lastY = scrollY;
     lastT = now;
@@ -401,7 +457,11 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     const st = scrollTarget();
     if (!introDone && st > HERO + 0.02) finishIntro();
     if (introDone) {
-      engine.target = st;
+      // Native scroll is never touched. But when you stop between two
+      // projects, the visuals finish the transition to the nearer one, so
+      // every resting position shows a complete project.
+      const idle = now - lastMove > SETTLE_AFTER_MS;
+      engine.target = idle && st < SETTLE_END ? Math.round(st) : st;
     } else {
       // The opening is time-driven and exact: no spring lag.
       engine.target = introP;
@@ -423,6 +483,8 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       if (on) active = i;
     });
     railIndex.textContent = String(active + 1).padStart(2, "0");
+    const inScene = p > FIRST_PROJECT - 0.5 && p < SETTLE_END - 0.5;
+    indexItems.forEach((b, i) => b.classList.toggle("is-current", inScene && i === active));
     const rp = (p - FIRST_PROJECT) / Math.max(1, projectEls.length - 1);
     railFill.style.transform = `scaleX(${Math.max(0, Math.min(1, rp)).toFixed(4)})`;
     requestAnimationFrame(frame);
@@ -517,106 +579,6 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     await sleep(220);
     playWave(1500, 2200);
   }
-
-  // ---- Paging: hero → each project → experience are defined pages ----
-  // Inside that stretch, one wheel/trackpad gesture moves exactly one page and
-  // the page eases into place; trackpad momentum can't skip past a project.
-  // Touch, keyboard and scrollbar scrolling settle on the nearest page.
-  // Below the experience heading, scrolling is normal again.
-  function pages(): number[] {
-    return anchors.slice(0, anchors.length - 1).map((a) => Math.round(a.y));
-  }
-  const lastPage = () => pages()[pages().length - 1];
-  const inPaged = (y = scrollY) => y < lastPage() - 4;
-  const nearestPage = (y = scrollY) => {
-    const ps = pages();
-    let best = 0;
-    for (let i = 1; i < ps.length; i++) if (Math.abs(ps[i] - y) < Math.abs(ps[best] - y)) best = i;
-    return best;
-  };
-
-  let pageAnim = 0;
-  let animating = false;
-  function goTo(y: number, duration = 900) {
-    cancelAnimationFrame(pageAnim);
-    const from = scrollY;
-    const dist = y - from;
-    if (Math.abs(dist) < 2) return;
-    if (engine.reducedMotion) {
-      scrollTo(0, y);
-      return;
-    }
-    animating = true;
-    const t0 = performance.now();
-    const step = (now: number) => {
-      const t = Math.min(1, (now - t0) / duration);
-      scrollTo(0, from + dist * easeInOut(t));
-      if (t < 1) pageAnim = requestAnimationFrame(step);
-      else animating = false;
-    };
-    pageAnim = requestAnimationFrame(step);
-  }
-
-  // Wheel: one page per gesture. A gesture ends after a short quiet period,
-  // which swallows the trackpad's momentum tail.
-  let acc = 0;
-  let gestureUsed = false;
-  let quiet = 0;
-  addEventListener(
-    "wheel",
-    (e) => {
-      if (e.ctrlKey) return; // pinch-zoom
-      const y = scrollY;
-      const down = e.deltaY > 0;
-      const ps = pages();
-      const atEnd = Math.abs(y - lastPage()) < 4;
-      // Leave paging: scrolling down from the experience page is free scrolling.
-      if (!inPaged(y) && !(atEnd && !down)) return;
-      e.preventDefault();
-      clearTimeout(quiet);
-      quiet = window.setTimeout(() => {
-        gestureUsed = false;
-        acc = 0;
-      }, 180);
-      if (gestureUsed || animating) return;
-      acc += e.deltaY;
-      if (Math.abs(acc) < 24) return;
-      gestureUsed = true;
-      const i = nearestPage(y);
-      const next = Math.max(0, Math.min(ps.length - 1, i + (down ? 1 : -1)));
-      goTo(ps[next]);
-    },
-    { passive: false },
-  );
-
-  // Keyboard paging inside the paged stretch.
-  addEventListener("keydown", (e) => {
-    const keys: Record<string, number> = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 };
-    const dir = keys[e.key];
-    if (!dir || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-    const y = scrollY;
-    const atEnd = Math.abs(y - lastPage()) < 4;
-    if (!inPaged(y) && !(atEnd && dir < 0)) return;
-    e.preventDefault();
-    if (animating) return;
-    const ps = pages();
-    goTo(ps[Math.max(0, Math.min(ps.length - 1, nearestPage(y) + dir))]);
-  });
-
-  // Anything else (touch, scrollbar): settle on the nearest page once scrolling stops.
-  let idle = 0;
-  addEventListener(
-    "scroll",
-    () => {
-      if (animating) return;
-      clearTimeout(idle);
-      idle = window.setTimeout(() => {
-        if (animating || !inPaged()) return;
-        goTo(pages()[nearestPage()], 600);
-      }, 160);
-    },
-    { passive: true },
-  );
 
   engine.start();
   requestAnimationFrame(frame);
