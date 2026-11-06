@@ -1,0 +1,85 @@
+---
+import { getCollection, render } from "astro:content";
+import { SITE, SOCIALS } from "@consts";
+
+const works = (await getCollection("work")).sort(
+  (a, b) => new Date(b.data.dateStart).getTime() - new Date(a.data.dateStart).getTime(),
+);
+
+const entries = await Promise.all(
+  works.map(async (entry) => {
+    const { Content } = await render(entry);
+    const start = new Date(entry.data.dateStart).getFullYear();
+    const end =
+      entry.data.dateEnd instanceof Date
+        ? String(entry.data.dateEnd.getFullYear())
+        : String(entry.data.dateEnd);
+    return { entry, Content, years: `${start} — ${end}` };
+  }),
+);
+
+---
+
+<section data-anchor="experience" class="relative min-h-[100svh] py-[20vh]">
+  <div class="max-w-xl">
+    <h2 class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-16">Experience</h2>
+    <ul class="flex flex-col gap-24">
+      {entries.map(({ entry, Content, years }) => (
+        <li class="flex flex-col gap-3">
+          <p class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{years}</p>
+          <h3 class="!font-serif text-4xl md:text-5xl tracking-tight leading-none font-normal text-black dark:text-white">
+            {entry.data.company}
+          </h3>
+          <p class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{entry.data.role}</p>
+          <div class="font-serif text-sm leading-relaxed opacity-70 line-clamp-4 mt-2">
+            <Content />
+          </div>
+        </li>
+      ))}
+    </ul>
+    <a href="/work" class="inline-block mt-20 font-mono text-xs uppercase tracking-[0.2em] text-accent-primary hover:underline">
+      All work →
+    </a>
+  </div>
+</section>
+
+<section
+  data-anchor="closing"
+  id="closing"
+  class="relative min-h-[100svh] flex flex-col items-center justify-center text-center gap-8"
+>
+  <div
+    class="flex flex-col items-center gap-8 px-16 py-12"
+    style="background: radial-gradient(closest-side, var(--outro-bg) 40%, transparent)"
+  >
+    <h2 class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50">Contact</h2>
+    <p class="font-serif text-5xl md:text-7xl tracking-tight leading-none text-black dark:text-white">
+      Let's make something.
+    </p>
+    <a
+      href={`mailto:${SITE.EMAIL}`}
+      class="font-serif text-xl md:text-2xl text-accent-primary hover:underline"
+    >
+      {SITE.EMAIL}
+    </a>
+    <ul class="flex flex-wrap justify-center items-center font-mono text-xs uppercase tracking-[0.2em]">
+      {SOCIALS.map((s, i) => (
+        <li class="flex items-center">
+          {i > 0 && <span class="opacity-50 mx-3" aria-hidden="true">/</span>}
+          <a href={s.HREF} target="_blank" rel="noopener" class="opacity-80 hover:opacity-100 hover:underline">
+            {s.NAME}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style is:global>
+  :root {
+    --outro-bg: rgb(255 247 237 / 0.85);
+  }
+  html.dark {
+    --outro-bg: rgb(2 6 23 / 0.85);
+  }
+</style>

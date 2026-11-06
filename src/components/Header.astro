@@ -1,9 +1,16 @@
 ---
 import Container from "@components/Container.astro";
 import InteractionSound from "./InteractionSound.astro";
+
+type Props = {
+  /** Transparent header without blur, border or dotted strip. */
+  bare?: boolean;
+};
+
+const { bare = false } = Astro.props;
 ---
 
-<header>
+<header class:list={[{ "header-bare": bare }]}>
   <Container hideLines={true}>
     <div class="flex flex-wrap gap-y-2 justify-between">
       <InteractionSound preset="link">

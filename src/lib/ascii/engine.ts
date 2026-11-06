@@ -3,21 +3,33 @@ import type { AsciiState, Field, FieldCtx, Rect, ShapeBuffer } from "./types";
 
 const DENSITY = " .:-=+*#%@";
 const DLEN = DENSITY.length;
-/** Old code scaled dx by this to correct for glyph aspect. */
+/** Glyph aspect correction used by the original fields. */
 const ASPECT = 0.875;
+/** Opacity steps layered on top of the glyph ramp: smoother gradients and edges. */
+const ALPHAS = [0.42, 0.7, 1];
+const NA = ALPHAS.length;
+/** Ink 0 = field (muted), ink 1 = shape (accent). Bucket = ink * NA + alpha step. */
+const NB = 2 * NA;
+/** Field clock speed (field units per second). The old code ran ~0.48/s. */
+const CLOCK = 0.62;
+/** How quickly `progress` chases `target` (higher = snappier). */
+const SPRING = 4.5;
+const LENS_RADIUS = 170;
+const LENS_STRENGTH = 0.55;
 
 export interface EngineOptions {
   canvas: HTMLCanvasElement;
   fontSize?: number;
-  fps?: number;
 }
 
+export type Rgba = [number, number, number, number];
+
 interface Reveal {
-  x: number; // css px
+  x: number;
   y: number;
-  start: number; // ms
-  speed: number; // css px per second
-  front: number; // wavefront width in css px
+  start: number;
+  speed: number;
+  front: number;
 }
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -51,19 +63,18 @@ function sample(buf: Float32Array, size: number, u: number, v: number, outside: 
 }
 
 /**
- * Renders a full-viewport ASCII grid. The page drives it with `progress`, a
- * float index into `states`: 2.4 means 60% state 2 / 40% state 3.
+ * Full-viewport ASCII stage. The page sets `target` (a float index into
+ * `states`); `progress` follows it with a spring, so scrolling has weight and
+ * every change is a blend.
  */
 export class AsciiEngine {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private fontSize: number;
-  private frameMs: number;
   private cellW = 7;
   private cellH = 9;
   private cols = 0;
   private rows = 0;
-  private dpr = 1;
   private shapes = new Map<string, ShapeBuffer>();
   private fieldCache = new Map<string, Field>();
   private states: AsciiState[] = [];
@@ -71,13 +82,21 @@ export class AsciiEngine {
   private last = 0;
   private t = 0;
   private reveal: Reveal | null = null;
-  private trail: { x: number; y: number; age: number }[] = [];
-  private color = "rgba(249,115,22,0.8)";
   private running = false;
-  private staticFrame = false;
-  private row: string[] = [];
+  private reduced = false;
+  private buckets: string[][] = [];
+  private used = new Uint8Array(NB);
+  private bucketStyle: string[] = new Array(NB).fill("#000");
+  // Pointer lens (eased).
+  private pTarget = { x: -9999, y: -9999, on: 0 };
+  private pointer = { x: -9999, y: -9999, s: 0 };
 
+  /** Float index into `states` the page wants to show. */
+  target = 0;
+  /** Smoothed index actually rendered. */
   progress = 0;
+  /** Scroll velocity in px/s (set by the page); stretches the ellipse a little. */
+  velocity = 0;
 
   constructor(opts: EngineOptions) {
     this.canvas = opts.canvas;
@@ -85,16 +104,17 @@ export class AsciiEngine {
     if (!ctx) throw new Error("2d context unavailable");
     this.ctx = ctx;
     this.fontSize = opts.fontSize ?? 10;
-    this.frameMs = 1000 / (opts.fps ?? 24);
-    this.staticFrame = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    this.reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     this.onResize = this.onResize.bind(this);
     this.onPointer = this.onPointer.bind(this);
+    this.onLeave = this.onLeave.bind(this);
     this.tick = this.tick.bind(this);
     this.onVisibility = this.onVisibility.bind(this);
+    this.setInks([0, 0, 0, 0.3], [249, 115, 22, 0.9]);
   }
 
   get reducedMotion() {
-    return this.staticFrame;
+    return this.reduced;
   }
 
   setShape(key: string, buf: ShapeBuffer) {
@@ -105,18 +125,22 @@ export class AsciiEngine {
     this.states = states;
   }
 
-  /** Ink colour, e.g. from the theme's accent. */
-  setColor(css: string) {
-    this.color = css;
+  /** Field ink (muted) and shape ink (accent), as [r, g, b, alpha]. */
+  setInks(field: Rgba, shape: Rgba) {
+    for (let a = 0; a < NA; a++) {
+      this.bucketStyle[a] = `rgba(${field[0]},${field[1]},${field[2]},${(field[3] * ALPHAS[a]).toFixed(3)})`;
+      this.bucketStyle[NA + a] = `rgba(${shape[0]},${shape[1]},${shape[2]},${(shape[3] * ALPHAS[a]).toFixed(3)})`;
+    }
   }
 
-  /** Start the circular wave that uncovers the grid from a point (CSS px). */
+  /** Start the ring that uncovers the grid from a point (CSS px). */
   startReveal(x: number, y: number, speed = 1400, front = 90) {
     this.reveal = { x, y, start: performance.now(), speed, front };
   }
 
-  get revealDone() {
-    return this.reveal === null;
+  /** Jump the spring to its target (e.g. on load). */
+  settle() {
+    this.progress = this.target;
   }
 
   start() {
@@ -124,8 +148,10 @@ export class AsciiEngine {
     this.running = true;
     addEventListener("resize", this.onResize);
     addEventListener("pointermove", this.onPointer, { passive: true });
+    document.documentElement.addEventListener("pointerleave", this.onLeave);
     document.addEventListener("visibilitychange", this.onVisibility);
     this.onResize();
+    this.last = performance.now();
     this.raf = requestAnimationFrame(this.tick);
   }
 
@@ -134,37 +160,50 @@ export class AsciiEngine {
     cancelAnimationFrame(this.raf);
     removeEventListener("resize", this.onResize);
     removeEventListener("pointermove", this.onPointer);
+    document.documentElement.removeEventListener("pointerleave", this.onLeave);
     document.removeEventListener("visibilitychange", this.onVisibility);
   }
 
   private onVisibility() {
-    if (document.hidden) cancelAnimationFrame(this.raf);
-    else if (this.running) this.raf = requestAnimationFrame(this.tick);
+    cancelAnimationFrame(this.raf);
+    if (!document.hidden && this.running) {
+      this.last = performance.now();
+      this.raf = requestAnimationFrame(this.tick);
+    }
   }
 
   private onResize() {
-    this.dpr = Math.min(2, devicePixelRatio || 1);
+    const dpr = Math.min(2, devicePixelRatio || 1);
     const w = innerWidth;
     const h = innerHeight;
-    this.canvas.width = Math.round(w * this.dpr);
-    this.canvas.height = Math.round(h * this.dpr);
+    this.canvas.width = Math.round(w * dpr);
+    this.canvas.height = Math.round(h * dpr);
     this.canvas.style.width = `${w}px`;
     this.canvas.style.height = `${h}px`;
     const ctx = this.ctx;
-    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.font = `${this.fontSize}px "JetBrains Mono", ui-monospace, monospace`;
     ctx.textBaseline = "top";
     this.cellW = ctx.measureText("M").width;
     this.cellH = Math.round(this.fontSize * 0.95);
     this.cols = Math.ceil(w / this.cellW);
     this.rows = Math.ceil(h / this.cellH);
-    this.row = new Array(this.cols);
+    this.buckets = Array.from({ length: NB }, () => new Array(this.cols).fill(" "));
   }
 
   private onPointer(e: PointerEvent) {
-    if (this.staticFrame) return;
-    this.trail.push({ x: e.clientX / this.cellW, y: e.clientY / this.cellH, age: 1 });
-    if (this.trail.length > 60) this.trail.shift();
+    if (e.pointerType === "touch" || this.reduced) return;
+    if (this.pointer.s < 0.01) {
+      this.pointer.x = e.clientX;
+      this.pointer.y = e.clientY;
+    }
+    this.pTarget.x = e.clientX;
+    this.pTarget.y = e.clientY;
+    this.pTarget.on = 1;
+  }
+
+  private onLeave() {
+    this.pTarget.on = 0;
   }
 
   private field(name: string): Field {
@@ -179,156 +218,200 @@ export class AsciiEngine {
   private tick(now: number) {
     if (!this.running) return;
     this.raf = requestAnimationFrame(this.tick);
-    if (now - this.last < this.frameMs) return;
+    const dt = Math.min(0.05, Math.max(0, (now - this.last) / 1000));
     this.last = now;
+    if (this.reduced) {
+      this.progress = this.target;
+    } else {
+      this.t += dt * CLOCK;
+      this.progress += (this.target - this.progress) * (1 - Math.exp(-dt * SPRING));
+      if (Math.abs(this.target - this.progress) < 1e-4) this.progress = this.target;
+      const pa = 1 - Math.exp(-dt * 12);
+      this.pointer.x += (this.pTarget.x - this.pointer.x) * pa;
+      this.pointer.y += (this.pTarget.y - this.pointer.y) * pa;
+      this.pointer.s += (this.pTarget.on - this.pointer.s) * (1 - Math.exp(-dt * 4));
+      if (this.pointer.s < 0.002) this.pointer.s = 0;
+    }
     this.draw(now);
-    if (!this.staticFrame) this.t += 0.02;
   }
 
-  /** Render one frame. Public so reduced-motion pages can repaint on scroll. */
+  /** Render one frame. */
   draw(now = performance.now()) {
     const n = this.states.length;
     if (!n || !this.cols) return;
     const p = Math.min(n - 1, Math.max(0, this.progress));
-    const i = Math.min(n - 2, Math.floor(p));
-    const A = this.states[Math.max(0, i)];
+    const i = Math.max(0, Math.min(n - 2, Math.floor(p)));
+    const A = this.states[i];
     const B = n > 1 ? this.states[i + 1] : A;
     const k = n > 1 ? smooth(clamp01(p - i)) : 0;
+    // The shape switches in a narrow window mid-transition, hidden by the
+    // scatter; everything else (field, frame, ink) blends across all of it.
+    const ks = smooth(clamp01((k - 0.3) / 0.4));
+    const scatter = A === B || this.reduced ? 0 : Math.sin(Math.PI * k);
+    const t = this.t;
 
     const fA = this.field(A.field);
     const fB = this.field(B.field);
-    const fctx: FieldCtx = { t: this.t, cols: this.cols, rows: this.rows };
+    const fctx: FieldCtx = { t, cols: this.cols, rows: this.rows };
     fA.prepare?.(fctx);
     if (fB !== fA) fB.prepare?.(fctx);
 
     const sA = A.shape ? this.shapes.get(A.shape) : undefined;
     const sB = B.shape ? this.shapes.get(B.shape) : undefined;
     const sdfBlend = !!(sA?.sdf && sB?.sdf);
+    const wA = sA ? 1 - ks : 0;
+    const wB = sB ? ks : 0;
+    const hasShape = wA + wB > 0;
 
-    const rA = A.frame();
-    const rB = B.frame();
-    const r = lerpRect(rA, rB, k);
+    const r = lerpRect(A.frame(), B.frame(), k);
     const intensity = lerp(A.intensity, B.intensity, k);
     const ambient = lerp(A.ambient, B.ambient, k);
     const shapeScale = lerp(A.shapeScale ?? 0.8, B.shapeScale ?? 0.8, k);
-    // Shape weight per side: a null shape contributes nothing.
-    const wA = sA ? 1 - k : 0;
-    const wB = sB ? k : 0;
 
-    // Square shape area, centred in the frame (shapes are square buffers).
     const side = Math.min(r.w, r.h) * shapeScale;
     const sqX = r.x + (r.w - side) / 2;
     const sqY = r.y + (r.h - side) / 2;
-    const fcx = (r.x + r.w / 2) / this.cellW;
-    const fcy = (r.y + r.h / 2) / this.cellH;
-    // Elliptical mask inscribed in the frame, with a soft rim.
+    const cw = this.cellW;
+    const ch = this.cellH;
+    const fcx = (r.x + r.w / 2) / cw;
+    const fcy = (r.y + r.h / 2) / ch;
+
+    // Ellipse: breathes slowly, stretches vertically with scroll speed.
+    const breathe = this.reduced ? 1 : 1 + 0.025 * Math.sin(t * 1.4);
+    const stretch = 1 + Math.min(0.1, Math.abs(this.velocity) / 9000);
     const ecx = r.x + r.w / 2;
     const ecy = r.y + r.h / 2;
-    const erx = Math.max(1, r.w / 2);
-    const ery = Math.max(1, r.h / 2);
-    const rim = 0.3;
+    const erx = Math.max(1, ((r.w / 2) * breathe) / Math.sqrt(stretch));
+    const ery = Math.max(1, (r.h / 2) * (2 - breathe) * stretch);
+    const rim = 0.32;
 
-    // Reveal wave
+    // Reveal ring
     let rv = Infinity;
     let rvFront = 1;
+    let revX = 0;
+    let revY = 0;
     const rev = this.reveal;
     if (rev) {
-      if (this.staticFrame) {
-        this.reveal = null;
-      } else {
+      if (this.reduced) this.reveal = null;
+      else {
         rv = ((now - rev.start) / 1000) * rev.speed;
         rvFront = rev.front;
+        revX = rev.x;
+        revY = rev.y;
         if (rv > Math.hypot(innerWidth, innerHeight) + rev.front) this.reveal = null;
       }
     }
 
-    // Age trail
-    const trail = this.trail;
-    for (let j = trail.length - 1; j >= 0; j--) {
-      trail[j].age -= 0.035;
-      if (trail[j].age <= 0) trail.splice(j, 1);
-    }
+    // Lens
+    const ls = this.pointer.s * LENS_STRENGTH;
+    const lx0 = this.pointer.x;
+    const ly0 = this.pointer.y;
+    const lr2 = LENS_RADIUS * LENS_RADIUS;
+
+    const warp = this.reduced ? 0 : 0.01;
+    const scat = scatter * 0.075;
 
     const ctx = this.ctx;
     ctx.clearRect(0, 0, innerWidth, innerHeight);
-    ctx.fillStyle = this.color;
-    const cw = this.cellW;
-    const ch = this.cellH;
-    const row = this.row;
+    const buckets = this.buckets;
+    const used = this.used;
 
     for (let y = 0; y < this.rows; y++) {
       const py = (y + 0.5) * ch;
-      let any = false;
+      used.fill(0);
       for (let x = 0; x < this.cols; x++) {
         const px = (x + 0.5) * cw;
 
-        // Ellipse mask: the field fills the frame, fading out towards the rim.
         const enx = (px - ecx) / erx;
         const eny = (py - ecy) / ery;
-        const er = Math.sqrt(enx * enx + eny * eny);
-        const ell = er >= 1 ? 0 : smooth(clamp01((1 - er) / rim));
+        const er2 = enx * enx + eny * eny;
+        let ell = 0;
+        if (er2 < 1) ell = smooth(clamp01((1 - Math.sqrt(er2)) / rim));
 
-        // Shape mask
-        let m = 0;
-        if (wA + wB > 0) {
-          const u = (px - sqX) / side;
-          const v = (py - sqY) / side;
-          if (sdfBlend) {
-            const d = lerp(sample(sA!.sdf!, sA!.size, u, v, 64), sample(sB!.sdf!, sB!.size, u, v, 64), k);
-            // Edge softness in buffer px, converted from SDF units (buffer px).
-            const t = clamp01((1.2 - d) / 2.4);
-            m = t * t * (3 - 2 * t);
-          } else {
-            if (sA) m += sample(sA.tone, sA.size, u, v, 0) * wA;
-            if (sB) m += sample(sB.tone, sB.size, u, v, 0) * wB;
+        let front = 0;
+        if (rv !== Infinity) {
+          const d = Math.hypot(px - revX, py - revY);
+          if (d > rv) continue;
+          if (d > rv - rvFront) front = 1 - (rv - d) / rvFront;
+        }
+        if (ell < 0.004 && front <= 0) continue;
+
+        // Lens: sample from a point pulled towards the pointer (magnifies).
+        let sx = px;
+        let sy = py;
+        let lens = 0;
+        if (ls > 0) {
+          const lx = px - lx0;
+          const ly = py - ly0;
+          const d2 = lx * lx + ly * ly;
+          if (d2 < lr2) {
+            const g = 1 - Math.sqrt(d2) / LENS_RADIUS;
+            lens = g * g * ls;
+            sx = px - lx * lens;
+            sy = py - ly * lens;
           }
         }
 
-        // Pointer trail
-        let tr = 0;
-        for (let j = 0; j < trail.length; j++) {
-          const p0 = trail[j];
-          const ddx = (x - p0.x) * ASPECT;
-          const ddy = y - p0.y;
-          const dd = ddx * ddx + ddy * ddy;
-          if (dd < 9) tr += (1 - Math.sqrt(dd) / 3) * p0.age * 0.45;
-        }
-
-        if (ell < 0.004 && tr < 0.01) {
-          row[x] = " ";
-          continue;
-        }
-
-        const dx = (x - fcx) * ASPECT;
-        const dy = y - fcy;
+        const cx = sx / cw - 0.5;
+        const cy = sy / ch - 0.5;
+        const dx = (cx - fcx) * ASPECT;
+        const dy = cy - fcy;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        let f = fA.sample(x, y, dist, dx, dy, fctx);
-        if (fB !== fA) f = lerp(f, fB.sample(x, y, dist, dx, dy, fctx), k);
+        let f = fA.sample(cx, cy, dist, dx, dy, fctx);
+        if (fB !== fA) f = lerp(f, fB.sample(cx, cy, dist, dx, dy, fctx), k);
         f = clamp01((f + 1) / 2);
 
-        // The field fills the ellipse in light glyphs; the shape is suggested by
-        // pushing its area into the dense end of the ramp (same motion, darker ink).
+        let m = 0;
+        if (hasShape) {
+          let u = (sx - sqX) / side;
+          let v = (sy - sqY) / side;
+          // Living shape: the field gently pushes the sampling point around.
+          u += warp * Math.sin(v * 9 + t * 2.1) + (f - 0.5) * 0.022;
+          v += warp * Math.cos(u * 8 - t * 1.6);
+          if (scat > 0) {
+            u += scat * Math.sin(cy * 0.31 + t * 5.1) * Math.cos(cx * 0.17 - t * 2.9);
+            v += scat * Math.cos(cx * 0.23 + t * 4.3) * Math.sin(cy * 0.19 + t * 2.2);
+          }
+          if (sdfBlend) {
+            const d = lerp(sample(sA!.sdf!, sA!.size, u, v, 64), sample(sB!.sdf!, sB!.size, u, v, 64), ks);
+            const e = clamp01((1.4 - d) / 2.8);
+            m = e * e * (3 - 2 * e);
+          } else {
+            if (sA && wA > 0) m += sample(sA.tone, sA.size, u, v, 0) * wA;
+            if (sB && wB > 0) m += sample(sB.tone, sB.size, u, v, 0) * wB;
+          }
+          m *= 1 - 0.5 * scatter;
+        }
+
         const light = f * ambient * 0.5;
         const dense = 0.5 + 0.5 * f;
-        let val = ell * (light + (dense - light) * m);
-        val = val * intensity + tr;
-
-        if (rv !== Infinity) {
-          const d = Math.hypot(px - rev!.x, py - rev!.y);
-          if (d > rv) val = 0;
-          else if (d > rv - rvFront) {
-            const fr = 1 - (rv - d) / rvFront; // 1 at the leading edge
-            val = Math.max(val, fr * fr * 0.9 * (0.6 + 0.4 * f));
+        let val = ell * (light + (dense - light) * m) * intensity + lens * ell * 0.35;
+        let ink = m > 0.28 ? 1 : 0;
+        if (front > 0) {
+          const fv = front * front * (0.65 + 0.35 * f);
+          if (fv > val) {
+            val = fv;
+            ink = 1;
           }
         }
 
-        let ci = (val * DLEN) | 0;
-        if (ci < 0) ci = 0;
-        else if (ci >= DLEN) ci = DLEN - 1;
-        row[x] = DENSITY[ci];
-        if (ci) any = true;
+        if (val <= 0) continue;
+        const q = (val >= 1 ? 0.9999 : val) * DLEN;
+        const gi = q | 0;
+        if (gi === 0) continue;
+        const fr = q - gi;
+        const ai = fr < 0.34 ? 0 : fr < 0.67 ? 1 : 2;
+        const b = ink * NA + ai;
+        buckets[b][x] = DENSITY[gi];
+        used[b] = 1;
       }
-      if (any) ctx.fillText(row.join(""), 0, y * ch);
+      for (let b = 0; b < NB; b++) {
+        if (!used[b]) continue;
+        const row = buckets[b];
+        ctx.fillStyle = this.bucketStyle[b];
+        ctx.fillText(row.join(""), 0, y * ch);
+        row.fill(" ");
+      }
     }
   }
 }
