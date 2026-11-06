@@ -20,8 +20,6 @@ const projects = FEATURED.map((f) => {
   return { ...f, entry };
 });
 const pad = (n: number) => String(n).padStart(2, "0");
-/** From this project on, the stage swaps to the left and the text to the right. */
-const FLIP_FROM = Math.ceil(projects.length / 2);
 /** Scroll per project inside the pinned scene, in viewport heights. */
 const STEP = 1.5;
 /** Scene height: STEP per project, plus a hold at the end. */
@@ -72,11 +70,8 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       class="relative"
       style={`height: ${sceneHeight}svh`}
       data-step={STEP}
-      data-flip-from={FLIP_FROM}
       aria-label="Selected projects"
     >
-      <!-- Snap points: proximity snapping helps you land exactly on a project. -->
-      {projects.map((_, i) => <div class="scene-snap" style={`top: ${i * STEP * 100}svh`} aria-hidden="true" />)}
       <div id="scene-pin" class="sticky top-0 h-[100svh] flex items-center">
         <div class="relative w-full h-[70svh]">
           {
@@ -84,10 +79,7 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
               <div
                 data-project
                 data-thumb={entry.data.thumbnail}
-                class:list={[
-                  "scene-project absolute inset-y-0 left-0 w-full md:w-1/2 flex flex-col justify-center",
-                  i >= FLIP_FROM && "md:left-1/2 md:pl-12",
-                ]}
+                class="scene-project absolute inset-y-0 left-0 w-full md:w-1/2 md:left-1/2 md:pl-12 flex flex-col justify-center"
                 style="--d:1;--o:0"
               >
                 <span class="sp-mask">
@@ -121,7 +113,7 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
             ))
           }
         </div>
-        <div id="rail" class="absolute left-0 bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
+        <div id="rail" class="absolute left-0 md:left-[calc(50%+3rem)] bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
           <span id="rail-index" class="text-accent-primary">01</span>
           <span class="relative block w-32 h-px bg-black/15 dark:bg-white/15 overflow-hidden">
             <span id="rail-fill" class="absolute inset-0 bg-accent-primary origin-left" style="transform: scaleX(0)"></span>
@@ -136,16 +128,6 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
 </PageLayout>
 
 <style is:global>
-  html:has(#scene) {
-    scroll-snap-type: y proximity;
-  }
-  .scene-snap {
-    position: absolute;
-    left: 0;
-    width: 1px;
-    height: 1px;
-    scroll-snap-align: start;
-  }
   #ascii-stage {
     position: fixed;
     inset: 0;
@@ -210,15 +192,6 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   }
 
   /* Pinned project scene. --d: -1 upcoming, 0 active, 1 gone (from the stage's smoothed progress). */
-  /* The rail follows the text to the right half once the stage flips. */
-  #rail {
-    transition: left 0.9s cubic-bezier(0.65, 0, 0.35, 1);
-  }
-  @media (min-width: 768px) {
-    #scene-pin.flipped #rail {
-      left: calc(50% + 3rem);
-    }
-  }
   .scene-project {
     pointer-events: none;
     opacity: var(--o);
@@ -276,8 +249,6 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
   const booting = root.dataset.boot === "1";
   const STEP = Number(scene.dataset.step) || 1.5;
-  const FLIP_FROM = Number(scene.dataset.flipFrom) || Infinity;
-  const scenePin = document.getElementById("scene-pin")!;
 
   const engine = new AsciiEngine({ canvas, fontSize: 10 });
 
@@ -328,7 +299,7 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   /** The visible right half, where images and the field's centre sit. */
   const sideFocus = (): Rect =>
     wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
-  /** Mirror images of the above, for the second half of the projects. */
+  /** Mirror images of the above, for the projects. */
   const mirror = (r: Rect): Rect => ({ ...r, x: innerWidth - (r.x + r.w) });
   const sideLeft = (): Rect => (wide() ? mirror(side()) : side());
   const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : side());
@@ -353,8 +324,9 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       id: `project-${i}`,
       field: FIELDS_BY_PROJECT[i % FIELDS_BY_PROJECT.length],
       shape: `project-${i}`,
-      frame: i >= FLIP_FROM ? sideLeft : side,
-      focus: i >= FLIP_FROM ? sideFocusLeft : sideFocus,
+      // Projects sit on the left: the stage crosses the page between sections.
+      frame: sideLeft,
+      focus: sideFocusLeft,
       intensity: 1,
       ambient: 0.75,
       shapeScale: 0.72,
@@ -451,7 +423,6 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       if (on) active = i;
     });
     railIndex.textContent = String(active + 1).padStart(2, "0");
-    scenePin.classList.toggle("flipped", p >= FIRST_PROJECT + FLIP_FROM - 0.5);
     const rp = (p - FIRST_PROJECT) / Math.max(1, projectEls.length - 1);
     railFill.style.transform = `scaleX(${Math.max(0, Math.min(1, rp)).toFixed(4)})`;
     requestAnimationFrame(frame);
@@ -546,6 +517,106 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     await sleep(220);
     playWave(1500, 2200);
   }
+
+  // ---- Paging: hero → each project → experience are defined pages ----
+  // Inside that stretch, one wheel/trackpad gesture moves exactly one page and
+  // the page eases into place; trackpad momentum can't skip past a project.
+  // Touch, keyboard and scrollbar scrolling settle on the nearest page.
+  // Below the experience heading, scrolling is normal again.
+  function pages(): number[] {
+    return anchors.slice(0, anchors.length - 1).map((a) => Math.round(a.y));
+  }
+  const lastPage = () => pages()[pages().length - 1];
+  const inPaged = (y = scrollY) => y < lastPage() - 4;
+  const nearestPage = (y = scrollY) => {
+    const ps = pages();
+    let best = 0;
+    for (let i = 1; i < ps.length; i++) if (Math.abs(ps[i] - y) < Math.abs(ps[best] - y)) best = i;
+    return best;
+  };
+
+  let pageAnim = 0;
+  let animating = false;
+  function goTo(y: number, duration = 900) {
+    cancelAnimationFrame(pageAnim);
+    const from = scrollY;
+    const dist = y - from;
+    if (Math.abs(dist) < 2) return;
+    if (engine.reducedMotion) {
+      scrollTo(0, y);
+      return;
+    }
+    animating = true;
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / duration);
+      scrollTo(0, from + dist * easeInOut(t));
+      if (t < 1) pageAnim = requestAnimationFrame(step);
+      else animating = false;
+    };
+    pageAnim = requestAnimationFrame(step);
+  }
+
+  // Wheel: one page per gesture. A gesture ends after a short quiet period,
+  // which swallows the trackpad's momentum tail.
+  let acc = 0;
+  let gestureUsed = false;
+  let quiet = 0;
+  addEventListener(
+    "wheel",
+    (e) => {
+      if (e.ctrlKey) return; // pinch-zoom
+      const y = scrollY;
+      const down = e.deltaY > 0;
+      const ps = pages();
+      const atEnd = Math.abs(y - lastPage()) < 4;
+      // Leave paging: scrolling down from the experience page is free scrolling.
+      if (!inPaged(y) && !(atEnd && !down)) return;
+      e.preventDefault();
+      clearTimeout(quiet);
+      quiet = window.setTimeout(() => {
+        gestureUsed = false;
+        acc = 0;
+      }, 180);
+      if (gestureUsed || animating) return;
+      acc += e.deltaY;
+      if (Math.abs(acc) < 24) return;
+      gestureUsed = true;
+      const i = nearestPage(y);
+      const next = Math.max(0, Math.min(ps.length - 1, i + (down ? 1 : -1)));
+      goTo(ps[next]);
+    },
+    { passive: false },
+  );
+
+  // Keyboard paging inside the paged stretch.
+  addEventListener("keydown", (e) => {
+    const keys: Record<string, number> = { ArrowDown: 1, PageDown: 1, " ": 1, ArrowUp: -1, PageUp: -1 };
+    const dir = keys[e.key];
+    if (!dir || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+    const y = scrollY;
+    const atEnd = Math.abs(y - lastPage()) < 4;
+    if (!inPaged(y) && !(atEnd && dir < 0)) return;
+    e.preventDefault();
+    if (animating) return;
+    const ps = pages();
+    goTo(ps[Math.max(0, Math.min(ps.length - 1, nearestPage(y) + dir))]);
+  });
+
+  // Anything else (touch, scrollbar): settle on the nearest page once scrolling stops.
+  let idle = 0;
+  addEventListener(
+    "scroll",
+    () => {
+      if (animating) return;
+      clearTimeout(idle);
+      idle = window.setTimeout(() => {
+        if (animating || !inPaged()) return;
+        goTo(pages()[nearestPage()], 600);
+      }, 160);
+    },
+    { passive: true },
+  );
 
   engine.start();
   requestAnimationFrame(frame);
