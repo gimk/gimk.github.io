@@ -210,17 +210,23 @@ export class AsciiEngine {
     const r = lerpRect(rA, rB, k);
     const intensity = lerp(A.intensity, B.intensity, k);
     const ambient = lerp(A.ambient, B.ambient, k);
+    const shapeScale = lerp(A.shapeScale ?? 0.8, B.shapeScale ?? 0.8, k);
     // Shape weight per side: a null shape contributes nothing.
     const wA = sA ? 1 - k : 0;
     const wB = sB ? k : 0;
 
     // Square shape area, centred in the frame (shapes are square buffers).
-    const side = Math.min(r.w, r.h);
+    const side = Math.min(r.w, r.h) * shapeScale;
     const sqX = r.x + (r.w - side) / 2;
     const sqY = r.y + (r.h - side) / 2;
     const fcx = (r.x + r.w / 2) / this.cellW;
     const fcy = (r.y + r.h / 2) / this.cellH;
-    const feather = Math.max(60, Math.min(r.w, r.h) * 0.35);
+    // Elliptical mask inscribed in the frame, with a soft rim.
+    const ecx = r.x + r.w / 2;
+    const ecy = r.y + r.h / 2;
+    const erx = Math.max(1, r.w / 2);
+    const ery = Math.max(1, r.h / 2);
+    const rim = 0.3;
 
     // Reveal wave
     let rv = Infinity;
@@ -256,11 +262,11 @@ export class AsciiEngine {
       for (let x = 0; x < this.cols; x++) {
         const px = (x + 0.5) * cw;
 
-        // Ambient weight: full inside the frame rect, feathered outside.
-        const ox = px < r.x ? r.x - px : px > r.x + r.w ? px - r.x - r.w : 0;
-        const oy = py < r.y ? r.y - py : py > r.y + r.h ? py - r.y - r.h : 0;
-        const outD = ox > oy ? ox + oy * 0.5 : oy + ox * 0.5;
-        const amb = ambient * (outD <= 0 ? 1 : smooth(clamp01(1 - outD / feather)));
+        // Ellipse mask: the field fills the frame, fading out towards the rim.
+        const enx = (px - ecx) / erx;
+        const eny = (py - ecy) / ery;
+        const er = Math.sqrt(enx * enx + eny * eny);
+        const ell = er >= 1 ? 0 : smooth(clamp01((1 - er) / rim));
 
         // Shape mask
         let m = 0;
@@ -288,7 +294,7 @@ export class AsciiEngine {
           if (dd < 9) tr += (1 - Math.sqrt(dd) / 3) * p0.age * 0.45;
         }
 
-        if (m < 0.004 && amb < 0.004 && tr < 0.01) {
+        if (ell < 0.004 && tr < 0.01) {
           row[x] = " ";
           continue;
         }
@@ -300,8 +306,11 @@ export class AsciiEngine {
         if (fB !== fA) f = lerp(f, fB.sample(x, y, dist, dx, dy, fctx), k);
         f = clamp01((f + 1) / 2);
 
-        // Inside the shape the field animates the ink; outside it's ambient texture.
-        let val = m * (0.55 + 0.45 * f) + (1 - m) * f * amb;
+        // The field fills the ellipse in light glyphs; the shape is suggested by
+        // pushing its area into the dense end of the ramp (same motion, darker ink).
+        const light = f * ambient * 0.5;
+        const dense = 0.5 + 0.5 * f;
+        let val = ell * (light + (dense - light) * m);
         val = val * intensity + tr;
 
         if (rv !== Infinity) {

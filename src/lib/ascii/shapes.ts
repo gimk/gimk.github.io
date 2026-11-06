@@ -226,7 +226,7 @@ export interface ImageShapeOptions {
 }
 
 export function imageShape(img: ImageSample, opts: ImageShapeOptions): ShapeBuffer {
-  const { lightInk, contrast = 1.15, floor = 0.15, fadeBottom = 0.22 } = opts;
+  const { lightInk, contrast = 1.6, floor = 0.3, fadeBottom = 0.22 } = opts;
   const { size, lum, alpha } = img;
   const tone = new Float32Array(size * size);
   for (let y = 0; y < size; y++) {

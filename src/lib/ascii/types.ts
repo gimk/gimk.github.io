@@ -79,6 +79,8 @@ export interface AsciiState {
   frame: () => Rect;
   /** 0..1 overall ink. Lower it behind reading text. */
   intensity: number;
-  /** 0..1 how much the field shows outside the shape. */
+  /** 0..1 strength of the field around the shape, inside the ellipse. */
   ambient: number;
+  /** Shape size as a fraction of the frame's short side (default 0.8). */
+  shapeScale?: number;
 }

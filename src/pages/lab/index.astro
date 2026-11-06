@@ -181,24 +181,32 @@ const pad = (n: number) => String(n).padStart(2, "0");
     return { x: r.left, y: r.top, w: r.width, h: r.height };
   };
   const viewport = (): Rect => ({ x: 0, y: 0, w: innerWidth, h: innerHeight });
+  const isWide = () => !!projectFrame && projectFrame.offsetWidth > 0;
+  /**
+   * Desktop: the right side of the screen, slightly overscanned so the ellipse
+   * bleeds off the edge. Shared by the portrait and every project icon, so the
+   * stage never moves while the shape inside it changes.
+   */
   const sideFrame = (): Rect => {
-    if (projectFrame && projectFrame.offsetWidth) return rectOf(projectFrame);
+    if (isWide()) return { x: innerWidth * 0.46, y: -innerHeight * 0.04, w: innerWidth * 0.6, h: innerHeight * 1.08 };
     // Mobile: a band under the header (placeholder until the mobile pass).
     return { x: 0, y: innerHeight * 0.08, w: innerWidth, h: innerHeight * 0.3 };
   };
+  const heroSide = (): Rect => (isWide() ? sideFrame() : rectOf(heroFrame));
 
   const states: AsciiState[] = [
-    { id: "boot", field: "wave", shape: null, frame: viewport, intensity: 0.75, ambient: 1 },
-    { id: "portrait", field: "wave", shape: "portrait", frame: () => rectOf(heroFrame), intensity: 1, ambient: 0.1 },
+    { id: "boot", field: "wave", shape: null, frame: viewport, intensity: 0.9, ambient: 1 },
+    { id: "portrait", field: "wave", shape: "portrait", frame: heroSide, intensity: 1, ambient: 0.6, shapeScale: 0.85 },
     ...FEATURED.map((f) => ({
       id: f.icon,
       field: f.field,
       shape: f.icon,
       frame: sideFrame,
-      intensity: 0.95,
-      ambient: 0.06,
+      intensity: 1,
+      ambient: 0.85,
+      shapeScale: 0.6,
     })),
-    { id: "calm", field: "calm", shape: null, frame: viewport, intensity: 0.35, ambient: 0.5 },
+    { id: "calm", field: "calm", shape: null, frame: viewport, intensity: 0.45, ambient: 0.8 },
   ];
   engine.setStates(states);
 
