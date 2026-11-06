@@ -3,8 +3,13 @@ import type { AsciiState, Field, FieldCtx, Rect, ShapeBuffer } from "./types";
 
 const DENSITY = " .:-=+*#%@";
 const DLEN = DENSITY.length;
-/** Glyph aspect correction used by the original fields. */
-const ASPECT = 0.875;
+/**
+ * Field space. The original animations ran on 7×8px cells with dx scaled by
+ * 0.875, i.e. 8px per unit on both axes. Fields are sampled in those units
+ * from pixel positions, so their proportions don't depend on the glyph grid.
+ */
+const UNIT_X = 7;
+const UNIT = 8;
 /** Opacity steps layered on top of the glyph ramp: smoother gradients and edges. */
 const ALPHAS = [0.42, 0.7, 1];
 const NA = ALPHAS.length;
@@ -189,7 +194,8 @@ export class AsciiEngine {
     ctx.font = `${this.fontSize}px "JetBrains Mono", ui-monospace, monospace`;
     ctx.textBaseline = "top";
     this.cellW = ctx.measureText("M").width;
-    this.cellH = Math.round(this.fontSize * 0.95);
+    // Tight leading like the original (10px glyphs on 8px rows).
+    this.cellH = Math.round(this.fontSize * 0.8);
     this.cols = Math.ceil(w / this.cellW);
     this.rows = Math.ceil(h / this.cellH);
     this.buckets = Array.from({ length: NB }, () => new Array(this.cols).fill(" "));
@@ -274,7 +280,7 @@ export class AsciiEngine {
 
     const FA = this.stateFields(A);
     const FB = this.stateFields(B);
-    const fctx: FieldCtx = { t, cols: this.cols, rows: this.rows };
+    const fctx: FieldCtx = { t, cols: innerWidth / UNIT_X, rows: innerHeight / UNIT };
     const live = new Set<Field>();
     if (k < 1) {
       live.add(FA.a);
@@ -313,8 +319,8 @@ export class AsciiEngine {
     const sqY = fo.y + (fo.h - side) / 2;
     const cw = this.cellW;
     const ch = this.cellH;
-    const fcx = (fo.x + fo.w / 2) / cw;
-    const fcy = (fo.y + fo.h / 2) / ch;
+    const fcx = fo.x + fo.w / 2; // px
+    const fcy = fo.y + fo.h / 2;
 
     // Ellipse: breathes slowly, stretches vertically with scroll speed.
     const breathe = this.reduced ? 1 : 1 + 0.025 * Math.sin(t * 1.4);
@@ -392,10 +398,10 @@ export class AsciiEngine {
           }
         }
 
-        const cx = sx / cw - 0.5;
-        const cy = sy / ch - 0.5;
-        const dx = (cx - fcx) * ASPECT;
-        const dy = cy - fcy;
+        const cx = sx / UNIT_X;
+        const cy = sy / UNIT;
+        const dx = (sx - fcx) / UNIT;
+        const dy = (sy - fcy) / UNIT;
         const dist = Math.sqrt(dx * dx + dy * dy);
         let f = 0;
         if (k < 1) {
