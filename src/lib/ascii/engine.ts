@@ -12,6 +12,8 @@ const NA = ALPHAS.length;
 const NB = 2 * NA;
 /** Field clock speed (field units per second). The old code ran ~0.48/s. */
 const CLOCK = 0.62;
+/** Seconds of each playlist period spent blending into the next field. */
+const PLAYLIST_BLEND = 2.2;
 /** How quickly `progress` chases `target` (higher = snappier). */
 const SPRING = 4.5;
 const LENS_RADIUS = 170;
@@ -81,6 +83,8 @@ export class AsciiEngine {
   private raf = 0;
   private last = 0;
   private t = 0;
+  /** Real seconds, for playlists. */
+  private clock = 0;
   private reveal: Reveal | null = null;
   private running = false;
   private reduced = false;
@@ -224,6 +228,7 @@ export class AsciiEngine {
       this.progress = this.target;
     } else {
       this.t += dt * CLOCK;
+      this.clock += dt;
       this.progress += (this.target - this.progress) * (1 - Math.exp(-dt * SPRING));
       if (Math.abs(this.target - this.progress) < 1e-4) this.progress = this.target;
       const pa = 1 - Math.exp(-dt * 12);
@@ -233,6 +238,21 @@ export class AsciiEngine {
       if (this.pointer.s < 0.002) this.pointer.s = 0;
     }
     this.draw(now);
+  }
+
+  /** A state's field(s) right now: a single field, or two playlist fields and a blend weight. */
+  private stateFields(st: AsciiState): { a: Field; b: Field; w: number } {
+    const list = st.fields;
+    if (!list || list.length < 2) {
+      const f = this.field(st.field);
+      return { a: f, b: f, w: 0 };
+    }
+    const period = st.period ?? 7;
+    const pos = this.clock / period;
+    const idx = Math.floor(pos);
+    const into = (pos - idx) * period; // seconds into this period
+    const w = smooth(clamp01((into - (period - PLAYLIST_BLEND)) / PLAYLIST_BLEND));
+    return { a: this.field(list[idx % list.length]), b: this.field(list[(idx + 1) % list.length]), w };
   }
 
   /** Render one frame. */
@@ -252,11 +272,23 @@ export class AsciiEngine {
     const scatter = A === B || this.reduced || rigid ? 0 : Math.sin(Math.PI * k);
     const t = this.t;
 
-    const fA = this.field(A.field);
-    const fB = this.field(B.field);
+    const FA = this.stateFields(A);
+    const FB = this.stateFields(B);
     const fctx: FieldCtx = { t, cols: this.cols, rows: this.rows };
-    fA.prepare?.(fctx);
-    if (fB !== fA) fB.prepare?.(fctx);
+    const live = new Set<Field>();
+    if (k < 1) {
+      live.add(FA.a);
+      if (FA.w > 0) live.add(FA.b);
+    }
+    if (k > 0) {
+      live.add(FB.a);
+      if (FB.w > 0) live.add(FB.b);
+    }
+    for (const f of live) f.prepare?.(fctx);
+    const accent = lerp(A.accent ?? 0, B.accent ?? 0, k);
+    // With no shape to carry the dense glyphs, the field itself uses the full ramp.
+    const fieldMax = lerp(A.shape ? 0.5 : 1, B.shape ? 0.5 : 1, k);
+    const accentT = accent > 0 ? 1.15 - accent * 0.55 : 9;
 
     const sA = A.shape ? this.shapes.get(A.shape) : undefined;
     const sB = B.shape ? this.shapes.get(B.shape) : undefined;
@@ -364,8 +396,16 @@ export class AsciiEngine {
         const dx = (cx - fcx) * ASPECT;
         const dy = cy - fcy;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        let f = fA.sample(cx, cy, dist, dx, dy, fctx);
-        if (fB !== fA) f = lerp(f, fB.sample(cx, cy, dist, dx, dy, fctx), k);
+        let f = 0;
+        if (k < 1) {
+          f = FA.a.sample(cx, cy, dist, dx, dy, fctx);
+          if (FA.w > 0) f = lerp(f, FA.b.sample(cx, cy, dist, dx, dy, fctx), FA.w);
+        }
+        if (k > 0) {
+          let g = FB.a.sample(cx, cy, dist, dx, dy, fctx);
+          if (FB.w > 0) g = lerp(g, FB.b.sample(cx, cy, dist, dx, dy, fctx), FB.w);
+          f = k < 1 ? lerp(f, g, k) : g;
+        }
         f = clamp01((f + 1) / 2);
 
         let m = 0;
@@ -398,11 +438,11 @@ export class AsciiEngine {
           m *= 1 - 0.5 * scatter;
         }
 
-        const light = f * ambient * 0.5;
+        const light = f * ambient * fieldMax;
         // Low texture: the image's own shading drives the ink, the field only grains it.
         const dense = 0.5 + 0.5 * (0.7 + (f - 0.7) * texture);
         let val = ell * (light + (dense - light) * m) * intensity + lens * ell * 0.35;
-        let ink = m > 0.28 ? 1 : 0;
+        let ink = m > 0.28 || val > accentT ? 1 : 0;
         if (front > 0) {
           const fv = front * front * (0.65 + 0.35 * f);
           if (fv > val) {
