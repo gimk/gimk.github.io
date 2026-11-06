@@ -20,6 +20,8 @@ const projects = FEATURED.map((f) => {
   return { ...f, entry };
 });
 const pad = (n: number) => String(n).padStart(2, "0");
+/** From this project on, the stage swaps to the left and the text to the right. */
+const FLIP_FROM = Math.ceil(projects.length / 2);
 /** Scroll per project inside the pinned scene, in viewport heights. */
 const STEP = 1.5;
 /** Scene height: STEP per project, plus a hold at the end. */
@@ -65,17 +67,27 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     </section>
 
     <!-- Projects: one pinned scene; text and icon change together -->
-    <section id="scene" class="relative" style={`height: ${sceneHeight}svh`} data-step={STEP} aria-label="Selected projects">
+    <section
+      id="scene"
+      class="relative"
+      style={`height: ${sceneHeight}svh`}
+      data-step={STEP}
+      data-flip-from={FLIP_FROM}
+      aria-label="Selected projects"
+    >
       <!-- Snap points: proximity snapping helps you land exactly on a project. -->
       {projects.map((_, i) => <div class="scene-snap" style={`top: ${i * STEP * 100}svh`} aria-hidden="true" />)}
-      <div class="sticky top-0 h-[100svh] flex items-center">
-        <div class="relative w-full md:w-1/2 h-[70svh]">
+      <div id="scene-pin" class="sticky top-0 h-[100svh] flex items-center">
+        <div class="relative w-full h-[70svh]">
           {
             projects.map(({ entry, kind }, i) => (
               <div
                 data-project
                 data-thumb={entry.data.thumbnail}
-                class="scene-project absolute inset-0 flex flex-col justify-center"
+                class:list={[
+                  "scene-project absolute inset-y-0 left-0 w-full md:w-1/2 flex flex-col justify-center",
+                  i >= FLIP_FROM && "md:left-1/2 md:pl-12",
+                ]}
                 style="--d:1;--o:0"
               >
                 <span class="sp-mask">
@@ -109,7 +121,7 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
             ))
           }
         </div>
-        <div class="absolute left-0 bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
+        <div id="rail" class="absolute left-0 bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
           <span id="rail-index" class="text-accent-primary">01</span>
           <span class="relative block w-32 h-px bg-black/15 dark:bg-white/15 overflow-hidden">
             <span id="rail-fill" class="absolute inset-0 bg-accent-primary origin-left" style="transform: scaleX(0)"></span>
@@ -198,6 +210,15 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   }
 
   /* Pinned project scene. --d: -1 upcoming, 0 active, 1 gone (from the stage's smoothed progress). */
+  /* The rail follows the text to the right half once the stage flips. */
+  #rail {
+    transition: left 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  @media (min-width: 768px) {
+    #scene-pin.flipped #rail {
+      left: calc(50% + 3rem);
+    }
+  }
   .scene-project {
     pointer-events: none;
     opacity: var(--o);
@@ -255,6 +276,8 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
   const booting = root.dataset.boot === "1";
   const STEP = Number(scene.dataset.step) || 1.5;
+  const FLIP_FROM = Number(scene.dataset.flipFrom) || Infinity;
+  const scenePin = document.getElementById("scene-pin")!;
 
   const engine = new AsciiEngine({ canvas, fontSize: 10 });
 
@@ -305,6 +328,10 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   /** The visible right half, where images and the field's centre sit. */
   const sideFocus = (): Rect =>
     wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
+  /** Mirror images of the above, for the second half of the projects. */
+  const mirror = (r: Rect): Rect => ({ ...r, x: innerWidth - (r.x + r.w) });
+  const sideLeft = (): Rect => (wide() ? mirror(side()) : side());
+  const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : side());
   const heroSide = (): Rect => (wide() ? side() : rectOf(heroFrame));
   const centre = (): Rect => ({ x: innerWidth * 0.08, y: innerHeight * 0.04, w: innerWidth * 0.84, h: innerHeight * 0.92 });
 
@@ -326,8 +353,8 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       id: `project-${i}`,
       field: FIELDS_BY_PROJECT[i % FIELDS_BY_PROJECT.length],
       shape: `project-${i}`,
-      frame: side,
-      focus: sideFocus,
+      frame: i >= FLIP_FROM ? sideLeft : side,
+      focus: i >= FLIP_FROM ? sideFocusLeft : sideFocus,
       intensity: 1,
       ambient: 0.75,
       shapeScale: 0.72,
@@ -424,6 +451,7 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       if (on) active = i;
     });
     railIndex.textContent = String(active + 1).padStart(2, "0");
+    scenePin.classList.toggle("flipped", p >= FIRST_PROJECT + FLIP_FROM - 0.5);
     const rp = (p - FIRST_PROJECT) / Math.max(1, projectEls.length - 1);
     railFill.style.transform = `scaleX(${Math.max(0, Math.min(1, rp)).toFixed(4)})`;
     requestAnimationFrame(frame);
