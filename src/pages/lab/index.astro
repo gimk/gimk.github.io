@@ -129,7 +129,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 <script>
   import { AsciiEngine } from "@lib/ascii/engine";
   import { ICONS } from "@lib/ascii/icons";
-  import { iconShape, imageLuminance, imageShape, placeholderPortrait } from "@lib/ascii/shapes";
+  import { iconShape, imageSample, imageShape, placeholderPortrait, type ImageSample } from "@lib/ascii/shapes";
   import type { AsciiState, Rect } from "@lib/ascii/types";
 
   const projectCount = document.querySelectorAll("article[data-anchor]").length;
@@ -151,12 +151,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
   const engine = new AsciiEngine({ canvas, fontSize: 10, fps: 24 });
 
   // ---- Theme ----
-  let portraitLum: Float32Array | null = null;
+  let portrait: ImageSample | null = null;
   const isDark = () => root.classList.contains("dark");
   function applyTheme() {
     const rgb = getComputedStyle(root).getPropertyValue("--color-accent").trim().split(/\s+/).join(",");
-    engine.setColor(`rgba(${rgb},${isDark() ? 0.55 : 0.8})`);
-    if (portraitLum) engine.setShape("portrait", imageShape(portraitLum, { lightInk: isDark() }));
+    engine.setColor(`rgba(${rgb},${isDark() ? 0.8 : 0.85})`);
+    if (portrait) engine.setShape("portrait", imageShape(portrait, { lightInk: isDark() }));
   }
   new MutationObserver(applyTheme).observe(root, { attributes: true, attributeFilter: ["class"] });
 
@@ -164,14 +164,15 @@ const pad = (n: number) => String(n).padStart(2, "0");
   for (const [key, draw] of Object.entries(ICONS)) engine.setShape(key, iconShape(draw));
   const portraitImg = new Image();
   portraitImg.onload = () => {
-    portraitLum = imageLuminance(portraitImg);
+    // Head-and-shoulders crop of the photo (fractions of width/height).
+    portrait = imageSample(portraitImg, { crop: { x: 0.1, y: 0.1, w: 0.82 } });
     applyTheme();
   };
   portraitImg.onerror = () => {
-    portraitLum = imageLuminance(placeholderPortrait());
+    portrait = imageSample(placeholderPortrait());
     applyTheme();
   };
-  portraitImg.src = "/portrait.jpg";
+  portraitImg.src = "/portrait-ascii.jpg";
   applyTheme();
 
   // ---- States ----
