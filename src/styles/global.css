@@ -61,6 +61,31 @@ header::after {
   -webkit-mask-image: linear-gradient(to bottom, black, transparent);
 }
 
+/* Bare header: transparent over a full-bleed canvas. Selectors are chained
+   with header.header-bare so they beat `html.dark header` (0,1,2). */
+header.header-bare,
+html.dark header.header-bare {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+
+header.header-bare::after {
+  display: none;
+}
+
+/* Once scrolled, fade the page colour in behind the bare header so content
+   passing underneath stays legible, without a hard bar. */
+header.header-bare {
+  transition: background 0.4s ease;
+}
+html.scrolled header.header-bare {
+  background: linear-gradient(to bottom, #fff7ed 30%, rgba(255, 247, 237, 0));
+}
+html.dark.scrolled header.header-bare {
+  background: linear-gradient(to bottom, #020617 30%, rgba(2, 6, 23, 0));
+}
 
 main {
   @apply flex-1 py-8 overflow-x-clip;

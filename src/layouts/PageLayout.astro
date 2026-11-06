@@ -13,9 +13,11 @@ type Props = {
   type?: "website" | "article";
   /** Set false on pages that run their own full-viewport ASCII stage. */
   asciiBackground?: boolean;
+  /** Transparent header with no blur, border or dotted strip, for pages with a full-bleed ASCII canvas. */
+  bareHeader?: boolean;
 };
 
-const { title, description, image, type, asciiBackground = true } = Astro.props;
+const { title, description, image, type, asciiBackground = true, bareHeader = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -24,7 +26,7 @@ const { title, description, image, type, asciiBackground = true } = Astro.props;
     <Head title={`${title} | Pantoine.com`} description={description} image={image} type={type} />
   </head>
   <body>
-    <Header />
+    <Header bare={bareHeader} />
     <main>
       <slot />
     </main>
