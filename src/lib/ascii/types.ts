@@ -52,6 +52,19 @@ export interface ShapeBuffer {
   size: number;
   tone: Float32Array;
   sdf?: Float32Array;
+  /**
+   * Images only: shading inside the silhouette (tone without the matte). With
+   * an SDF, blends melt the silhouette via the SDF and crossfade the shading.
+   */
+  shade?: Float32Array;
+  /**
+   * Images only: contour strength 0..1 and its gradient direction (gx, gy).
+   * Strong contours are drawn with direction-matched glyphs (- / | \) so
+   * features stay crisp at ASCII resolution.
+   */
+  edge?: Float32Array;
+  gx?: Float32Array;
+  gy?: Float32Array;
 }
 
 /**
@@ -83,4 +96,11 @@ export interface AsciiState {
   ambient: number;
   /** Shape size as a fraction of the frame's short side (default 0.8). */
   shapeScale?: number;
+  /**
+   * 0..1 how much the field and the pointer lens displace the shape (default 1).
+   * Keep 0 on faces: any warp makes them unrecognisable.
+   */
+  warp?: number;
+  /** 0..1 how much the field modulates ink inside the shape (default 1). Low = the image's own shading wins. */
+  texture?: number;
 }
