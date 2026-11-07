@@ -11,7 +11,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
 <PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
-  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <canvas class="ascii-stage" aria-hidden="true" transition:persist="ascii-stage"></canvas>
   <div id="projects-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
     <PageIntro
       back={{ href: "/", label: "Home" }}

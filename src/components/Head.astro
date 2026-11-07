@@ -101,6 +101,11 @@ const imageURL = new URL(image, Astro.site);
 
   document.addEventListener("DOMContentLoaded", initPigAnimation);
   document.addEventListener("astro:after-swap", initPigAnimation);
+  // Marks every page after the first one of the visit (client-side navigation),
+  // so pages can skip their first-load openings, e.g. the home boot lines.
+  document.addEventListener("astro:after-swap", () => {
+    document.documentElement.dataset.navigated = "1";
+  });
 </script>
 
 <script is:inline>

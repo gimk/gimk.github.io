@@ -19,7 +19,7 @@ const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: 
 ---
 
 <PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
-  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <canvas class="ascii-stage" aria-hidden="true" transition:persist="ascii-stage"></canvas>
   <div id="blog-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
     <PageIntro
       back={{ href: "/", label: "Home" }}

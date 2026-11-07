@@ -29,6 +29,39 @@ export function onPage(selector: string, init: () => (() => void) | void) {
 }
 
 // ---------------------------------------------------------------------------
+// One engine for the whole visit
+//
+// Every page's canvas carries transition:persist, so the router keeps the same
+// canvas across navigations, and the engine drawing on it keeps running. A
+// page leaving calls `releaseEngine`, which freezes what is on screen; the next
+// page gets the same engine from `stageEngine` and sets its own states, which
+// the frozen picture blends into.
+
+let live: { engine: AsciiEngine; canvas: HTMLCanvasElement } | null = null;
+
+/** The running engine if it already draws on this canvas, or a new one. */
+export function stageEngine(canvas: HTMLCanvasElement): AsciiEngine {
+  if (live?.canvas === canvas) return live.engine;
+  live?.engine.stop();
+  live = { engine: new AsciiEngine({ canvas, fontSize: 10 }), canvas };
+  return live.engine;
+}
+/** The page is leaving: keep the engine drawing what is on screen for the next one. */
+export function releaseEngine(engine: AsciiEngine) {
+  if (live?.engine === engine) engine.hold();
+  else engine.stop();
+}
+if (typeof document !== "undefined") {
+  // The new page has no stage: stop drawing on a canvas that is gone.
+  document.addEventListener("astro:after-swap", () => {
+    if (live && !live.canvas.isConnected) {
+      live.engine.stop();
+      live = null;
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Frames
 
 export const wide = () => innerWidth >= 768;
@@ -105,7 +138,7 @@ export interface Stage {
 
 export function createStage(canvas: HTMLCanvasElement): Stage {
   const root = document.documentElement;
-  const engine = new AsciiEngine({ canvas, fontSize: 10 });
+  const engine = stageEngine(canvas);
   const images = new Map<string, ImageSample>();
 
   function applyTheme() {
@@ -128,15 +161,21 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
       const icon = ICONS[ICON_BY_PROJECT[projectId?.toLowerCase() ?? ""] ?? ""] ?? ICONS.blank;
       engine.setShape(key, iconShape(icon));
       const img = new Image();
-      img.onload = () => {
+      const loaded = () => {
         images.set(key, imageSample(img));
         applyTheme();
       };
+      img.onload = loaded;
       img.src = src;
+      // Already cached (e.g. shown on the previous page): no icon flash.
+      if (img.complete && img.naturalWidth) {
+        img.onload = null;
+        loaded();
+      }
     },
     destroy() {
       observer.disconnect();
-      engine.stop();
+      releaseEngine(engine);
     },
   };
 }

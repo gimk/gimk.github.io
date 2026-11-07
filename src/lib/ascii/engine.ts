@@ -21,6 +21,9 @@ const CLOCK = 0.62;
 const PLAYLIST_BLEND = 2.2;
 /** How quickly `progress` chases `target` (higher = snappier). */
 const SPRING = 4.5;
+/** Speed of the blend from the previous page's stage into the new one. */
+const CARRY_SPRING = 3;
+const CARRY = "__carry";
 const LENS_RADIUS = 170;
 const LENS_STRENGTH = 0.55;
 
@@ -42,6 +45,29 @@ interface Reveal {
 const smooth = (t: number) => t * t * (3 - 2 * t);
 const clamp01 = (t: number) => (t < 0 ? 0 : t > 1 ? 1 : t);
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/**
+ * One state standing for the blend of A and B at k: rects (frozen at their
+ * current value) and numbers interpolated; field, playlist and shape from
+ * whichever side dominates.
+ */
+function mixStates(A: AsciiState, B: AsciiState, k: number): AsciiState {
+  const D = k < 0.5 ? A : B;
+  const frame = lerpRect(A.frame(), B.frame(), k);
+  const focus = lerpRect((A.focus ?? A.frame)(), (B.focus ?? B.frame)(), k);
+  const num = (a: number | undefined, b: number | undefined, d: number) => lerp(a ?? d, b ?? d, k);
+  return {
+    ...D,
+    frame: () => frame,
+    focus: () => focus,
+    intensity: lerp(A.intensity, B.intensity, k),
+    ambient: lerp(A.ambient, B.ambient, k),
+    accent: num(A.accent, B.accent, 0),
+    shapeScale: num(A.shapeScale, B.shapeScale, 0.8),
+    warp: num(A.warp, B.warp, 1),
+    texture: num(A.texture, B.texture, 1),
+  };
+}
 
 function lerpRect(a: Rect, b: Rect, t: number): Rect {
   return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: lerp(a.w, b.w, t), h: lerp(a.h, b.h, t) };
@@ -104,7 +130,7 @@ export class AsciiEngine {
   target = 0;
   /** Smoothed index actually rendered. */
   progress = 0;
-  /** Scroll velocity in px/s (set by the page); stretches the ellipse a little. */
+  /** Scroll velocity in px/s (set by the page); swells the circle a little. */
   velocity = 0;
 
   constructor(opts: EngineOptions) {
@@ -128,6 +154,41 @@ export class AsciiEngine {
 
   setShape(key: string, buf: ShapeBuffer) {
     this.shapes.set(key, buf);
+  }
+
+  getShape(key: string): ShapeBuffer | undefined {
+    return this.shapes.get(key);
+  }
+
+  // ---- Carry-over between pages ----
+  // The engine outlives page navigations (the canvas is persisted). On leaving,
+  // a page freezes what is on screen; the next page sets its own states, and
+  // the frozen state blends into them over time instead of cutting.
+  private carryState: AsciiState | null = null;
+  private carryK = 1;
+  /** The blend drawn last (states and weight), so `hold` freezes exactly what is on screen. */
+  private shown: { A: AsciiState; B: AsciiState; k: number } | null = null;
+
+  /** True while blending in from the previous page. */
+  get carrying() {
+    return this.carryK < 1 && !!this.carryState;
+  }
+
+  /**
+   * Freeze what is on screen (rects and numbers at their current blend, the
+   * dominant field and shape) and forget the page's states and shapes.
+   */
+  hold() {
+    if (!this.shown) return;
+    const { A, B, k } = this.shown;
+    const st = mixStates(A, B, k);
+    const shape = st.shape ? this.shapes.get(st.shape) : undefined;
+    this.shapes.clear();
+    if (shape) this.shapes.set(CARRY, shape);
+    this.carryState = { ...st, shape: shape ? CARRY : null };
+    this.carryK = 0;
+    this.states = [];
+    this.shown = null;
   }
 
   setStates(states: AsciiState[]) {
@@ -232,10 +293,15 @@ export class AsciiEngine {
     this.last = now;
     if (this.reduced) {
       this.progress = this.target;
+      this.carryK = 1;
     } else {
       this.t += dt * CLOCK;
       this.clock += dt;
       this.progress += (this.target - this.progress) * (1 - Math.exp(-dt * SPRING));
+      if (this.carryK < 1 && this.states.length) {
+        this.carryK += (1 - this.carryK) * (1 - Math.exp(-dt * CARRY_SPRING));
+        if (this.carryK > 0.998) this.carryK = 1;
+      }
       if (Math.abs(this.target - this.progress) < 1e-4) this.progress = this.target;
       const pa = 1 - Math.exp(-dt * 12);
       this.pointer.x += (this.pTarget.x - this.pointer.x) * pa;
@@ -267,9 +333,17 @@ export class AsciiEngine {
     if (!n || !this.cols) return;
     const p = Math.min(n - 1, Math.max(0, this.progress));
     const i = Math.max(0, Math.min(n - 2, Math.floor(p)));
-    const A = this.states[i];
-    const B = n > 1 ? this.states[i + 1] : A;
-    const k = n > 1 ? smooth(clamp01(p - i)) : 0;
+    let A = this.states[i];
+    let B = n > 1 ? this.states[i + 1] : A;
+    let k = n > 1 ? smooth(clamp01(p - i)) : 0;
+    // Arriving from another page: blend from what was on screen there into
+    // whatever this page shows right now (itself possibly mid-blend).
+    if (this.carryK < 1 && this.carryState) {
+      B = k <= 0 ? A : k >= 1 ? B : mixStates(A, B, k);
+      A = this.carryState;
+      k = smooth(this.carryK);
+    }
+    this.shown = { A, B, k };
     // The shape switches in a narrow window mid-transition, hidden by the
     // scatter; everything else (field, frame, ink) blends across all of it.
     const ks = smooth(clamp01((k - 0.3) / 0.4));
@@ -322,13 +396,15 @@ export class AsciiEngine {
     const fcx = fo.x + fo.w / 2; // px
     const fcy = fo.y + fo.h / 2;
 
-    // Ellipse: breathes slowly, stretches vertically with scroll speed.
+    // Always a perfect circle, inscribed in the frame (centred on it, its
+    // diameter the frame's short side). It breathes slowly and swells a
+    // little with scroll speed, evenly, so it never turns into an ellipse.
     const breathe = this.reduced ? 1 : 1 + 0.025 * Math.sin(t * 1.4);
-    const stretch = 1 + Math.min(0.1, Math.abs(this.velocity) / 9000);
+    const swell = 1 + Math.min(0.05, Math.abs(this.velocity) / 18000);
     const ecx = r.x + r.w / 2;
     const ecy = r.y + r.h / 2;
-    const erx = Math.max(1, ((r.w / 2) * breathe) / Math.sqrt(stretch));
-    const ery = Math.max(1, (r.h / 2) * (2 - breathe) * stretch);
+    const erx = Math.max(1, (Math.min(r.w, r.h) / 2) * breathe * swell);
+    const ery = erx;
     const rim = 0.32;
 
     // Reveal ring
