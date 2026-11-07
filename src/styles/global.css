@@ -87,7 +87,7 @@ article a:hover {
 }
 
 /* Long-form reading column on project and post pages: larger serif text,
-   with media breaking out wider than the text. */
+   media spans exactly the width of the text. */
 .reading-body article {
   @apply font-serif text-lg leading-relaxed;
 }
@@ -96,13 +96,10 @@ article a:hover {
 .reading-body article > p > img:only-child,
 .reading-body article > img,
 .reading-body article > figure {
-  position: relative;
-  left: 50%;
-  width: min(64rem, calc(100vw - 2.5rem));
-  max-width: none;
-  transform: translateX(-50%);
+  width: 100%;
+  height: auto;
 }
-/* Rows of images inside a wide figure share the width instead of overflowing. */
+/* Rows of images inside a figure share the width instead of overflowing. */
 .reading-body article figure > img,
 .reading-body article figure > video {
   width: 100%;

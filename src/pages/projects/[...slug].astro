@@ -29,7 +29,7 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
  
  
 >
-  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <canvas class="ascii-stage" aria-hidden="true" transition:persist="ascii-stage"></canvas>
   <div
     id="project-page"
     class="mx-auto max-w-screen-xl px-5 md:px-10"
@@ -64,7 +64,7 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
       }
     </PageIntro>
 
-    <div id="project-body" class="reading-body mx-auto max-w-2xl pb-[20vh]">
+    <div id="project-body" class="reading-body mx-auto max-w-3xl pb-[20vh]">
       <article>
         <Content />
       </article>
