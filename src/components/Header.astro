@@ -3,7 +3,6 @@ import Container from "@components/Container.astro";
 import InteractionSound from "./InteractionSound.astro";
 import { getCollection } from "astro:content";
 
-
 const NAV = [
   { href: "/projects", label: "Projects" },
   { href: "/work", label: "Work" },
@@ -29,84 +28,36 @@ const latest = (await getCollection("projects"))
           aria-label="Grouink grouink"
           ><div>
           <svg
-            class="cochon-svg"
+            class="cochon-svg text-orange-900 dark:text-slate-100"
             aria-hidden="true"
-            width="200"
-            height="200"
+            width="40"
+            height="40"
             viewBox="0 0 200 200"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style="width: 40px; height: 40px;"
           >
-            <g clip-path="url(#clip0_2313_5602)">
-              <circle
-                cx="100"
-                cy="100"
-                r="100"
-                class="fill-orange-50 dark:fill-slate-950"></circle>
-
-              <path
-                id="right-ear"
-                class="fill-orange-900 dark:fill-slate-100"
-                d="M152.256 98.9896C152.085 99.4168 151.993 99.8496 152.012 100.306C152.851 120.331 190.403 165.414 208.086 185.745C209.925 187.86 208.856 191.052 206.071 191.798L105.09 218.854C102.537 219.539 99 217.725 99 215.215V90.3436C99 89.3302 100.43 88.3593 101.193 87.6482L132.52 58.4687C132.837 58.1736 133.204 57.9305 133.605 57.7495L158.821 46.3752C161.691 45.081 164.933 47.3168 164.507 50.2964L160.559 77.9293C160.518 78.2132 160.444 78.4917 160.337 78.7596L152.256 98.9896Z"
-              ></path>
-              <path
-                id="left-ear"
-                class="fill-orange-900 dark:fill-slate-100"
-                d="M47.744 98.9896C47.9147 99.4168 48.0069 99.8496 47.9878 100.306C47.1494 120.331 9.5965 165.414 -8.08553 185.745C-9.92479 187.86 -8.85643 191.052 -6.07075 191.798L94.9099 218.854C97.4631 219.539 101 217.725 101 215.215V90.3436C101 89.3302 99.5702 88.3593 98.8068 87.6482L67.4799 58.4687C67.1631 58.1736 66.7964 57.9305 66.3951 57.7495L41.1788 46.3752C38.3094 45.081 35.0674 47.3168 35.4932 50.2964L39.4414 77.9293C39.482 78.2132 39.5565 78.4917 39.6635 78.7596L47.744 98.9896Z"
-              ></path>
-
-              <circle
-                id="head"
-                class="fill-orange-900 dark:fill-slate-100"
-                cx="100"
-                cy="113"
-                r="63"></circle>
-
-              <g id="snout-group">
-                <path
-                  class="fill-orange-50 dark:fill-slate-950"
-                  d="M100.5 150C84.7599 150 72 142.165 72 132.5C72 122.835 84.7599 115 100.5 115C116.24 115 129 122.835 129 132.5C129 142.165 116.24 150 100.5 150Z"
-                ></path>
-                <circle
-                  class="fill-orange-900 dark:fill-slate-100"
-                  cx="89.5"
-                  cy="132.5"
-                  r="5.5"></circle>
-                <circle
-                  class="fill-orange-900 dark:fill-slate-100"
-                  cx="110.5"
-                  cy="132.5"
-                  r="5.5"></circle>
-              </g>
-
-              <ellipse
-                id="left-eye"
-                class="fill-orange-50 dark:fill-slate-950"
-                cx="81"
-                cy="94"
-                rx="8"
-                ry="8"
-                style="transition: ry 0.08s ease-in-out;"></ellipse>
-              <ellipse
-                id="right-eye"
-                class="fill-orange-50 dark:fill-slate-950"
-                cx="120"
-                cy="94"
-                rx="8"
-                ry="8"
-                style="transition: ry 0.08s ease-in-out;"></ellipse>
-            </g>
             <defs>
-              <clipPath id="clip0_2313_5602">
-                <rect
-                  width="200"
-                  height="200"
-                  rx="100"
-                  fill="white"
-                  class="dark:fill-clip-bg"></rect>
-              </clipPath>
+              <clipPath id="pig-clip"><circle cx="100" cy="100" r="100" /></clipPath>
             </defs>
+            <g clip-path="url(#pig-clip)" fill="currentColor">
+              <circle class="pig-hole" cx="100" cy="100" r="100" />
+              <ellipse class="pig-body" cx="100" cy="222" rx="92" ry="62" />
+              <g class="pig-rig">
+                <g class="pig-ears" stroke="currentColor" stroke-width="12" stroke-linejoin="round">
+                  <polygon class="pig-ear pig-ear-l" points="46,38 96,70 54,104" />
+                  <polygon class="pig-ear pig-ear-r" points="154,38 104,70 146,104" />
+                </g>
+                <circle class="pig-head" cx="100" cy="113" r="63" />
+                <g class="pig-face">
+                  <ellipse class="pig-eye pig-hole" cx="81" cy="94" rx="8" ry="8" />
+                  <ellipse class="pig-eye pig-hole" cx="119" cy="94" rx="8" ry="8" />
+                  <g class="pig-snout">
+                    <ellipse class="pig-hole" cx="100" cy="132" rx="28" ry="17" />
+                    <circle cx="89.5" cy="132" r="5" />
+                    <circle cx="110.5" cy="132" r="5" />
+                  </g>
+                </g>
+              </g>
+            </g>
           </svg>
         </div>
       </a>
@@ -122,7 +73,7 @@ const latest = (await getCollection("projects"))
             </svg>
             <span class="opacity-60 hidden sm:inline">Last project</span>
             <span class="opacity-30 hidden sm:inline" aria-hidden="true">·</span>
-            <span class="text-black dark:text-white">{latest.data.title}</span>
+            <span class="text-ink">{latest.data.title}</span>
             <span class="opacity-60 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-accent-primary" aria-hidden="true">→</span>
           </a>
         </InteractionSound>
@@ -236,8 +187,9 @@ const latest = (await getCollection("projects"))
       {NAV.map((item, i) => (
         <a
           href={item.href}
-          class:list={["mobile-menu-link !font-serif text-5xl tracking-tight", { "text-accent-primary": isCurrent(item.href) }]}
+          class:list={["font-serif text-5xl tracking-tight", { "text-accent-primary": isCurrent(item.href) }]}
           style={`--i:${i}`}
+          data-reveal
           aria-current={isCurrent(item.href) ? "page" : undefined}
         >
           {item.label}
@@ -245,7 +197,7 @@ const latest = (await getCollection("projects"))
       ))}
     </nav>
     {latest && (
-      <a href={`/projects/${latest.id}`} class="mobile-menu-link mt-10 font-mono text-xs uppercase tracking-[0.2em] opacity-60" style="--i:3">
+      <a href={`/projects/${latest.id}`} class="mt-10 eyebrow opacity-60" style="--i:3" data-reveal>
         Last project · {latest.data.title} →
       </a>
     )}
@@ -304,44 +256,32 @@ const latest = (await getCollection("projects"))
     flex-direction: column;
     justify-content: center;
     padding: 6rem 1.5rem 3rem;
-    background: #fff7ed;
+    background: rgb(var(--color-page));
+    /* Links reveal quicker and tighter than page text. Toggling [hidden]
+       restarts the animation, so it replays every time the menu opens. */
+    --reveal-duration: 0.6s;
+    --reveal-step: 60ms;
+    --reveal-base: 0ms;
   }
   .mobile-menu[hidden] {
     display: none;
-  }
-  :global(html.dark) .mobile-menu {
-    background: #020617;
-  }
-  .mobile-menu-link {
-    animation: menu-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
-    animation-delay: calc(var(--i, 0) * 60ms);
-  }
-  @keyframes menu-in {
-    from {
-      opacity: 0;
-      transform: translateY(12px);
-      filter: blur(6px);
-    }
   }
   :global(html.menu-open) {
     overflow: hidden;
   }
   /* Shared backdrop for the header's pills: readable over the ASCII and content. */
   .header-pill {
-    background: rgb(255 247 237 / 0.78);
-    border: 1px solid rgb(0 0 0 / 0.08);
+    background: rgb(var(--color-page) / 0.78);
+    border: 1px solid rgb(var(--color-ink) / 0.08);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
   }
+  /* The border needs a touch more contrast on the dark page. */
   :global(html.dark) .header-pill {
-    background: rgb(2 6 23 / 0.78);
-    border-color: rgb(255 255 255 / 0.1);
+    border-color: rgb(var(--color-ink) / 0.1);
   }
   a.header-pill:hover {
-    background: rgb(255 247 237 / 0.95);
-  }
-  :global(html.dark) a.header-pill:hover {
-    background: rgb(2 6 23 / 0.95);
+    background: rgb(var(--color-page) / 0.95);
   }
   .nav-link {
     opacity: 0.75;
@@ -363,23 +303,30 @@ const latest = (await getCollection("projects"))
     border-radius: 9999px;
     background: currentColor;
     transform: scale(0);
-    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition: transform 0.3s var(--ease-out-soft);
   }
   .nav-link:hover .nav-dot,
   .nav-link.is-current .nav-dot {
     transform: scale(1);
   }
-  .sun-moon {
+  /* Timing shared by the theme and sound icons. */
+  header {
     --duration: 500ms;
     --ease-elastic: cubic-bezier(0.5, 1.25, 0.75, 1.25);
   }
+
+  /* Theme icon: the sun's mask slides in to make a moon. */
   .sun-moon .moon-mask circle {
-    transition: cx var(--duration) var(--ease-elastic), cy var(--duration) var(--ease-elastic), transform var(--duration) var(--ease-elastic);
+    transition:
+      cx var(--duration) var(--ease-elastic),
+      cy var(--duration) var(--ease-elastic),
+      transform var(--duration) var(--ease-elastic);
   }
   :global(.dark) .sun-moon .moon-mask circle {
     cx: 17;
     cy: 11;
-    transform: translateX(-7px) translateY(1px); /* fallback for browsers not supporting cx transition */
+    /* Fallback for browsers that can't transition cx. */
+    transform: translateX(-7px) translateY(1px);
   }
   @supports (cx: 17) {
     :global(.dark) .sun-moon .moon-mask circle {
@@ -394,7 +341,9 @@ const latest = (await getCollection("projects"))
     transform: scale(1.75);
   }
   .sun-moon .sun-beams {
-    transition: transform var(--duration) var(--ease-elastic), opacity var(--duration) ease-in-out;
+    transition:
+      transform var(--duration) var(--ease-elastic),
+      opacity var(--duration) ease-in-out;
     transform-origin: center;
   }
   :global(.dark) .sun-moon .sun-beams {
@@ -402,18 +351,22 @@ const latest = (await getCollection("projects"))
     opacity: 0;
   }
 
-  /* Sound Toggle Animations */
+  /* Sound icon: the waves collapse into a cross when muted. */
   .sound-icon .sound-waves {
-    transition: opacity var(--duration) ease-in-out, transform var(--duration) var(--ease-elastic);
+    transition:
+      opacity var(--duration) ease-in-out,
+      transform var(--duration) var(--ease-elastic);
     transform-origin: center;
   }
-  .sound-icon .sound-cross-1, .sound-icon .sound-cross-2 {
-    transition: opacity var(--duration) ease-in-out, transform var(--duration) var(--ease-elastic);
+  .sound-icon .sound-cross-1,
+  .sound-icon .sound-cross-2 {
+    transition:
+      opacity var(--duration) ease-in-out,
+      transform var(--duration) var(--ease-elastic);
     transform-origin: 18px 12px;
     opacity: 0;
     transform: scale(0.5) rotate(-45deg);
   }
-  
   :global(.muted) .sound-icon .sound-waves {
     opacity: 0;
     transform: translateX(-5px) scale(0.5);
@@ -422,5 +375,73 @@ const latest = (await getCollection("projects"))
   :global(.muted) .sound-icon .sound-cross-2 {
     opacity: 1;
     transform: scale(1) rotate(0deg);
+  }
+
+  /* Pig: JS drives --lx/--ly (look direction, -1..1) and --sniff (0..1);
+     each layer moves by its own amount, in SVG units. */
+  .cochon-svg {
+    --lx: 0;
+    --ly: 0;
+    --sniff: 0;
+    overflow: hidden;
+  }
+  .cochon-svg .pig-hole {
+    fill: rgb(var(--color-page));
+  }
+  .pig-rig {
+    transform-origin: 100px 160px;
+    transform: rotate(calc(var(--lx) * 6deg));
+  }
+  .pig-ears {
+    transform: translate(calc(var(--lx) * 4px), calc(var(--ly) * 4px));
+  }
+  .pig-head {
+    transform: translate(calc(var(--lx) * 7px), calc(var(--ly) * 7px));
+  }
+  .pig-face {
+    transform: translate(calc(var(--lx) * 18px), calc(var(--ly) * 15px));
+  }
+  .pig-snout {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(calc(1 + var(--sniff) * 0.1), calc(1 + var(--sniff) * 0.06));
+  }
+  .pig-eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 70ms ease-in;
+  }
+  .cochon-svg.is-blinking .pig-eye {
+    transform: scaleY(0.12);
+  }
+  .pig-ear {
+    transform-box: fill-box;
+  }
+  .pig-ear-l {
+    transform-origin: 90% 75%;
+  }
+  .pig-ear-r {
+    transform-origin: 10% 75%;
+  }
+  .pig-ear.is-flicking {
+    animation: pig-ear-flick 420ms cubic-bezier(0.3, 0.7, 0.4, 1);
+  }
+  .pig-ear-r.is-flicking {
+    animation-name: pig-ear-flick-r;
+  }
+  @keyframes pig-ear-flick {
+    30% { transform: rotate(-14deg); }
+    60% { transform: rotate(5deg); }
+  }
+  @keyframes pig-ear-flick-r {
+    30% { transform: rotate(14deg); }
+    60% { transform: rotate(-5deg); }
+  }
+  .cochon-svg.is-bouncing {
+    animation: pig-bounce 380ms cubic-bezier(0.3, 0.7, 0.4, 1.4);
+  }
+  @keyframes pig-bounce {
+    25% { transform: scale(1.12, 0.88); }
+    55% { transform: scale(0.94, 1.08); }
   }
 </style>
