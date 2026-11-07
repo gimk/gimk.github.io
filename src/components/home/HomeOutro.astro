@@ -93,10 +93,10 @@ const entries = await Promise.all(
 <section
   data-anchor="closing"
   id="closing"
-  class="relative min-h-[100svh] flex flex-col items-center justify-center text-center gap-8"
+  class="relative flex flex-col items-center justify-center text-center gap-8"
 >
   <div
-    class="stage-backdrop flex flex-col items-center gap-8 px-16 py-12"
+    class="stage-backdrop flex flex-col items-center gap-8 px-4 md:px-16 py-12"
     style="--backdrop-stop: 40%"
   >
     <h2 class="eyebrow">Contact</h2>
@@ -105,15 +105,15 @@ const entries = await Promise.all(
     </p>
     <a
       href={`mailto:${SITE.EMAIL}`}
-      class="font-serif text-xl md:text-2xl text-accent-primary hover:underline"
+      class="font-serif text-xl md:text-2xl text-accent-primary hover:underline py-2 -my-2"
     >
       {SITE.EMAIL}
     </a>
-    <ul class="flex flex-wrap justify-center items-center font-mono text-xs uppercase tracking-[0.2em]">
+    <ul class="flex flex-wrap justify-center items-center font-mono text-xs uppercase tracking-[0.2em] -my-3">
       {SOCIALS.map((s, i) => (
         <li class="flex items-center">
-          {i > 0 && <span class="opacity-50 mx-3" aria-hidden="true">/</span>}
-          <a href={s.HREF} target="_blank" rel="noopener" class="opacity-80 hover:opacity-100 hover:underline">
+          {i > 0 && <span class="opacity-50 mx-1 md:mx-2" aria-hidden="true">/</span>}
+          <a href={s.HREF} target="_blank" rel="noopener" class="inline-block px-2 py-3 opacity-80 hover:opacity-100 hover:underline">
             {s.NAME}
           </a>
         </li>

@@ -67,6 +67,22 @@ body > footer {
   @apply pt-10 pb-8 overflow-x-clip;
 }
 
+/* Home: the page ends on the closing section, a full screen whose content is
+   centred under the ASCII rings. The footer overlays its bottom instead of
+   adding height after it, so at max scroll the text and the stage line up. */
+body:has(#closing) > main {
+  padding-bottom: 0;
+}
+#closing {
+  min-height: 100svh;
+  min-height: 100dvh; /* tracks mobile toolbars, like the stage's innerHeight */
+}
+body:has(#closing) > footer {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 10;
+}
+
 /* Markdown content. */
 article {
   @apply max-w-full prose dark:prose-invert prose-img:mx-auto prose-img:my-auto;
