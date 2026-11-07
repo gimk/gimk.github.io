@@ -16,7 +16,7 @@ After an initial brief and brainstorming from the CPO, I had to imagine, priorit
 
 ![Future of coach project page](/projectfiles/coach/home-app-page1.png)
 
-<div class="text-center md:mx-16 mb-16 border rounded-2xl bg-black/10 border-black/20 dark:border-white/20 p-4 gap-2">
+<div class="text-center md:mx-16 mb-16">
     <svg class="inline-block" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_4021_23699)"> <path class="stroke-black/75 dark:stroke-white/75" d="M12 10L8 6L4 10" stroke="" stroke-linecap="round" stroke-linejoin="round"/></g><defs> <clipPath id="clip0_4021_23699"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>
     <p class="mt-1">Above is the home page of the app. As you can see, the navigation is peculiar, with 3 buttons. The left one goes to Projects, and the right one goes to the Timeline. We'll see about the chat button later.</p>
 </div>
@@ -44,11 +44,11 @@ Both are very similar in essence, after all creating a project isn't very compli
 
 As you can see on the first screen below, the chat appears above the screen, anywhere on the home page. It's similar to the way Gemini is presented on a Pixel phone.
 
-<div class="flex gap-4 md:gap-6 md:my-12 md:-mx-24">
-    <div class=""><img src="/projectfiles/coach/ia-project1.png" alt="ia assistant suggesting project creation"/></div>
-    <div class=""><img src="/projectfiles/coach/ia-project2.png" alt="ia assistant suggesting project creation"/></div>
-    <div class=""><img src="/projectfiles/coach/ia-project3.png" alt="ia assistant suggesting project creation"/></div>
-</div>
+<figure class="flex items-start gap-4 md:gap-6">
+    <img src="/projectfiles/coach/ia-project1.png" alt="ia assistant suggesting project creation"/>
+    <img src="/projectfiles/coach/ia-project2.png" alt="ia assistant suggesting project creation"/>
+    <img src="/projectfiles/coach/ia-project3.png" alt="ia assistant suggesting project creation"/>
+</figure>
 
 Obviously I'm skipping steps with my screens here. You would have to subscribe to a loan at some point, and sign a contract, etc.
 
@@ -58,11 +58,11 @@ The Timeline page is very useful to keep an eye on the overall health of your fi
 
 It’s also the place to keep track of your recurring expenses. One fun feature here is the _AI-powered Subscription Manager_, using our subtly named AI, **CoachAI**.
 
-<div class="flex gap-4 md:gap-6 md:my-12 md:-mx-24">
-    <div class=""><img src="/projectfiles/coach/recurring1.png" alt="ia assistant suggesting ways to reduce recurring expenses"/></div>
-    <div class=""><img src="/projectfiles/coach/recurring2.png" alt="ia assistant suggesting ways to reduce recurring expenses"/></div>
-    <div class=""><img src="/projectfiles/coach/recurring3.png" alt="ia assistant suggesting ways to reduce recurring expenses"/></div>
-</div>
+<figure class="flex items-start gap-4 md:gap-6">
+    <img src="/projectfiles/coach/recurring1.png" alt="ia assistant suggesting ways to reduce recurring expenses"/>
+    <img src="/projectfiles/coach/recurring2.png" alt="ia assistant suggesting ways to reduce recurring expenses"/>
+    <img src="/projectfiles/coach/recurring3.png" alt="ia assistant suggesting ways to reduce recurring expenses"/>
+</figure>
 
 Everything has its own loading, to make the experience as realistic as possible. You can check this in the third persona of the prototype available at the top of this page.
 
@@ -72,19 +72,19 @@ Being widget-based, the Home page is designed for high customizability; almost a
 
 At the center of this experience, is the chat with CoachAI, available anywhere and ready to answer any of your questions. See below an example of an interaction.
 
-<div class="flex gap-4 md:gap-6 md:my-12 md:-mx-24">
-    <div class=""><img src="/projectfiles/coach/ia-talk1.png" alt="ia assistant answering questions about finance and travels"/></div>
-    <div class=""><img src="/projectfiles/coach/ia-talk2.png" alt="ia assistant answering questions about finance and travels"/></div>
-    <div class=""><img src="/projectfiles/coach/ia-talk3.png" alt="ia assistant answering questions about finance and travels"/></div>
-</div>
+<figure class="flex items-start gap-4 md:gap-6">
+    <img src="/projectfiles/coach/ia-talk1.png" alt="ia assistant answering questions about finance and travels"/>
+    <img src="/projectfiles/coach/ia-talk2.png" alt="ia assistant answering questions about finance and travels"/>
+    <img src="/projectfiles/coach/ia-talk3.png" alt="ia assistant answering questions about finance and travels"/>
+</figure>
 
 At the top of the page, you have the classic banking/aggregation experience, with all your connected accounts listed. You can add or remove banks as you wish, using open banking technologies.
 
-<div class="flex gap-4 md:gap-6 md:my-12 md:-mx-24">
-    <div class=""><img src="/projectfiles/coach/add-bank1.png" alt="connect a new bank to your coach app"/></div>
-    <div class=""><img src="/projectfiles/coach/add-bank2.png" alt="connect a new bank to your coach app"/></div>
-    <div class=""><img src="/projectfiles/coach/add-bank3.png" alt="connect a new bank to your coach app"/></div>
-</div>
+<figure class="flex items-start gap-4 md:gap-6">
+    <img src="/projectfiles/coach/add-bank1.png" alt="connect a new bank to your coach app"/>
+    <img src="/projectfiles/coach/add-bank2.png" alt="connect a new bank to your coach app"/>
+    <img src="/projectfiles/coach/add-bank3.png" alt="connect a new bank to your coach app"/>
+</figure>
 
 It's quite easy now, especially on mobile, where you just have to open your bank app and accept the connection.
 
@@ -94,26 +94,26 @@ We've all had that moment when you see a transaction from a week ago and you jus
 
 _Sigh_, I wish the transaction names were more explicit.
 
-<div class="flex gap-4 md:gap-6 md:my-8 md:-mx-24">
-    <div class=""><img src="/projectfiles/coach/transac-find1.png" alt="Ask coachai to find what the hell is this transaction"/></div>
-    <div class=""><img src="/projectfiles/coach/transac-find2.png" alt="Ask coachai to find what the hell is this transaction"/></div>
-    <div class=""><img src="/projectfiles/coach/transac-find3.png" alt="Ask coachai to find what the hell is this transaction"/></div>
-</div>
+<figure class="flex items-start gap-4 md:gap-6">
+    <img src="/projectfiles/coach/transac-find1.png" alt="Ask coachai to find what the hell is this transaction"/>
+    <img src="/projectfiles/coach/transac-find2.png" alt="Ask coachai to find what the hell is this transaction"/>
+    <img src="/projectfiles/coach/transac-find3.png" alt="Ask coachai to find what the hell is this transaction"/>
+</figure>
 
 The rest of the Home page and widgets is straightforward. We have widgets to categorize transactions, show your monthly savings, but also widgets for your carbon footprint, credit score, future expenses, and so on.
 
-<div class="flex gap-2 md:gap-4 md:my-8 md:-mx-24">
-    <div class=""><img src="/projectfiles/coach/features1.png" alt="A screenshot of a widget on the home page"/></div>
-    <div class=""><img src="/projectfiles/coach/features2.png" alt="A screenshot of a widget on the home page"/></div>
-    <div class=""><img src="/projectfiles/coach/features3.png" alt="A screenshot of a widget on the home page"/></div>
-    <div class=""><img src="/projectfiles/coach/features4.png" alt="A screenshot of a widget on the home page"/></div>
-    <div class=""><img src="/projectfiles/coach/features5.png" alt="A screenshot of a widget on the home page"/></div>
-</div>
+<figure class="flex items-start gap-2 md:gap-4">
+    <img src="/projectfiles/coach/features1.png" alt="A screenshot of a widget on the home page"/>
+    <img src="/projectfiles/coach/features2.png" alt="A screenshot of a widget on the home page"/>
+    <img src="/projectfiles/coach/features3.png" alt="A screenshot of a widget on the home page"/>
+    <img src="/projectfiles/coach/features4.png" alt="A screenshot of a widget on the home page"/>
+    <img src="/projectfiles/coach/features5.png" alt="A screenshot of a widget on the home page"/>
+</figure>
 
 Naturally, the best way to truly appreciate the effort invested in this project is to use the [**full prototype**](<https://www.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach-(Copy)?page-id=2%3A15&node-id=3-74499&node-type=canvas&viewport=-11533%2C-1257%2C0.82&t=x6nHlUpV0nzDfHer-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1>). Be aware, though, that navigating them can be a little challenging. These are scenarized prototypes based on personas, but you should still be able to easily observe most of the features mentioned above.
 
 <div class="flex justify-center">
-    <iframe style="border: 1px solid rgba(0, 0, 0, 0.1);" width="450" height="800" src="https://embed.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach--Copy-?page-id=2%3A15&node-id=3-74499&p=f&viewport=-176%2C148%2C0.1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1&embed-host=share" allowfullscreen></iframe>
+    <iframe class="max-w-full" style="border: 1px solid rgba(0, 0, 0, 0.1);" width="450" height="800" src="https://embed.figma.com/proto/MQtL93liBRA63HQ11iZa5j/Future-of-Coach--Copy-?page-id=2%3A15&node-id=3-74499&p=f&viewport=-176%2C148%2C0.1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=3%3A74499&show-proto-sidebar=1&embed-host=share" allowfullscreen></iframe>
 </div>
 
 Thank you for reading!

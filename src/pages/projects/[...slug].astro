@@ -26,8 +26,8 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
   description={project.data.description}
   image={project.data.ogImage}
   type="article"
-  asciiBackground={false}
-  bareHeader
+ 
+ 
 >
   <canvas class="ascii-stage" aria-hidden="true"></canvas>
   <div
@@ -102,6 +102,18 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     max-width: none;
     transform: translateX(-50%);
   }
+  /* Rows of images inside a wide figure share the width instead of overflowing. */
+  .project-body article figure > img,
+  .project-body article figure > video {
+    width: 100%;
+    height: auto;
+    margin: 0;
+  }
+  .project-body article figure.flex > *,
+  .project-body article figure .flex > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
   .project-body article h2,
   .project-body article h3 {
     @apply !font-serif font-normal tracking-tight;
@@ -135,7 +147,6 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
   onPage("#project-page", () => {
     const page = document.getElementById("project-page")!;
     const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
-    const intro = document.getElementById("project-intro")!;
     const body = document.getElementById("project-body")!;
     const next = document.getElementById("project-next")!;
     const { id = "", thumb = "", nextId = "", nextThumb = "" } = page.dataset;

@@ -40,7 +40,7 @@ export const rectOf = (el: Element): Rect => {
 export const side = (): Rect =>
   wide()
     ? { x: innerWidth * 0.28, y: -innerHeight * 0.35, w: innerWidth * 1.12, h: innerHeight * 1.7 }
-    : { x: -innerWidth * 0.1, y: innerHeight * 0.02, w: innerWidth * 1.2, h: innerHeight * 0.42 };
+    : { x: -innerWidth * 0.15, y: innerHeight * 0.06, w: innerWidth * 1.3, h: innerHeight * 0.44 };
 /** The visible right half, where images and the field's centre sit. */
 export const sideFocus = (): Rect =>
   wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();

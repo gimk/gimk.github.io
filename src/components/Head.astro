@@ -87,6 +87,7 @@ const imageURL = new URL(image, Astro.site);
   // This script runs only once on initial load for View Transitions
   import type { TransitionBeforeSwapEvent } from "astro:transitions/client";
   import { initPigAnimation } from "../scripts/pig-animation";
+  import "@lib/ui-sounds";
   
   document.addEventListener("astro:before-swap", (e) =>
     [
@@ -103,16 +104,6 @@ const imageURL = new URL(image, Astro.site);
 </script>
 
 <script is:inline>
-  // Function to add 'show' class to elements for staggered animation
-  function animate() {
-    const animateElements = document.querySelectorAll(".animate");
-    animateElements.forEach((element, index) => {
-      setTimeout(() => {
-        element.classList.add("show");
-      }, index * 150); // Stagger animation start time
-    });
-  }
-
   // Function to add/remove 'scrolled' class based on scroll position
   function onScroll() {
     if (window.scrollY > 0) {
@@ -204,13 +195,11 @@ const imageURL = new URL(image, Astro.site);
   // This function sets up event listeners and starts animations.
   // It's called on initial load and after Astro view transitions.
   function init() {
-    console.log("Running init()..."); // Log init execution for debugging
 
     // --- Initial Setup: Theme, Scroll Behavior, Entry Animations ---
     preloadTheme(); // Set the theme immediately
     preloadSoundState(); // Ensure the muted class is applied on view transition swaps
     onScroll(); // Check initial scroll position
-    animate(); // Start entry animations
 
     // --- Event Listener Setup ---
 
@@ -219,14 +208,6 @@ const imageURL = new URL(image, Astro.site);
     // Remove existing listener to prevent duplicates on swaps, then add it
     backToTop?.removeEventListener("click", scrollToTop);
     backToTop?.addEventListener("click", scrollToTop); // Use named function directly
-
-    // Back to Previous Page Button (e.g., on a blog post)
-    const backToPrev = document.getElementById("back-to-prev");
-    // Add listener only if it hasn't been added before (using a data attribute)
-    if (backToPrev && !backToPrev.hasAttribute("data-listener-added")) {
-      backToPrev.addEventListener("click", () => window.history.back());
-      backToPrev.setAttribute("data-listener-added", "true"); // Mark as added
-    }
 
     // Theme Toggle Button
     const themeColorMeta = document.querySelector("meta[name=\"theme-color\"]");

@@ -70,7 +70,7 @@ const focusVolume = focusVolumeProp ?? presetData.focusVolume ?? 1.0;
   document.addEventListener("click", (event) => {
     const target = (event.target as HTMLElement).closest("[data-sound-click]");
     if (target instanceof HTMLElement && target.dataset.soundClick) {
-      playSound(target.dataset.soundClick, getVolume(target, 'click'));
+      playSound(target.dataset.soundClick, getVolume(target, "click"));
     }
   }, { capture: true });
 
@@ -79,15 +79,15 @@ const focusVolume = focusVolumeProp ?? presetData.focusVolume ?? 1.0;
     const target = (event.target as HTMLElement).closest("[data-sound-cursor-in], [data-sound-cursor-out]");
     if (target instanceof HTMLElement) {
       // Logic for Cursor In
-      if (target.dataset.soundCursorIn && !target.classList.contains('is-cursor-active')) {
-        target.classList.add('is-cursor-active');
-        playSound(target.dataset.soundCursorIn, getVolume(target, 'cursorIn'));
+      if (target.dataset.soundCursorIn && !target.classList.contains("is-cursor-active")) {
+        target.classList.add("is-cursor-active");
+        playSound(target.dataset.soundCursorIn, getVolume(target, "cursorIn"));
         
         // Setup Logic for Cursor Out (since mouseleave doesn't bubble)
-        target.addEventListener('mouseleave', () => {
-          target.classList.remove('is-cursor-active');
+        target.addEventListener("mouseleave", () => {
+          target.classList.remove("is-cursor-active");
           if (target.dataset.soundCursorOut) {
-            playSound(target.dataset.soundCursorOut, getVolume(target, 'cursorOut'));
+            playSound(target.dataset.soundCursorOut, getVolume(target, "cursorOut"));
           }
         }, { once: true });
       }
@@ -98,7 +98,7 @@ const focusVolume = focusVolumeProp ?? presetData.focusVolume ?? 1.0;
   document.addEventListener("focusin", (event) => {
     const target = (event.target as HTMLElement).closest("[data-sound-focus]");
     if (target instanceof HTMLElement && target.dataset.soundFocus) {
-      playSound(target.dataset.soundFocus, getVolume(target, 'focus'));
+      playSound(target.dataset.soundFocus, getVolume(target, "focus"));
     }
   });
 

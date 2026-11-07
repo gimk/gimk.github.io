@@ -30,8 +30,11 @@ const half =
 <section
   id={id}
   class:list={[
-    "relative flex flex-col justify-center",
-    tall ? "min-h-[calc(100svh-6rem)] pb-16" : "min-h-[62svh] pt-16 pb-20",
+    "relative flex flex-col md:justify-center",
+    // Phones: the ASCII is a band across the top, so the text sits below it.
+    tall
+      ? "min-h-[calc(100svh-6rem)] pb-[14svh] md:pb-16 justify-end md:justify-center"
+      : "min-h-[62svh] pt-[40svh] pb-16 md:pt-16 md:pb-20",
   ]}
 >
   <div class:list={["flex flex-col gap-7", half]}>

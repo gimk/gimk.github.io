@@ -207,4 +207,3 @@ export const FIELDS: Record<string, FieldFactory> = {
   calm,
 };
 
-export const FIELD_NAMES = Object.keys(FIELDS);

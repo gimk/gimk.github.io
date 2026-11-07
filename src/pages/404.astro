@@ -1,0 +1,73 @@
+---
+import PageLayout from "@layouts/PageLayout.astro";
+import PageIntro from "@components/stage/PageIntro.astro";
+---
+
+<PageLayout
+  title="Not found"
+  description="This page doesn't exist, or it moved."
+ 
+ 
+>
+  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <div id="notfound-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
+    <PageIntro
+      align="center"
+      tall
+      label="404 — Not found"
+      title="Lost in the field."
+      description="This page doesn't exist, or it moved."
+    >
+      <div data-reveal class="flex flex-wrap items-center justify-center gap-3" style="--i:4">
+        <a href="/" class="font-mono sp-link cta-pill"><span aria-hidden="true">←</span> Home</a>
+        <a href="/projects" class="font-mono sp-link cta-pill">Projects <span aria-hidden="true">→</span></a>
+        <a href="/blog" class="font-mono sp-link cta-pill">Writing <span aria-hidden="true">→</span></a>
+      </div>
+    </PageIntro>
+  </div>
+</PageLayout>
+
+<style is:global>
+  /* One screen, no scroll: no footer, and the opening fits under the header. */
+  html:has(#notfound-page) {
+    overflow: hidden;
+  }
+  html:has(#notfound-page) footer {
+    display: none;
+  }
+  html:has(#notfound-page) main {
+    padding-block: 0;
+  }
+  #notfound-page > section {
+    min-height: calc(100svh - 5.5rem);
+    padding-bottom: 0;
+    justify-content: center;
+  }
+  /* Soft backdrop so the text stays legible over the ASCII. */
+  #notfound-page section > div {
+    background: radial-gradient(closest-side, rgb(255 247 237 / 0.85) 45%, transparent);
+    padding: 4rem 2rem;
+  }
+  html.dark #notfound-page section > div {
+    background: radial-gradient(closest-side, rgb(2 6 23 / 0.85) 45%, transparent);
+  }
+</style>
+
+<script>
+  import { onPage, createStage, centre, PLAYLIST } from "@lib/ascii/stage";
+  import type { AsciiState } from "@lib/ascii/types";
+
+  onPage("#notfound-page", () => {
+    const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
+    const stage = createStage(canvas);
+    const { engine } = stage;
+    const states: AsciiState[] = [
+      { id: "lost", field: "wave", fields: PLAYLIST, period: 5, accent: 0.6, shape: null, frame: centre, intensity: 0.55, ambient: 1 },
+    ];
+    engine.setStates(states);
+    engine.target = 0;
+    engine.settle();
+    engine.start();
+    return () => stage.destroy();
+  });
+</script>
