@@ -1,65 +1,198 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import Container from "@components/Container-md.astro";
-import FormattedDate from "@components/FormattedDate.astro";
+import PageIntro from "@components/stage/PageIntro.astro";
 import { readingTime } from "@lib/utils";
-import BackToPrev from "@components/BackToPrev.astro";
-import Link from "@components/Link.astro";
 
 export async function getStaticPaths() {
   const projects = (await getCollection("projects"))
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  return projects.map((project) => ({
+  return projects.map((project, i) => ({
     params: { slug: project.id },
-    props: project,
+    // The next (older) project, wrapping around to the newest.
+    props: { project, next: projects[(i + 1) % projects.length] },
   }));
 }
-type Props = CollectionEntry<"projects">;
+type Props = { project: CollectionEntry<"projects">; next: CollectionEntry<"projects"> };
 
-const project = Astro.props;
+const { project, next } = Astro.props;
 const { Content } = await render(project);
+const date = project.data.date.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 ---
 
-<PageLayout title={project.data.title} description={project.data.description} image={project.data.ogImage} type="article">
-  <Container>
-    <div class="animate">
-      <BackToPrev href="/projects"> Back to projects </BackToPrev>
-    </div>
-    <div class="space-y-1 my-10">
-      <div class="animate flex items-center gap-1.5">
-        <div class="font-base text-sm">
-          <FormattedDate date={project.data.date} />
-        </div>
-        &bull;
-        <div class="font-base text-sm">
-          {readingTime(project.body)}
-        </div>
-      </div>
-      <div class="animate text-2xl font-semibold text-black dark:text-white">
-        {project.data.title}
-      </div>
+<PageLayout
+  title={project.data.title}
+  description={project.data.description}
+  image={project.data.ogImage}
+  type="article"
+  asciiBackground={false}
+  bareHeader
+>
+  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <div
+    id="project-page"
+    class="mx-auto max-w-screen-xl px-5 md:px-10"
+    data-id={project.id}
+    data-thumb={project.data.thumbnail}
+    data-next-id={next.id}
+    data-next-thumb={next.data.thumbnail}
+  >
+    <PageIntro
+      id="project-intro"
+      tall
+      back={{ href: "/projects", label: "Projects" }}
+      label={`${date} — ${readingTime(project.body)}`}
+      title={project.data.title}
+      description={project.data.description}
+    >
       {
         (project.data.demoURL || project.data.repoURL) && (
-          <nav class="animate flex gap-1">
+          <div data-reveal data-edge class="flex flex-wrap gap-3 mt-3" style="--i:4">
             {project.data.demoURL && (
-              <Link href={project.data.demoURL} external>
-                {project.data.demoLabel || "visit site"}
-              </Link>
+              <a href={project.data.demoURL} target="_blank" rel="noopener" class="font-mono sp-link cta-pill">
+                {project.data.demoLabel || "Visit site"} <span aria-hidden="true">↗</span>
+              </a>
             )}
-            {project.data.demoURL && project.data.repoURL && <span>/</span>}
             {project.data.repoURL && (
-              <Link href={project.data.repoURL} external>
-                {project.data.repoLabel || "more info"}
-              </Link>
+              <a href={project.data.repoURL} target="_blank" rel="noopener" class="font-mono sp-link cta-pill">
+                {project.data.repoLabel || "More info"} <span aria-hidden="true">↗</span>
+              </a>
             )}
-          </nav>
+          </div>
         )
       }
+    </PageIntro>
+
+    <div id="project-body" class="project-body mx-auto max-w-2xl pb-[20vh]">
+      <article>
+        <Content />
+      </article>
     </div>
-    <article class="animate">
-      <Content />
-    </article>
-  </Container>
+
+    <!-- Next project: the stage morphs into its image as it arrives. -->
+    <section id="project-next" class="relative min-h-[100svh] flex items-center">
+      <a href={`/projects/${next.id}`} class="link-row flex flex-col gap-6 md:w-1/2 py-10">
+        <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">Next project</span>
+        <span data-edge class="!font-serif text-5xl md:text-7xl tracking-tight leading-[0.98] text-black dark:text-white">
+          {next.data.title}
+        </span>
+        <span data-edge class="max-w-md font-serif text-xl leading-snug opacity-80">{next.data.description}</span>
+        <span data-edge class="font-mono sp-link cta-pill self-start mt-3">
+          Read the case study <span aria-hidden="true">→</span>
+        </span>
+      </a>
+    </section>
+  </div>
 </PageLayout>
+
+<style is:global>
+  /* Reading column: media runs wider than the text. */
+  .project-body article {
+    @apply font-serif text-lg leading-relaxed;
+  }
+  .project-body article > video,
+  .project-body article > p > video,
+  .project-body article > p > img:only-child,
+  .project-body article > img,
+  .project-body article > figure {
+    position: relative;
+    left: 50%;
+    width: min(64rem, calc(100vw - 2.5rem));
+    max-width: none;
+    transform: translateX(-50%);
+  }
+  .project-body article h2,
+  .project-body article h3 {
+    @apply !font-serif font-normal tracking-tight;
+  }
+  .project-body article h2 {
+    @apply text-3xl mt-20;
+  }
+  .project-body article h3 {
+    @apply text-2xl mt-14;
+  }
+  .project-body article hr {
+    @apply my-16 border-black/10 dark:border-white/10;
+  }
+</style>
+
+<script>
+  import {
+    onPage,
+    createStage,
+    side,
+    sideFocus,
+    fieldFor,
+    PROJECT_LOOK,
+    scrollProgress,
+    docTop,
+    edgeBlur,
+    type Anchor,
+  } from "@lib/ascii/stage";
+  import type { AsciiState } from "@lib/ascii/types";
+
+  onPage("#project-page", () => {
+    const page = document.getElementById("project-page")!;
+    const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
+    const intro = document.getElementById("project-intro")!;
+    const body = document.getElementById("project-body")!;
+    const next = document.getElementById("project-next")!;
+    const { id = "", thumb = "", nextId = "", nextThumb = "" } = page.dataset;
+
+    const stage = createStage(canvas);
+    const { engine } = stage;
+    stage.addProjectImage("this", thumb, id);
+    stage.addProjectImage("next", nextThumb, nextId);
+
+    const states: AsciiState[] = [
+      // The project's image, as on the home page.
+      { id: "this", field: fieldFor(id), shape: "this", frame: side, focus: sideFocus, intensity: 1, ...PROJECT_LOOK },
+      // Reading: the stage steps back almost entirely.
+      { id: "read", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.08, ambient: 0.6 },
+      // The next project arrives.
+      { id: "next", field: fieldFor(nextId), shape: "next", frame: side, focus: sideFocus, intensity: 1, ...PROJECT_LOOK },
+    ];
+    engine.setStates(states);
+
+    let anchors: Anchor[] = [];
+    function measure() {
+      const vh = innerHeight;
+      anchors = [
+        { y: 0, win: [0.35, 1] },
+        { y: docTop(body) + vh * 0.1, win: [0.5, 1] },
+        { y: docTop(next) + next.offsetHeight / 2 - vh / 2, win: [0, 1] },
+      ];
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+
+    // The article itself never blurs: only the opening and closing blocks do.
+    const blur = edgeBlur([...page.querySelectorAll<HTMLElement>("[data-edge]")], engine.reducedMotion);
+
+    engine.target = scrollProgress(anchors);
+    engine.settle();
+    engine.start();
+
+    let raf = 0;
+    let lastY = scrollY;
+    let lastT = performance.now();
+    function frame(now: number) {
+      const dt = Math.max(1, now - lastT) / 1000;
+      engine.velocity += ((scrollY - lastY) / dt - engine.velocity) * 0.15;
+      lastY = scrollY;
+      lastT = now;
+      engine.target = scrollProgress(anchors);
+      blur();
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      stage.destroy();
+    };
+  });
+</script>

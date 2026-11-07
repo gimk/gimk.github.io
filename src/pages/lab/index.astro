@@ -287,39 +287,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
   .scene-project {
     opacity: var(--o, 1);
   }
-  /* Call-to-action pill: case studies and "see all" links. */
-  .cta-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 0.9rem 0.55rem 1.05rem;
-    border-radius: 9999px;
-    border: 1px solid rgb(var(--color-accent) / 0.3);
-    color: rgb(var(--color-accent));
-    font-size: 0.7rem;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    transition:
-      background-color 0.3s ease,
-      border-color 0.3s ease;
-  }
-  .cta-pill:hover,
-  .cta-pill:focus-visible,
-  .link-row:hover .cta-pill,
-  .link-row:focus-visible .cta-pill {
-    background: rgb(var(--color-accent) / 0.08);
-    border-color: rgb(var(--color-accent) / 0.6);
-  }
-  .sp-link span {
-    display: inline-block;
-    transition: transform 0.3s ease;
-  }
-  .link-row:hover .sp-link span,
-  .sp-link:hover span {
-    transform: translateX(4px);
-  }
-
   @media (prefers-reduced-motion: reduce) {
     [data-intro],
     .boot-caret,
@@ -335,399 +302,419 @@ const pad = (n: number) => String(n).padStart(2, "0");
   import { ICONS } from "@lib/ascii/icons";
   import { iconShape, imageSample, imageShape, type ImageSample } from "@lib/ascii/shapes";
   import type { AsciiState, Rect } from "@lib/ascii/types";
+  import { onPage } from "@lib/ascii/stage";
 
-  /** The hero cycles through the original animations, each blending into the next. Starts on "wave" so the opening wave flows straight into it. */
-  const HERO_PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "rings", "solar", "cells", "grid"];
+  // Runs on every visit, including client-side navigations back to this page.
+  onPage("#scene", () => {
+  let alive = true;
 
-  const root = document.documentElement;
-  const canvas = document.getElementById("ascii-stage") as HTMLCanvasElement;
-  const heroFrame = document.getElementById("hero-frame")!;
-  const scene = document.getElementById("scene")!;
-  const projectEls = [...document.querySelectorAll<HTMLElement>("[data-project]")];
-  const moreEl = document.getElementById("more-projects")!;
-  const railIndex = document.getElementById("rail-index")!;
-  const railFill = document.getElementById("rail-fill")!;
-  const experience = document.querySelector<HTMLElement>('[data-anchor="experience"]')!;
-  const blog = document.querySelector<HTMLElement>('[data-anchor="blog"]')!;
-  const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
-  const booting = root.dataset.boot === "1";
+    /** The hero cycles through the original animations, each blending into the next. Starts on "wave" so the opening wave flows straight into it. */
+    const HERO_PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "rings", "solar", "cells", "grid"];
 
-  const engine = new AsciiEngine({ canvas, fontSize: 10 });
+    const root = document.documentElement;
+    const canvas = document.getElementById("ascii-stage") as HTMLCanvasElement;
+    const heroFrame = document.getElementById("hero-frame")!;
+    const scene = document.getElementById("scene")!;
+    const projectEls = [...document.querySelectorAll<HTMLElement>("[data-project]")];
+    const moreEl = document.getElementById("more-projects")!;
+    const railIndex = document.getElementById("rail-index")!;
+    const railFill = document.getElementById("rail-fill")!;
+    const experience = document.querySelector<HTMLElement>('[data-anchor="experience"]')!;
+    const blog = document.querySelector<HTMLElement>('[data-anchor="blog"]')!;
+    const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
+    const booting = root.dataset.boot === "1";
 
-  // ---- Theme / inks: muted field, accent shape and peaks ----
-  const projectImages: (ImageSample | null)[] = projectEls.map(() => null);
-  const isDark = () => root.classList.contains("dark");
-  function applyTheme() {
-    const accent = getComputedStyle(root).getPropertyValue("--color-accent").trim().split(/\s+/).map(Number);
-    const dark = isDark();
-    const fieldInk: Rgba = dark ? [255, 255, 255, 0.34] : [20, 20, 20, 0.34];
-    const shapeInk: Rgba = [accent[0], accent[1], accent[2], dark ? 0.95 : 1];
-    engine.setInks(fieldInk, shapeInk);
-    projectImages.forEach((img, i) => {
-      if (img) engine.setShape(`project-${i}`, imageShape(img, { lightInk: dark, contrast: 1.3, floor: 0.35, fadeBottom: 0 }));
-    });
-  }
-  new MutationObserver(applyTheme).observe(root, { attributes: true, attributeFilter: ["class"] });
+    const engine = new AsciiEngine({ canvas, fontSize: 10 });
 
-  // ---- Project illustrations: each project's 3D thumbnail, shaded in ASCII ----
-  // The flat icon set is the fallback while an image loads or if it fails.
-  projectEls.forEach((el, i) => {
-    engine.setShape(`project-${i}`, iconShape(ICONS[el.dataset.icon ?? ""] ?? ICONS.blank));
-    const img = new Image();
-    img.onload = () => {
-      projectImages[i] = imageSample(img);
-      applyTheme();
-    };
-    img.src = el.dataset.thumb ?? "";
-  });
-  applyTheme();
-
-  // ---- Frames ----
-  const wide = () => innerWidth >= 768;
-  const rectOf = (el: Element): Rect => {
-    const r = el.getBoundingClientRect();
-    return { x: r.left, y: r.top, w: r.width, h: r.height };
-  };
-  /**
-   * Right side: the ellipse is much larger than the screen's right half,
-   * runs off the top, bottom and right edges, and its soft left rim reaches
-   * a little under the text column.
-   */
-  const side = (): Rect =>
-    wide()
-      ? { x: innerWidth * 0.28, y: -innerHeight * 0.35, w: innerWidth * 1.12, h: innerHeight * 1.7 }
-      : { x: -innerWidth * 0.1, y: innerHeight * 0.02, w: innerWidth * 1.2, h: innerHeight * 0.42 };
-  /** The visible right half, where images and the field's centre sit. */
-  const sideFocus = (): Rect =>
-    wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
-  /** Mirror images of the above, for the projects. */
-  const mirror = (r: Rect): Rect => ({ ...r, x: innerWidth - (r.x + r.w) });
-  const sideLeft = (): Rect => (wide() ? mirror(side()) : side());
-  const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : side());
-  const heroSide = (): Rect => (wide() ? side() : rectOf(heroFrame));
-  const centre = (): Rect => ({ x: innerWidth * 0.08, y: innerHeight * 0.04, w: innerWidth * 0.84, h: innerHeight * 0.92 });
-
-  // The opening wave is centred on the terminal caret: it starts as a point
-  // there, grows until it fills the screen, then travels into the hero ellipse.
-  let origin = { x: innerWidth * 0.2, y: innerHeight * 0.4 };
-  const seed = (): Rect => ({ x: origin.x - 1, y: origin.y - 1, w: 2, h: 2 });
-  const bloom = (): Rect => {
-    const r = Math.hypot(Math.max(origin.x, innerWidth - origin.x), Math.max(origin.y, innerHeight - origin.y)) * 1.15;
-    return { x: origin.x - r, y: origin.y - r, w: r * 2, h: r * 2 };
-  };
-
-  // ---- States ----
-  const states: AsciiState[] = [
-    { id: "seed", field: "wave", shape: null, frame: seed, intensity: 1, ambient: 1, accent: 0.8 },
-    { id: "bloom", field: "wave", shape: null, frame: bloom, intensity: 0.9, ambient: 1, accent: 0.6 },
-    { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: heroSide, focus: () => (wide() ? sideFocus() : heroSide()), intensity: 1, ambient: 1, accent: 1 },
-    ...projectEls.map((el, i) => ({
-      id: `project-${i}`,
-      field: el.dataset.field ?? "wave",
-      shape: `project-${i}`,
-      // Projects sit on the left: the stage crosses the page between sections.
-      frame: sideLeft,
-      focus: sideFocusLeft,
-      intensity: 1,
-      ambient: 0.75,
-      shapeScale: 0.72,
-      warp: 0.35,
-      texture: 0.5,
-    })),
-    // "And N more": the field alone, still on the left, closing the sequence.
-    { id: "more", field: "cells", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.8, ambient: 0.9 },
-    { id: "experience", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.5, ambient: 0.9 },
-    { id: "blog", field: "grid", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.45, ambient: 0.9 },
-    { id: "closing", field: "rings", shape: null, frame: centre, intensity: 0.85, ambient: 1, accent: 0.5 },
-  ];
-  engine.setStates(states);
-  const HERO = 2;
-  const FIRST_PROJECT = 3;
-
-  // ---- Scroll → target ----
-  // Each anchor is the scrollY where a state (from "hero" on) is fully formed.
-  // `win` is the slice of the gap to the next anchor where the morph happens;
-  // outside it the state holds.
-  interface Anchor {
-    y: number;
-    win: [number, number];
-  }
-  let anchors: Anchor[] = [];
-  const docTop = (el: Element) => el.getBoundingClientRect().top + scrollY;
-  let sceneDocTop = 0;
-  function measure() {
-    const vh = innerHeight;
-    sceneDocTop = docTop(scene);
-    const centreOf = (el: HTMLElement) => sceneDocTop + el.offsetTop + el.offsetHeight / 2 - vh / 2;
-    anchors = [
-      { y: 0, win: [0.15, 0.95] },
-      // A project is fully formed when its text is centred on screen; the
-      // morph runs while one text leaves and the next arrives.
-      ...projectEls.map((el) => ({ y: centreOf(el), win: [0.3, 0.7] as [number, number] })),
-      { y: centreOf(moreEl), win: [0.15, 0.7] },
-      { y: docTop(experience) - vh * 0.1, win: [0.55, 1] },
-      { y: docTop(blog) - vh * 0.1, win: [0.5, 1] },
-      { y: docTop(closing), win: [0, 1] },
-    ];
-  }
-  measure();
-  addEventListener("resize", measure);
-  addEventListener("load", measure);
-
-  function scrollTarget(): number {
-    const y = scrollY;
-    if (y <= anchors[0].y) return HERO;
-    for (let j = 0; j < anchors.length - 1; j++) {
-      const a = anchors[j];
-      const b = anchors[j + 1];
-      if (y < b.y) {
-        const f = (y - a.y) / Math.max(1, b.y - a.y);
-        const [w0, w1] = a.win;
-        return HERO + j + Math.min(1, Math.max(0, (f - w0) / (w1 - w0)));
-      }
+    // ---- Theme / inks: muted field, accent shape and peaks ----
+    const projectImages: (ImageSample | null)[] = projectEls.map(() => null);
+    const isDark = () => root.classList.contains("dark");
+    function applyTheme() {
+      const accent = getComputedStyle(root).getPropertyValue("--color-accent").trim().split(/\s+/).map(Number);
+      const dark = isDark();
+      const fieldInk: Rgba = dark ? [255, 255, 255, 0.34] : [20, 20, 20, 0.34];
+      const shapeInk: Rgba = [accent[0], accent[1], accent[2], dark ? 0.95 : 1];
+      engine.setInks(fieldInk, shapeInk);
+      projectImages.forEach((img, i) => {
+        if (img) engine.setShape(`project-${i}`, imageShape(img, { lightInk: dark, contrast: 1.3, floor: 0.35, fadeBottom: 0 }));
+      });
     }
-    return HERO + anchors.length - 1;
-  }
+    const themeObserver = new MutationObserver(applyTheme);
+    themeObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
 
-  // ---- Project index: smooth-scroll to a project ----
-  const projectIndex = document.getElementById("project-index")!;
-  const indexItems = [...document.querySelectorAll<HTMLButtonElement>(".pi-item")];
-  indexItems.forEach((b) =>
-    b.addEventListener("click", () => {
-      const i = Number(b.dataset.index);
-      scrollTo({ top: anchors[1 + i].y, behavior: engine.reducedMotion ? "auto" : "smooth" });
-    }),
-  );
+    // ---- Project illustrations: each project's 3D thumbnail, shaded in ASCII ----
+    // The flat icon set is the fallback while an image loads or if it fails.
+    projectEls.forEach((el, i) => {
+      engine.setShape(`project-${i}`, iconShape(ICONS[el.dataset.icon ?? ""] ?? ICONS.blank));
+      const img = new Image();
+      img.onload = () => {
+        projectImages[i] = imageSample(img);
+        applyTheme();
+      };
+      img.src = el.dataset.thumb ?? "";
+    });
+    applyTheme();
 
-  // ---- Edge blur ----
-  // The same blur the hero text arrives with on the boot: text blurs and fades
-  // as it slides under the header or towards the bottom of the screen.
-  const edgeEls = [...document.querySelectorAll<HTMLElement>("[data-edge]")];
-  const edgeState = new Map<HTMLElement, number>();
-  let edgeLive = false;
-  const header = document.querySelector("header");
-  const EDGE_BLUR = 6; // px at the very edge, as in the boot
-  function updateEdges() {
-    const vh = innerHeight;
-    const top = header ? header.offsetHeight : 80;
-    const topZone = 110;
-    const bottomZone = vh * 0.16;
-    // Read everything first, then write, so layout is computed once.
-    const values = edgeEls.map((el) => {
+    // ---- Frames ----
+    const wide = () => innerWidth >= 768;
+    const rectOf = (el: Element): Rect => {
       const r = el.getBoundingClientRect();
-      if (r.bottom < -50 || r.top > vh + 50) return 1;
-      const c = r.top + Math.min(r.height, 120) / 2;
-      const t = (top + topZone - c) / topZone;
-      const b = (c - (vh - bottomZone)) / bottomZone;
-      const e = Math.max(0, Math.min(1, Math.max(t, b)));
-      return e * e * (3 - 2 * e);
-    });
-    edgeEls.forEach((el, i) => {
-      const e = Math.round(values[i] * 100) / 100;
-      if (edgeState.get(el) === e) return;
-      edgeState.set(el, e);
-      el.style.filter =
-        e <= 0
-          ? ""
-          : engine.reducedMotion
-            ? `opacity(${(1 - e * 0.9).toFixed(2)})`
-            : `blur(${(e * EDGE_BLUR).toFixed(2)}px) opacity(${(1 - e * 0.9).toFixed(2)})`;
-    });
-  }
-
-  // ---- Per-frame sync ----
-  let lastY = scrollY;
-  let lastT = performance.now();
-  let vel = 0;
-  let introDone = false;
-  let introP = 0;
-  /** Text magnetism: 0.55 = moves at 45% of scroll speed when centred. */
-  const MAGNET = 0.55;
-  const MAGNET_WIDTH = 0.3;
-
-  function frame(now: number) {
-    const dt = Math.max(1, now - lastT) / 1000;
-    vel += ((scrollY - lastY) / dt - vel) * 0.15;
-    lastY = scrollY;
-    lastT = now;
-    engine.velocity = vel;
-
-    const st = scrollTarget();
-    if (!introDone && st > HERO + 0.02) finishIntro();
-    if (introDone) {
-      // The stage follows the scroll exactly: stop mid-morph and it stays mid-morph.
-      engine.target = st;
-    } else {
-      // The opening is time-driven and exact: no spring lag.
-      engine.target = introP;
-      engine.settle();
-    }
-
-    const p = engine.progress;
-    // The nearest project, even mid-morph.
-    const active = Math.max(0, Math.min(projectEls.length - 1, Math.round(p - FIRST_PROJECT)));
-    // Text scrolls natively, with a little magnetism: near the middle of the
-    // screen it moves slower than the scroll, then catches up further out.
-    // Purely visual; the scroll position itself is never touched.
-    const vh = innerHeight;
-    let indexO = 0;
-    [...projectEls, moreEl].forEach((el) => {
-      // Layout position (ignores our own transform).
-      const top = sceneDocTop + el.offsetTop - scrollY;
-      if (top + el.offsetHeight < -vh || top > 2 * vh) return;
-      const o = (top + el.offsetHeight / 2 - vh / 2) / vh; // 0 = centred
-      const pull = engine.reducedMotion ? 0 : -MAGNET * o * Math.exp(-((o / MAGNET_WIDTH) ** 2));
-      el.style.transform = `translate3d(0, ${(pull * vh).toFixed(2)}px, 0)`;
-      const off = Math.abs(o + pull);
-      const o2 = Math.max(0, Math.min(1, 1 - (off - 0.2) / 0.35));
-      el.style.setProperty("--o", o2.toFixed(3));
-      if (el !== moreEl) indexO = Math.max(indexO, o2);
-    });
-    // The index arrives and leaves with the project text, not with the section edge.
-    projectIndex.style.setProperty("--index-o", indexO.toFixed(3));
-    projectIndex.style.pointerEvents = indexO > 0.3 ? "auto" : "none";
-    railIndex.textContent = String(active + 1).padStart(2, "0");
-    const inScene = p > FIRST_PROJECT - 0.5 && p < FIRST_PROJECT + projectEls.length - 0.5;
-    indexItems.forEach((b, i) => b.classList.toggle("is-current", inScene && i === active));
-    const rp = (p - FIRST_PROJECT) / Math.max(1, projectEls.length - 1);
-    railFill.style.transform = `scaleX(${Math.max(0, Math.min(1, rp)).toFixed(4)})`;
-    if (edgeLive) updateEdges();
-    requestAnimationFrame(frame);
-  }
-
-  // ---- Opening ----
-  const intros = [...document.querySelectorAll<HTMLElement>("[data-intro]")];
-  const caret = document.getElementById("boot-caret")!;
-  const lines = [document.getElementById("boot-1")!, document.getElementById("boot-2")!];
-  let typing = false;
-
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-  const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-
-  function caretPoint() {
-    const r = caret.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-  }
-  function fillLines() {
-    for (const l of lines) l.textContent = l.dataset.text ?? "";
-    lines[1].after(caret);
-  }
-  /** Show each intro element as the growing wave reaches it. */
-  function showTextAsWavePasses(bloomMs: number) {
-    const r = bloom().w / 2;
-    for (const el of intros) {
-      const b = el.getBoundingClientRect();
-      const d = Math.hypot(b.left + 24 - origin.x, b.top + b.height / 2 - origin.y);
-      // Invert the bloom's ease-out to find when its edge reaches distance d.
-      const frac = Math.min(0.999, d / (r * 0.75));
-      const t = 1 - Math.cbrt(1 - frac);
-      setTimeout(() => el.classList.add("in"), t * bloomMs + 80);
-    }
-  }
-
-  let raf = 0;
-  /** seed → bloom (the wave grows out of the caret) → hero (it travels into the ellipse and starts cycling). */
-  function playWave(bloomMs: number, morphMs: number) {
-    origin = caretPoint();
-    showTextAsWavePasses(bloomMs);
-    const t0 = performance.now();
-    const step = (now: number) => {
-      const e = now - t0;
-      if (e < bloomMs) introP = easeOut(e / bloomMs);
-      else {
-        // The wave starts travelling into the side ellipse.
-        if (introP < 1) hideBootLines();
-        introP = 1 + easeInOut(Math.min(1, (e - bloomMs) / morphMs));
-      }
-      if (introP < 2) raf = requestAnimationFrame(step);
-      else {
-        introDone = true;
-        afterIntro();
-      }
+      return { x: r.left, y: r.top, w: r.width, h: r.height };
     };
-    raf = requestAnimationFrame(step);
-  }
+    /**
+     * Right side: the ellipse is much larger than the screen's right half,
+     * runs off the top, bottom and right edges, and its soft left rim reaches
+     * a little under the text column.
+     */
+    const side = (): Rect =>
+      wide()
+        ? { x: innerWidth * 0.28, y: -innerHeight * 0.35, w: innerWidth * 1.12, h: innerHeight * 1.7 }
+        : { x: -innerWidth * 0.1, y: innerHeight * 0.02, w: innerWidth * 1.2, h: innerHeight * 0.42 };
+    /** The visible right half, where images and the field's centre sit. */
+    const sideFocus = (): Rect =>
+      wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
+    /** Mirror images of the above, for the projects. */
+    const mirror = (r: Rect): Rect => ({ ...r, x: innerWidth - (r.x + r.w) });
+    const sideLeft = (): Rect => (wide() ? mirror(side()) : side());
+    const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : side());
+    const heroSide = (): Rect => (wide() ? side() : rectOf(heroFrame));
+    const centre = (): Rect => ({ x: innerWidth * 0.08, y: innerHeight * 0.04, w: innerWidth * 0.84, h: innerHeight * 0.92 });
 
-  function finishIntro() {
-    if (introDone) return;
-    typing = false;
-    cancelAnimationFrame(raf);
-    fillLines();
-    introDone = true; // the spring carries the stage from wherever it is to the hero
-    intros.forEach((el) => el.classList.add("in"));
-    afterIntro();
-  }
-  /**
-   * The terminal lines have done their job once the wave heads to the right:
-   * they blur away, then their space closes so the greeting settles in the centre.
-   */
-  function hideBootLines() {
-    document.getElementById("boot-lines")?.classList.add("is-gone");
-  }
-  /** Runs once, however the intro ended (played through or skipped). */
-  let afterIntroDone = false;
-  function afterIntro() {
-    if (afterIntroDone) return;
-    afterIntroDone = true;
-    // Once the text has arrived, the edge blur takes over its filter.
-    setTimeout(() => {
-      root.classList.add("edge-live");
-      edgeLive = true;
-    }, 1200);
-    hideBootLines();
-  }
+    // The opening wave is centred on the terminal caret: it starts as a point
+    // there, grows until it fills the screen, then travels into the hero ellipse.
+    let origin = { x: innerWidth * 0.2, y: innerHeight * 0.4 };
+    const seed = (): Rect => ({ x: origin.x - 1, y: origin.y - 1, w: 2, h: 2 });
+    const bloom = (): Rect => {
+      const r = Math.hypot(Math.max(origin.x, innerWidth - origin.x), Math.max(origin.y, innerHeight - origin.y)) * 1.15;
+      return { x: origin.x - r, y: origin.y - r, w: r * 2, h: r * 2 };
+    };
 
-  async function typeLine(el: HTMLElement, cps: number) {
-    const text = el.dataset.text ?? "";
-    el.after(caret);
-    for (let i = 1; i <= text.length && typing; i++) {
-      el.textContent = text.slice(0, i);
-      await sleep(1000 / cps + Math.random() * 30);
+    // ---- States ----
+    const states: AsciiState[] = [
+      { id: "seed", field: "wave", shape: null, frame: seed, intensity: 1, ambient: 1, accent: 0.8 },
+      { id: "bloom", field: "wave", shape: null, frame: bloom, intensity: 0.9, ambient: 1, accent: 0.6 },
+      { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: heroSide, focus: () => (wide() ? sideFocus() : heroSide()), intensity: 1, ambient: 1, accent: 1 },
+      ...projectEls.map((el, i) => ({
+        id: `project-${i}`,
+        field: el.dataset.field ?? "wave",
+        shape: `project-${i}`,
+        // Projects sit on the left: the stage crosses the page between sections.
+        frame: sideLeft,
+        focus: sideFocusLeft,
+        intensity: 1,
+        ambient: 0.75,
+        shapeScale: 0.72,
+        warp: 0.35,
+        texture: 0.5,
+      })),
+      // "And N more": the field alone, still on the left, closing the sequence.
+      { id: "more", field: "cells", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.8, ambient: 0.9 },
+      { id: "experience", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.5, ambient: 0.9 },
+      { id: "blog", field: "grid", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.45, ambient: 0.9 },
+      { id: "closing", field: "rings", shape: null, frame: centre, intensity: 0.85, ambient: 1, accent: 0.5 },
+    ];
+    engine.setStates(states);
+    const HERO = 2;
+    const FIRST_PROJECT = 3;
+
+    // ---- Scroll → target ----
+    // Each anchor is the scrollY where a state (from "hero" on) is fully formed.
+    // `win` is the slice of the gap to the next anchor where the morph happens;
+    // outside it the state holds.
+    interface Anchor {
+      y: number;
+      win: [number, number];
     }
-  }
+    let anchors: Anchor[] = [];
+    const docTop = (el: Element) => el.getBoundingClientRect().top + scrollY;
+    let sceneDocTop = 0;
+    function measure() {
+      const vh = innerHeight;
+      sceneDocTop = docTop(scene);
+      const centreOf = (el: HTMLElement) => sceneDocTop + el.offsetTop + el.offsetHeight / 2 - vh / 2;
+      anchors = [
+        { y: 0, win: [0.15, 0.95] },
+        // A project is fully formed when its text is centred on screen; the
+        // morph runs while one text leaves and the next arrives.
+        ...projectEls.map((el) => ({ y: centreOf(el), win: [0.3, 0.7] as [number, number] })),
+        { y: centreOf(moreEl), win: [0.15, 0.7] },
+        { y: docTop(experience) - vh * 0.1, win: [0.55, 1] },
+        { y: docTop(blog) - vh * 0.1, win: [0.5, 1] },
+        { y: docTop(closing), win: [0, 1] },
+      ];
+    }
+    measure();
+    addEventListener("resize", measure);
+    addEventListener("load", measure);
 
-  async function boot() {
-    try {
-      localStorage.setItem("gimk:booted", "1");
-    } catch {}
-    if (engine.reducedMotion) {
+    function scrollTarget(): number {
+      const y = scrollY;
+      if (y <= anchors[0].y) return HERO;
+      for (let j = 0; j < anchors.length - 1; j++) {
+        const a = anchors[j];
+        const b = anchors[j + 1];
+        if (y < b.y) {
+          const f = (y - a.y) / Math.max(1, b.y - a.y);
+          const [w0, w1] = a.win;
+          return HERO + j + Math.min(1, Math.max(0, (f - w0) / (w1 - w0)));
+        }
+      }
+      return HERO + anchors.length - 1;
+    }
+
+    // ---- Project index: smooth-scroll to a project ----
+    const projectIndex = document.getElementById("project-index")!;
+    const indexItems = [...document.querySelectorAll<HTMLButtonElement>(".pi-item")];
+    indexItems.forEach((b) =>
+      b.addEventListener("click", () => {
+        const i = Number(b.dataset.index);
+        scrollTo({ top: anchors[1 + i].y, behavior: engine.reducedMotion ? "auto" : "smooth" });
+      }),
+    );
+
+    // ---- Edge blur ----
+    // The same blur the hero text arrives with on the boot: text blurs and fades
+    // as it slides under the header or towards the bottom of the screen.
+    const edgeEls = [...document.querySelectorAll<HTMLElement>("[data-edge]")];
+    const edgeState = new Map<HTMLElement, number>();
+    let edgeLive = false;
+    const header = document.querySelector("header");
+    const EDGE_BLUR = 6; // px at the very edge, as in the boot
+    function updateEdges() {
+      const vh = innerHeight;
+      const top = header ? header.offsetHeight : 80;
+      const topZone = 110;
+      const bottomZone = vh * 0.16;
+      // Read everything first, then write, so layout is computed once.
+      const values = edgeEls.map((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < -50 || r.top > vh + 50) return 1;
+        const c = r.top + Math.min(r.height, 120) / 2;
+        const t = (top + topZone - c) / topZone;
+        const b = (c - (vh - bottomZone)) / bottomZone;
+        const e = Math.max(0, Math.min(1, Math.max(t, b)));
+        return e * e * (3 - 2 * e);
+      });
+      edgeEls.forEach((el, i) => {
+        const e = Math.round(values[i] * 100) / 100;
+        if (edgeState.get(el) === e) return;
+        edgeState.set(el, e);
+        el.style.filter =
+          e <= 0
+            ? ""
+            : engine.reducedMotion
+              ? `opacity(${(1 - e * 0.9).toFixed(2)})`
+              : `blur(${(e * EDGE_BLUR).toFixed(2)}px) opacity(${(1 - e * 0.9).toFixed(2)})`;
+      });
+    }
+
+    // ---- Per-frame sync ----
+    let lastY = scrollY;
+    let lastT = performance.now();
+    let vel = 0;
+    let introDone = false;
+    let introP = 0;
+    /** Text magnetism: 0.55 = moves at 45% of scroll speed when centred. */
+    const MAGNET = 0.55;
+    const MAGNET_WIDTH = 0.3;
+
+    function frame(now: number) {
+      const dt = Math.max(1, now - lastT) / 1000;
+      vel += ((scrollY - lastY) / dt - vel) * 0.15;
+      lastY = scrollY;
+      lastT = now;
+      engine.velocity = vel;
+
+      const st = scrollTarget();
+      if (!introDone && st > HERO + 0.02) finishIntro();
+      if (introDone) {
+        // The stage follows the scroll exactly: stop mid-morph and it stays mid-morph.
+        engine.target = st;
+      } else {
+        // The opening is time-driven and exact: no spring lag.
+        engine.target = introP;
+        engine.settle();
+      }
+
+      const p = engine.progress;
+      // The nearest project, even mid-morph.
+      const active = Math.max(0, Math.min(projectEls.length - 1, Math.round(p - FIRST_PROJECT)));
+      // Text scrolls natively, with a little magnetism: near the middle of the
+      // screen it moves slower than the scroll, then catches up further out.
+      // Purely visual; the scroll position itself is never touched.
+      const vh = innerHeight;
+      let indexO = 0;
+      [...projectEls, moreEl].forEach((el) => {
+        // Layout position (ignores our own transform).
+        const top = sceneDocTop + el.offsetTop - scrollY;
+        if (top + el.offsetHeight < -vh || top > 2 * vh) return;
+        const o = (top + el.offsetHeight / 2 - vh / 2) / vh; // 0 = centred
+        const pull = engine.reducedMotion ? 0 : -MAGNET * o * Math.exp(-((o / MAGNET_WIDTH) ** 2));
+        el.style.transform = `translate3d(0, ${(pull * vh).toFixed(2)}px, 0)`;
+        const off = Math.abs(o + pull);
+        const o2 = Math.max(0, Math.min(1, 1 - (off - 0.2) / 0.35));
+        el.style.setProperty("--o", o2.toFixed(3));
+        if (el !== moreEl) indexO = Math.max(indexO, o2);
+      });
+      // The index arrives and leaves with the project text, not with the section edge.
+      projectIndex.style.setProperty("--index-o", indexO.toFixed(3));
+      projectIndex.style.pointerEvents = indexO > 0.3 ? "auto" : "none";
+      railIndex.textContent = String(active + 1).padStart(2, "0");
+      const inScene = p > FIRST_PROJECT - 0.5 && p < FIRST_PROJECT + projectEls.length - 0.5;
+      indexItems.forEach((b, i) => b.classList.toggle("is-current", inScene && i === active));
+      const rp = (p - FIRST_PROJECT) / Math.max(1, projectEls.length - 1);
+      railFill.style.transform = `scaleX(${Math.max(0, Math.min(1, rp)).toFixed(4)})`;
+      if (edgeLive) updateEdges();
+      if (alive) requestAnimationFrame(frame);
+    }
+
+    // ---- Opening ----
+    const intros = [...document.querySelectorAll<HTMLElement>("[data-intro]")];
+    const caret = document.getElementById("boot-caret")!;
+    const lines = [document.getElementById("boot-1")!, document.getElementById("boot-2")!];
+    let typing = false;
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    function caretPoint() {
+      const r = caret.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }
+    function fillLines() {
+      for (const l of lines) l.textContent = l.dataset.text ?? "";
+      lines[1].after(caret);
+    }
+    /** Show each intro element as the growing wave reaches it. */
+    function showTextAsWavePasses(bloomMs: number) {
+      const r = bloom().w / 2;
+      for (const el of intros) {
+        const b = el.getBoundingClientRect();
+        const d = Math.hypot(b.left + 24 - origin.x, b.top + b.height / 2 - origin.y);
+        // Invert the bloom's ease-out to find when its edge reaches distance d.
+        const frac = Math.min(0.999, d / (r * 0.75));
+        const t = 1 - Math.cbrt(1 - frac);
+        setTimeout(() => el.classList.add("in"), t * bloomMs + 80);
+      }
+    }
+
+    let raf = 0;
+    /** seed → bloom (the wave grows out of the caret) → hero (it travels into the ellipse and starts cycling). */
+    function playWave(bloomMs: number, morphMs: number) {
       origin = caretPoint();
-      return finishIntro();
+      showTextAsWavePasses(bloomMs);
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const e = now - t0;
+        if (e < bloomMs) introP = easeOut(e / bloomMs);
+        else {
+          // The wave starts travelling into the side ellipse.
+          if (introP < 1) hideBootLines();
+          introP = 1 + easeInOut(Math.min(1, (e - bloomMs) / morphMs));
+        }
+        if (introP < 2) raf = requestAnimationFrame(step);
+        else {
+          introDone = true;
+          afterIntro();
+        }
+      };
+      raf = requestAnimationFrame(step);
     }
-    for (const ev of ["keydown", "pointerdown", "wheel", "touchstart"]) {
-      addEventListener(ev, finishIntro, { once: true, passive: true });
-    }
-    typing = true;
-    await sleep(350);
-    await typeLine(lines[0], 22);
-    await sleep(260);
-    await typeLine(lines[1], 30);
-    for (let i = 0; i < 3 && typing; i++) {
-      lines[1].textContent += ".";
-      await sleep(180);
-    }
-    if (introDone) return;
-    await sleep(220);
-    playWave(1500, 2200);
-  }
 
-  engine.start();
-  requestAnimationFrame(frame);
-  // Dev-only handle for inspecting frames from the console.
-  if (import.meta.env.DEV) (window as unknown as { __stage: AsciiEngine }).__stage = engine;
-  if (booting) {
-    boot();
-  } else {
-    // Returning visitors: no typing, a quicker wave.
-    fillLines();
-    if (scrollY > 10 || engine.reducedMotion) {
-      origin = caretPoint();
-      finishIntro();
-      engine.target = scrollTarget();
-      engine.settle();
+    function finishIntro() {
+      if (introDone) return;
+      typing = false;
+      cancelAnimationFrame(raf);
+      fillLines();
+      introDone = true; // the spring carries the stage from wherever it is to the hero
+      intros.forEach((el) => el.classList.add("in"));
+      afterIntro();
+    }
+    /**
+     * The terminal lines have done their job once the wave heads to the right:
+     * they blur away, then their space closes so the greeting settles in the centre.
+     */
+    function hideBootLines() {
+      document.getElementById("boot-lines")?.classList.add("is-gone");
+    }
+    /** Runs once, however the intro ended (played through or skipped). */
+    let afterIntroDone = false;
+    function afterIntro() {
+      if (afterIntroDone) return;
+      afterIntroDone = true;
+      // Once the text has arrived, the edge blur takes over its filter.
+      setTimeout(() => {
+        root.classList.add("edge-live");
+        edgeLive = true;
+      }, 1200);
+      hideBootLines();
+    }
+
+    async function typeLine(el: HTMLElement, cps: number) {
+      const text = el.dataset.text ?? "";
+      el.after(caret);
+      for (let i = 1; i <= text.length && typing; i++) {
+        el.textContent = text.slice(0, i);
+        await sleep(1000 / cps + Math.random() * 30);
+      }
+    }
+
+    async function boot() {
+      try {
+        localStorage.setItem("gimk:booted", "1");
+      } catch {}
+      if (engine.reducedMotion) {
+        origin = caretPoint();
+        return finishIntro();
+      }
+      for (const ev of ["keydown", "pointerdown", "wheel", "touchstart"]) {
+        addEventListener(ev, finishIntro, { once: true, passive: true });
+      }
+      typing = true;
+      await sleep(350);
+      await typeLine(lines[0], 22);
+      await sleep(260);
+      await typeLine(lines[1], 30);
+      for (let i = 0; i < 3 && typing; i++) {
+        lines[1].textContent += ".";
+        await sleep(180);
+      }
+      if (introDone) return;
+      await sleep(220);
+      playWave(1500, 2200);
+    }
+
+    engine.start();
+    requestAnimationFrame(frame);
+    // Dev-only handle for inspecting frames from the console.
+    if (import.meta.env.DEV) (window as unknown as { __stage: AsciiEngine }).__stage = engine;
+    if (booting) {
+      boot();
     } else {
-      playWave(800, 1300);
+      // Returning visitors: no typing, a quicker wave.
+      fillLines();
+      if (scrollY > 10 || engine.reducedMotion) {
+        origin = caretPoint();
+        finishIntro();
+        engine.target = scrollTarget();
+        engine.settle();
+      } else {
+        playWave(800, 1300);
+      }
     }
-  }
+
+    // Leaving the page (client-side navigation): stop everything.
+    return () => {
+      alive = false;
+      typing = false;
+      cancelAnimationFrame(raf);
+      engine.stop();
+      themeObserver.disconnect();
+      removeEventListener("resize", measure);
+      removeEventListener("load", measure);
+      for (const ev of ["keydown", "pointerdown", "wheel", "touchstart"]) removeEventListener(ev, finishIntro);
+    };
+
+  });
 </script>

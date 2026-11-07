@@ -1,52 +1,161 @@
 ---
 import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import Container from "@components/Container.astro";
-import BackToPrev from "@components/BackToPrev.astro";
+import PageIntro from "@components/stage/PageIntro.astro";
 import { PROJECTS } from "@consts";
-import ArrowCardThumbnail from "@components/ArrowCardThumbnail.astro";
 
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
-<PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
-  <Container>
-    <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 items-start pt-0">
-      <aside class="md:col-span-3 pb-6 md:pb-16 md:sticky md:top-24">
-        <div class="shadow-ascii">
-          <div
-            class="relative bg-orange-50 dark:bg-slate-950 z-20 pb-8 border border-black/10 dark:border-white/10"
-          >
-          <div class="animate">
-            <BackToPrev href="/" hideShadow={true} hideBorder={true}> Back to home </BackToPrev>
-          </div>
-          <div class="px-4">
-            <div class="h-20 flex items-center">
-              <h1 class="animate font-semibold text-black dark:text-white text-3xl">
-                Projects
-              </h1>
-            </div>
-            <p class="animate mt-4 text-sm opacity-60 font-serif">
-              A collection of projects I've worked on, ranging from full-scale product redesigns to experimental prototypes.
-            </p>
-          </div>
-        </div>
-      </div>
-      </aside>
+<PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION} asciiBackground={false} bareHeader>
+  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <div id="projects-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
+    <PageIntro
+      back={{ href: "/", label: "Home" }}
+      id="projects-intro"
+      label={`Projects — ${projects.length}`}
+      title="Projects"
+      description="From full-scale product redesigns to tools I design and build myself."
+    />
 
-      <div class="md:col-start-5 md:col-span-6 pb-16">
-        <ul class="flex flex-col gap-8 m-0 p-0 list-none">
-          {
-            projects.map((project) => (
-              <li class="animate">
-                <ArrowCardThumbnail entry={project} />
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-    </div>
-  </Container>
+    <!-- Hover a row (or scroll to it) and the stage turns into that project. -->
+    <ul id="projects-list" class="md:w-1/2 pb-[30vh]">
+      {
+        projects.map((p, i) => (
+          <li>
+            <a
+              href={`/projects/${p.id}`}
+              data-row
+              data-id={p.id}
+              data-thumb={p.data.thumbnail}
+              class="link-row project-row grid grid-cols-[2.25rem_1fr] gap-x-4 py-10 md:py-12"
+            >
+              <span data-edge class="font-mono text-xs tracking-[0.2em] opacity-50 pt-1.5">
+                {pad(i + 1)}
+              </span>
+              <span class="flex flex-col">
+                <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">
+                  {p.data.date.getFullYear()}
+                </span>
+                <span data-edge class="mt-4 font-serif text-4xl md:text-5xl tracking-tight leading-[1.05] text-black dark:text-white">
+                  <span class="link-title">{p.data.title}</span>
+                </span>
+                <span data-edge class="mt-4 max-w-md font-serif text-lg leading-relaxed opacity-70">
+                  {p.data.description}
+                </span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </PageLayout>
+
+<style is:global>
+  .project-row {
+    transition: opacity 0.4s ease;
+  }
+  /* While one row is hovered, the others step back. */
+  #projects-list:has(.project-row:hover) .project-row:not(:hover) {
+    opacity: 0.45;
+  }
+</style>
+
+<script>
+  import {
+    onPage,
+    createStage,
+    side,
+    sideFocus,
+    fieldFor,
+    PROJECT_LOOK,
+    PLAYLIST,
+    edgeBlur,
+  } from "@lib/ascii/stage";
+  import type { AsciiState } from "@lib/ascii/types";
+
+  onPage("#projects-page", () => {
+    const page = document.getElementById("projects-page")!;
+    const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
+    const intro = document.getElementById("projects-intro")!;
+    const rows = [...page.querySelectorAll<HTMLAnchorElement>("[data-row]")];
+
+    const stage = createStage(canvas);
+    const { engine } = stage;
+    rows.forEach((row, i) => stage.addProjectImage(`p${i}`, row.dataset.thumb ?? "", row.dataset.id));
+
+    const states: AsciiState[] = [
+      // The opening: the original animations, cycling.
+      { id: "intro", field: "wave", fields: PLAYLIST, period: 6, shape: null, frame: side, focus: sideFocus, intensity: 1, ambient: 1, accent: 0.8 },
+      ...rows.map((row, i) => ({
+        id: `p${i}`,
+        field: fieldFor(row.dataset.id ?? ""),
+        shape: `p${i}`,
+        frame: side,
+        focus: sideFocus,
+        intensity: 1,
+        ...PROJECT_LOOK,
+      })),
+    ];
+    engine.setStates(states);
+
+    // Hover wins; otherwise the row nearest the middle of the screen, once
+    // the intro has scrolled away.
+    let hovered = -1;
+    const enter = (i: number) => () => (hovered = i);
+    const leave = () => (hovered = -1);
+    const handlers = rows.map((row, i) => {
+      const on = enter(i);
+      row.addEventListener("pointerenter", on);
+      row.addEventListener("focus", on);
+      row.addEventListener("pointerleave", leave);
+      row.addEventListener("blur", leave);
+      return on;
+    });
+
+    function target() {
+      if (hovered >= 0) return 1 + hovered;
+      if (intro.getBoundingClientRect().bottom > innerHeight * 0.55) return 0;
+      const mid = innerHeight / 2;
+      let best = 0;
+      let bestD = Infinity;
+      rows.forEach((row, i) => {
+        const r = row.getBoundingClientRect();
+        const d = Math.abs(r.top + r.height / 2 - mid);
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      });
+      return 1 + best;
+    }
+
+    const blur = edgeBlur([...page.querySelectorAll<HTMLElement>("[data-edge]")], engine.reducedMotion);
+    engine.target = target();
+    engine.settle();
+    engine.start();
+
+    let raf = 0;
+    function frame() {
+      engine.target = target();
+      blur();
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      rows.forEach((row, i) => {
+        row.removeEventListener("pointerenter", handlers[i]);
+        row.removeEventListener("focus", handlers[i]);
+        row.removeEventListener("pointerleave", leave);
+        row.removeEventListener("blur", leave);
+      });
+      stage.destroy();
+    };
+  });
+</script>
