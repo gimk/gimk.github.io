@@ -1,6 +1,7 @@
 ---
 import Container from "@components/Container.astro";
 import InteractionSound from "./InteractionSound.astro";
+import { getCollection } from "astro:content";
 
 type Props = {
   /** Transparent header without blur, border or dotted strip. */
@@ -8,11 +9,25 @@ type Props = {
 };
 
 const { bare = false } = Astro.props;
+
+const NAV = [
+  { href: "/projects", label: "Projects" },
+  { href: "/work", label: "Work" },
+  { href: "/blog", label: "Blog" },
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+
+/** Quick access to the most recent project, whichever it is. */
+const latest = (await getCollection("projects"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())[0];
 ---
 
 <header class:list={[{ "header-bare": bare }]}>
   <Container hideLines={true}>
     <div class="flex flex-wrap gap-y-2 justify-between">
+      <div class="flex items-center gap-4">
       <InteractionSound preset="link">
         <a
           style="cursor: url('/cursor-hover.svg') 16 16, auto !important;"
@@ -102,41 +117,50 @@ const { bare = false } = Astro.props;
         </div>
       </a>
       </InteractionSound>
-      <nav class="flex gap-2">
-        <InteractionSound preset="link">
+      {latest && (
+        <InteractionSound preset="button">
           <a
-            href="/projects"
-            class="px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary underline-offset-2 sm:hover:underline"
+            href={`/projects/${latest.id}`}
+            class="latest-link header-pill group flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-full transition-colors duration-300 text-xs"
           >
-            projects
+            <svg width="12" height="12" viewBox="12.7 17.8 37 37" class="text-accent-primary shrink-0" fill="currentColor" aria-hidden="true">
+              <path d="M 31.2344 54.7305 C 31.8438 54.7305 32.2891 54.2852 32.4062 53.6524 C 34.0703 40.8086 35.8750 38.8633 48.5781 37.4570 C 49.2344 37.3867 49.6797 36.8945 49.6797 36.2852 C 49.6797 35.6758 49.2344 35.2070 48.5781 35.1133 C 35.8750 33.7070 34.0703 31.7617 32.4062 18.9180 C 32.2891 18.2852 31.8438 17.8633 31.2344 17.8633 C 30.6250 17.8633 30.1797 18.2852 30.0860 18.9180 C 28.4219 31.7617 26.5938 33.7070 13.9140 35.1133 C 13.2344 35.2070 12.7891 35.6758 12.7891 36.2852 C 12.7891 36.8945 13.2344 37.3867 13.9140 37.4570 C 26.5703 39.1211 28.3281 40.8321 30.0860 53.6524 C 30.1797 54.2852 30.6250 54.7305 31.2344 54.7305 Z"></path>
+            </svg>
+            <span class="opacity-60 hidden sm:inline">Last project</span>
+            <span class="opacity-30 hidden sm:inline" aria-hidden="true">·</span>
+            <span class="text-black dark:text-white">{latest.data.title}</span>
+            <span class="opacity-60 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-accent-primary" aria-hidden="true">→</span>
           </a>
         </InteractionSound>
-        <InteractionSound preset="link">
-          <a
-            href="/work"
-            class="px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary underline-offset-2 sm:hover:underline"
-          >
-            work
-          </a>
-        </InteractionSound>
-        <InteractionSound preset="link">
-          <a
-            href="/blog"
-            class="px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary underline-offset-2 sm:hover:underline"
-          >
-            blog
-          </a>
-        </InteractionSound>
-        
+      )}
+      </div>
+      <nav class="header-pill flex items-center gap-0.5 sm:gap-1 pl-2 pr-1 py-0.5 rounded-full" aria-label="Main">
+        <ul class="flex items-center gap-1 sm:gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">
+          {NAV.map((item) => (
+            <li>
+              <InteractionSound preset="link">
+                <a
+                  href={item.href}
+                  class:list={["nav-link px-2 py-2 flex items-center gap-2", { "is-current": isCurrent(item.href) }]}
+                  aria-current={isCurrent(item.href) ? "page" : undefined}
+                >
+                  <span class="nav-dot" aria-hidden="true"></span>
+                  {item.label}
+                </a>
+              </InteractionSound>
+            </li>
+          ))}
+        </ul>
+        <span class="hidden sm:block w-px h-4 bg-current opacity-15 mx-1" aria-hidden="true"></span>
         <button
           id="sound-button"
           aria-label="Toggle sound button"
-          class="group px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary"
+          class="group p-2 flex items-center opacity-60 hover:opacity-100 transition duration-300 ease-in-out sm:hover:text-accent-primary"
         >
           <svg
             class="sound-icon sm:group-hover:stroke-accent-primary transition-colors duration-300 ease-in-out"
-            width="18"
-            height="18"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -160,12 +184,12 @@ const { bare = false } = Astro.props;
           <button
             id="theme-button"
             aria-label="Toggle theme button"
-            class="group px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary"
+            class="group p-2 flex items-center opacity-60 hover:opacity-100 transition duration-300 ease-in-out sm:hover:text-accent-primary"
           >
             <svg
               class="sun-moon sm:group-hover:stroke-accent-primary transition-colors duration-300 ease-in-out"
-              width="18"
-              height="18"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -226,6 +250,49 @@ const { bare = false } = Astro.props;
 </script>
 
 <style>
+  /* Shared backdrop for the header's pills: readable over the ASCII and content. */
+  .header-pill {
+    background: rgb(255 247 237 / 0.78);
+    border: 1px solid rgb(0 0 0 / 0.08);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  :global(html.dark) .header-pill {
+    background: rgb(2 6 23 / 0.78);
+    border-color: rgb(255 255 255 / 0.1);
+  }
+  a.header-pill:hover {
+    background: rgb(255 247 237 / 0.95);
+  }
+  :global(html.dark) a.header-pill:hover {
+    background: rgb(2 6 23 / 0.95);
+  }
+  .nav-link {
+    opacity: 0.75;
+    transition:
+      opacity 0.3s ease,
+      color 0.3s ease;
+  }
+  .nav-link:hover,
+  .nav-link:focus-visible,
+  .nav-link.is-current {
+    opacity: 1;
+  }
+  .nav-link.is-current {
+    color: rgb(var(--color-accent));
+  }
+  .nav-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
+    background: currentColor;
+    transform: scale(0);
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .nav-link:hover .nav-dot,
+  .nav-link.is-current .nav-dot {
+    transform: scale(1);
+  }
   .sun-moon {
     --duration: 500ms;
     --ease-elastic: cubic-bezier(0.5, 1.25, 0.75, 1.25);

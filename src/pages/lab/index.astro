@@ -2,18 +2,23 @@
 import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import LabOutro from "@components/lab/LabOutro.astro";
+import ExperienceCounter from "@components/ExperienceCounter.astro";
+import { SOCIALS } from "@consts";
 
-/** Featured projects, in scroll order. Icon + motion field live in the script's LOOKS. */
+/** Featured projects, in scroll order, with their motion field and fallback icon. */
 const FEATURED = [
-  { id: "comp-studio", kind: "Tool · Design & code" },
-  { id: "dither-studio", kind: "Tool · Design & code" },
-  { id: "colors-studio", kind: "Tool · Design & code" },
-  { id: "vibe-coding-trilogy", kind: "Site · Photography" },
-  { id: "bankin-year-2", kind: "Product design · Bankin'" },
-  { id: "future-of-coach", kind: "Product design · Younited" },
+  { id: "comp-studio", kind: "Tool · Design & code", field: "interference", icon: "comp" },
+  { id: "colors-studio", kind: "Tool · Design & code", field: "plasma", icon: "colors" },
+  { id: "vibe-coding-trilogy", kind: "Site · Photography", field: "vortex", icon: "photo" },
 ];
 
 const all = await getCollection("projects");
+const published = all.filter((p) => !p.data.draft);
+const projectCount = published.length;
+/** Everything not featured, newest first, for the closing "more" card. */
+const others = published
+  .filter((p) => !FEATURED.some((f) => f.id === p.id.toLowerCase()))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 const projects = FEATURED.map((f) => {
   const entry = all.find((p) => p.id.toLowerCase() === f.id);
   if (!entry) throw new Error(`Missing project ${f.id}`);
@@ -21,9 +26,6 @@ const projects = FEATURED.map((f) => {
 });
 const pad = (n: number) => String(n).padStart(2, "0");
 /** Scroll per project inside the pinned scene, in viewport heights. */
-const STEP = 1.5;
-/** Scene height: STEP per project, plus a hold at the end. */
-const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
 ---
 
 <PageLayout title="Lab" description="ASCII stage prototype" asciiBackground={false} bareHeader>
@@ -38,25 +40,39 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
 
   <div class="mx-auto max-w-screen-xl px-5 md:px-10">
     <!-- Hero -->
-    <section id="hero" class="relative min-h-[calc(100svh-6rem)] flex items-center">
-      <div class="md:w-1/2 flex flex-col gap-10 relative z-10">
-        <div class="font-mono text-xs text-accent-primary leading-6 min-h-12" aria-hidden="true">
-          <p id="boot-1" data-text="> init gimk.portfolio"></p>
+    <section id="hero" class="relative min-h-[calc(100svh-6rem)] flex items-center pb-20">
+      <div class="md:w-1/2 flex flex-col gap-7 relative z-10">
+        <div id="boot-lines" class="font-mono text-xs text-accent-primary leading-6 min-h-12" aria-hidden="true">
+          <p id="boot-1" data-text="> init pantoine.com"></p>
           <p id="boot-2" data-text="> loading fields"></p>
           <span id="boot-caret" class="boot-caret">▍</span>
         </div>
         <h1
           data-intro
-          class="!font-serif font-normal text-6xl md:text-8xl tracking-tight leading-[0.92] text-black dark:text-white"
+          data-edge
+          class="!font-serif font-normal text-4xl md:text-5xl tracking-tight leading-none text-black dark:text-white"
         >
-          Antoine<br />Pouligny
+          Hi, I'm Antoine.
         </h1>
-        <p data-intro class="font-mono text-xs uppercase tracking-[0.2em] opacity-60">
-          Creative Engineer — Senior Product Designer
+        <p data-intro data-edge class="max-w-md font-serif text-xl md:text-2xl leading-snug text-black/80 dark:text-white/80">
+          A Creative Engineer and Senior Product Designer, with <span class="hero-counter"><ExperienceCounter /></span>
+          of experience bridging product, design and code.
         </p>
-        <p data-intro class="max-w-sm font-serif text-lg leading-relaxed opacity-80">
-          I merge design and engineering to build clear, simple and meaningful user systems.
+        <p data-intro data-edge class="max-w-sm font-serif text-base leading-relaxed opacity-70">
+          Also a photographer, a foodie with a French culinary license, and lately building my own tools with AI.
         </p>
+        <ul data-intro data-edge class="flex flex-wrap items-center font-mono text-[10px] uppercase tracking-[0.2em]">
+          {
+            SOCIALS.map((s, i) => (
+              <li class="flex items-center">
+                {i > 0 && <span class="opacity-40 mx-3" aria-hidden="true">/</span>}
+                <a href={s.HREF} target="_blank" rel="noopener" class="opacity-70 hover:opacity-100 hover:text-accent-primary transition-colors">
+                  {s.NAME}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
       </div>
       <div id="hero-frame" class="md:hidden absolute inset-x-0 top-0 h-[45vh] -z-10" aria-hidden="true"></div>
       <p data-intro class="scroll-cue absolute bottom-6 left-0 font-mono text-[10px] uppercase tracking-[0.3em] opacity-50">
@@ -64,72 +80,27 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       </p>
     </section>
 
-    <!-- Projects: one pinned scene; text and icon change together -->
-    <section
-      id="scene"
-      class="relative"
-      style={`height: ${sceneHeight}svh`}
-      data-step={STEP}
-      aria-label="Selected projects"
-    >
-      <div id="scene-pin" class="sticky top-0 h-[100svh] flex items-center">
-        <div class="relative w-full h-[70svh]">
-          {
-            projects.map(({ entry, kind }, i) => (
-              <div
-                data-project
-                data-thumb={entry.data.thumbnail}
-                class="scene-project absolute inset-y-0 left-0 w-full md:w-1/2 md:left-1/2 md:pl-12 flex flex-col justify-center"
-                style="--d:1;--o:0"
-              >
-                <span class="sp-mask">
-                  <span class="sp-line font-mono text-xs uppercase tracking-[0.2em] opacity-50" style="--i:0">
-                    {pad(i + 1)} — {entry.data.date.getFullYear()} — {kind}
-                  </span>
-                </span>
-                <span class="sp-mask mt-6">
-                  <h2
-                    class="sp-line !font-serif font-normal text-5xl md:text-7xl tracking-tight leading-[0.95] text-black dark:text-white"
-                    style="--i:1"
-                  >
-                    {entry.data.title}
-                  </h2>
-                </span>
-                <span class="sp-mask mt-6">
-                  <span class="sp-line max-w-md font-serif text-lg leading-relaxed opacity-80" style="--i:2">
-                    {entry.data.description}
-                  </span>
-                </span>
-                <span class="sp-mask mt-10">
-                  <a
-                    href={`/projects/${entry.id}`}
-                    class="sp-line sp-link font-mono text-xs uppercase tracking-[0.2em] text-accent-primary"
-                    style="--i:3"
-                  >
-                    Read the case study <span aria-hidden="true">→</span>
-                  </a>
-                </span>
-              </div>
-            ))
-          }
-        </div>
-        <!-- Index: jump straight to a project (desktop). -->
+    <!--
+      Projects: the ASCII stage stays fixed while the text scrolls natively past
+      it; the stage morphs to whichever project is nearest the centre.
+    -->
+    <section id="scene" class="relative" aria-label="Selected projects">
+      <!-- Overlay pinned for the whole section: index and phone rail. -->
+      <div class="sticky top-0 h-[100svh] -mb-[100svh] pointer-events-none z-10">
         <nav
           id="project-index"
-          class="hidden md:flex absolute left-[calc(50%+3rem)] bottom-[7svh] flex-col gap-2 font-mono text-[10px] uppercase tracking-[0.2em]"
+          class="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 flex-col items-end gap-3 font-mono text-[10px] tracking-[0.2em] pointer-events-auto"
           aria-label="Projects"
         >
           {
             projects.map(({ entry }, i) => (
-              <button type="button" data-index={i} class="pi-item flex items-center gap-3 text-left">
+              <button type="button" data-index={i} class="pi-item flex items-center gap-3" aria-label={entry.data.title} title={entry.data.title}>
+                <span>{pad(i + 1)}</span>
                 <span class="pi-bar" aria-hidden="true" />
-                <span class="opacity-60">{pad(i + 1)}</span>
-                <span>{entry.data.title}</span>
               </button>
             ))
           }
         </nav>
-        <!-- Compact rail on phones. -->
         <div id="rail" class="md:hidden absolute left-0 bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
           <span id="rail-index" class="text-accent-primary">01</span>
           <span class="relative block w-32 h-px bg-black/15 dark:bg-white/15 overflow-hidden">
@@ -137,6 +108,56 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
           </span>
           <span class="opacity-50">{pad(projects.length)}</span>
         </div>
+      </div>
+      {
+        projects.map(({ entry, kind, field, icon }, i) => (
+          <div
+            data-project
+            data-thumb={entry.data.thumbnail}
+            data-field={field}
+            data-icon={icon}
+            class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-20 flex flex-col justify-center"
+          >
+            <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">
+              {pad(i + 1)} — {entry.data.date.getFullYear()} — {kind}
+            </span>
+            <h2 data-edge class="mt-6 !font-serif font-normal text-5xl md:text-7xl tracking-tight leading-[0.95] text-black dark:text-white">
+              {entry.data.title}
+            </h2>
+            <p data-edge class="mt-6 max-w-md font-serif text-lg leading-relaxed opacity-80">{entry.data.description}</p>
+            <a
+              href={`/projects/${entry.id}`}
+              data-edge
+              class="font-mono sp-link cta-pill mt-10 self-start"
+            >
+              Read the case study <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        ))
+      }
+      <!-- The rest of the work: closes the sequence like a project would. -->
+      <div
+        id="more-projects"
+        class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-20 flex flex-col justify-center"
+      >
+        <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">
+          {pad(projects.length + 1)} — Archive
+        </span>
+        <h2 data-edge class="mt-6 !font-serif font-normal text-5xl md:text-7xl tracking-tight leading-[0.95] text-black dark:text-white">
+          And {others.length} more.
+        </h2>
+        <ul data-edge class="mt-6 max-w-md font-serif text-lg leading-relaxed opacity-80">
+          {
+            others.map((p, i) => (
+              <li class="inline">
+                <a href={`/projects/${p.id}`} class="underline decoration-black/20 dark:decoration-white/20 underline-offset-4 hover:text-accent-primary hover:decoration-current transition-colors">{p.data.title}</a>{i < others.length - 1 && <span class="opacity-50">, </span>}
+              </li>
+            ))
+          }
+        </ul>
+        <a data-edge href="/projects" class="font-mono sp-link cta-pill mt-10 self-start">
+          See all {projectCount} projects <span aria-hidden="true">→</span>
+        </a>
       </div>
     </section>
 
@@ -174,6 +195,18 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1),
       filter 1.1s ease;
   }
+  html.edge-live [data-intro][data-edge] {
+    transition: none;
+  }
+  #boot-lines {
+    transition:
+      opacity 1s ease,
+      filter 1s ease;
+  }
+  #boot-lines.is-gone {
+    opacity: 0;
+    filter: blur(6px);
+  }
   html[data-boot] [data-intro]:not(.in) {
     opacity: 0;
     transform: translateY(14px);
@@ -208,7 +241,15 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     }
   }
 
-  /* Pinned project scene. --d: -1 upcoming, 0 active, 1 gone (from the stage's smoothed progress). */
+  .hero-counter #experience-counter {
+    font-weight: 400;
+    color: rgb(var(--color-accent));
+    font-variant-numeric: tabular-nums;
+  }
+  #project-index {
+    opacity: var(--index-o, 0);
+    transition: opacity 0.2s linear;
+  }
   .pi-item {
     opacity: 0.4;
     transition:
@@ -234,21 +275,29 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     width: 2.25rem;
   }
   .scene-project {
-    pointer-events: none;
-    opacity: var(--o);
+    opacity: var(--o, 1);
   }
-  .scene-project.is-active {
-    pointer-events: auto;
+  /* Call-to-action pill: case studies and "see all" links. */
+  .cta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.9rem 0.55rem 1.05rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--color-accent) / 0.3);
+    color: rgb(var(--color-accent));
+    font-size: 0.7rem;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease;
   }
-  .sp-mask {
-    display: block;
-    overflow: hidden;
-    padding-bottom: 0.12em;
-  }
-  .sp-line {
-    display: block;
-    will-change: transform;
-    transform: translateY(calc(clamp(-1, var(--d) * (1 + var(--i) * 0.35), 1) * -110%));
+  .cta-pill:hover,
+  .cta-pill:focus-visible {
+    background: rgb(var(--color-accent) / 0.08);
+    border-color: rgb(var(--color-accent) / 0.6);
   }
   .sp-link span {
     display: inline-block;
@@ -274,8 +323,6 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   import { iconShape, imageSample, imageShape, type ImageSample } from "@lib/ascii/shapes";
   import type { AsciiState, Rect } from "@lib/ascii/types";
 
-  /** Motion field per featured project, same order as the markup. */
-  const FIELDS_BY_PROJECT = ["interference", "grid", "plasma", "vortex", "rings", "cells"];
   /** The hero cycles through the original animations, each blending into the next. Starts on "wave" so the opening wave flows straight into it. */
   const HERO_PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "rings", "solar", "cells", "grid"];
 
@@ -284,12 +331,13 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   const heroFrame = document.getElementById("hero-frame")!;
   const scene = document.getElementById("scene")!;
   const projectEls = [...document.querySelectorAll<HTMLElement>("[data-project]")];
+  const moreEl = document.getElementById("more-projects")!;
   const railIndex = document.getElementById("rail-index")!;
   const railFill = document.getElementById("rail-fill")!;
   const experience = document.querySelector<HTMLElement>('[data-anchor="experience"]')!;
+  const blog = document.querySelector<HTMLElement>('[data-anchor="blog"]')!;
   const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
   const booting = root.dataset.boot === "1";
-  const STEP = Number(scene.dataset.step) || 1.5;
 
   const engine = new AsciiEngine({ canvas, fontSize: 10 });
 
@@ -310,9 +358,8 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
 
   // ---- Project illustrations: each project's 3D thumbnail, shaded in ASCII ----
   // The flat icon set is the fallback while an image loads or if it fails.
-  const FALLBACK_ICONS = ["comp", "dither", "colors", "photo", "bankin", "coach"];
   projectEls.forEach((el, i) => {
-    engine.setShape(`project-${i}`, iconShape(ICONS[FALLBACK_ICONS[i]] ?? ICONS.blank));
+    engine.setShape(`project-${i}`, iconShape(ICONS[el.dataset.icon ?? ""] ?? ICONS.blank));
     const img = new Image();
     img.onload = () => {
       projectImages[i] = imageSample(img);
@@ -361,9 +408,9 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     { id: "seed", field: "wave", shape: null, frame: seed, intensity: 1, ambient: 1, accent: 0.8 },
     { id: "bloom", field: "wave", shape: null, frame: bloom, intensity: 0.9, ambient: 1, accent: 0.6 },
     { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: heroSide, focus: () => (wide() ? sideFocus() : heroSide()), intensity: 1, ambient: 1, accent: 1 },
-    ...projectEls.map((_, i) => ({
+    ...projectEls.map((el, i) => ({
       id: `project-${i}`,
-      field: FIELDS_BY_PROJECT[i % FIELDS_BY_PROJECT.length],
+      field: el.dataset.field ?? "wave",
       shape: `project-${i}`,
       // Projects sit on the left: the stage crosses the page between sections.
       frame: sideLeft,
@@ -374,7 +421,10 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       warp: 0.35,
       texture: 0.5,
     })),
+    // "And N more": the field alone, still on the left, closing the sequence.
+    { id: "more", field: "cells", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.8, ambient: 0.9 },
     { id: "experience", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.5, ambient: 0.9 },
+    { id: "blog", field: "grid", shape: null, frame: centre, intensity: 0.4, ambient: 0.9 },
     { id: "closing", field: "rings", shape: null, frame: centre, intensity: 0.85, ambient: 1, accent: 0.5 },
   ];
   engine.setStates(states);
@@ -391,19 +441,19 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   }
   let anchors: Anchor[] = [];
   const docTop = (el: Element) => el.getBoundingClientRect().top + scrollY;
+  let sceneDocTop = 0;
   function measure() {
     const vh = innerHeight;
-    const sceneTop = docTop(scene);
-    const last = projectEls.length - 1;
+    sceneDocTop = docTop(scene);
+    const centreOf = (el: HTMLElement) => sceneDocTop + el.offsetTop + el.offsetHeight / 2 - vh / 2;
     anchors = [
       { y: 0, win: [0.15, 0.95] },
-      // Long holds, a short morph in the middle of each gap.
-      ...projectEls.map((_, i) => ({
-        y: sceneTop + i * STEP * vh,
-        // Hold ~80% of the way, morph in the middle 20%.
-        win: (i === last ? [0.15, 0.7] : [0.4, 0.6]) as [number, number],
-      })),
+      // A project is fully formed when its text is centred on screen; the
+      // morph runs while one text leaves and the next arrives.
+      ...projectEls.map((el) => ({ y: centreOf(el), win: [0.3, 0.7] as [number, number] })),
+      { y: centreOf(moreEl), win: [0.15, 0.7] },
       { y: docTop(experience) - vh * 0.1, win: [0.55, 1] },
+      { y: docTop(blog) - vh * 0.1, win: [0.5, 1] },
       { y: docTop(closing), win: [0, 1] },
     ];
   }
@@ -427,6 +477,7 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   }
 
   // ---- Project index: smooth-scroll to a project ----
+  const projectIndex = document.getElementById("project-index")!;
   const indexItems = [...document.querySelectorAll<HTMLButtonElement>(".pi-item")];
   indexItems.forEach((b) =>
     b.addEventListener("click", () => {
@@ -434,6 +485,42 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       scrollTo({ top: anchors[1 + i].y, behavior: engine.reducedMotion ? "auto" : "smooth" });
     }),
   );
+
+  // ---- Edge blur ----
+  // The same blur the hero text arrives with on the boot: text blurs and fades
+  // as it slides under the header or towards the bottom of the screen.
+  const edgeEls = [...document.querySelectorAll<HTMLElement>("[data-edge]")];
+  const edgeState = new Map<HTMLElement, number>();
+  let edgeLive = false;
+  const header = document.querySelector("header");
+  const EDGE_BLUR = 6; // px at the very edge, as in the boot
+  function updateEdges() {
+    const vh = innerHeight;
+    const top = header ? header.offsetHeight : 80;
+    const topZone = 110;
+    const bottomZone = vh * 0.16;
+    // Read everything first, then write, so layout is computed once.
+    const values = edgeEls.map((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.bottom < -50 || r.top > vh + 50) return 1;
+      const c = r.top + Math.min(r.height, 120) / 2;
+      const t = (top + topZone - c) / topZone;
+      const b = (c - (vh - bottomZone)) / bottomZone;
+      const e = Math.max(0, Math.min(1, Math.max(t, b)));
+      return e * e * (3 - 2 * e);
+    });
+    edgeEls.forEach((el, i) => {
+      const e = Math.round(values[i] * 100) / 100;
+      if (edgeState.get(el) === e) return;
+      edgeState.set(el, e);
+      el.style.filter =
+        e <= 0
+          ? ""
+          : engine.reducedMotion
+            ? `opacity(${(1 - e * 0.9).toFixed(2)})`
+            : `blur(${(e * EDGE_BLUR).toFixed(2)}px) opacity(${(1 - e * 0.9).toFixed(2)})`;
+    });
+  }
 
   // ---- Per-frame sync ----
   let lastY = scrollY;
@@ -443,8 +530,11 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
   let introP = 0;
   let lastMove = 0;
   /** States from the hero to the experience heading settle on a whole state when scrolling stops. */
-  const SETTLE_END = FIRST_PROJECT + projectEls.length;
+  const SETTLE_END = FIRST_PROJECT + projectEls.length + 1; // projects + "more"
   const SETTLE_AFTER_MS = 140;
+  /** Text magnetism: 0.55 = moves at 45% of scroll speed when centred. */
+  const MAGNET = 0.55;
+  const MAGNET_WIDTH = 0.3;
 
   function frame(now: number) {
     const dt = Math.max(1, now - lastT) / 1000;
@@ -468,25 +558,35 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       engine.settle();
     }
 
-    // Project text follows the stage's smoothed progress.
     const p = engine.progress;
-    // The nearest project, even mid-morph when no project text is showing.
+    // The nearest project, even mid-morph.
     const active = Math.max(0, Math.min(projectEls.length - 1, Math.round(p - FIRST_PROJECT)));
-    projectEls.forEach((el, i) => {
-      // Outgoing text clears in the first half of a morph, incoming text
-      // arrives in the second half: the swap lands when the image is scattered.
-      const d = Math.max(-1, Math.min(1, (p - (FIRST_PROJECT + i)) * 2));
-      el.style.setProperty("--d", d.toFixed(4));
-      el.style.setProperty("--o", Math.max(0, 1 - Math.abs(d) * 0.9).toFixed(3));
-      const on = Math.abs(d) < 0.5;
-      el.classList.toggle("is-active", on);
-      el.setAttribute("aria-hidden", on ? "false" : "true");
+    // Text scrolls natively, with a little magnetism: near the middle of the
+    // screen it moves slower than the scroll, then catches up further out.
+    // Purely visual; the scroll position itself is never touched.
+    const vh = innerHeight;
+    let indexO = 0;
+    [...projectEls, moreEl].forEach((el) => {
+      // Layout position (ignores our own transform).
+      const top = sceneDocTop + el.offsetTop - scrollY;
+      if (top + el.offsetHeight < -vh || top > 2 * vh) return;
+      const o = (top + el.offsetHeight / 2 - vh / 2) / vh; // 0 = centred
+      const pull = engine.reducedMotion ? 0 : -MAGNET * o * Math.exp(-((o / MAGNET_WIDTH) ** 2));
+      el.style.transform = `translate3d(0, ${(pull * vh).toFixed(2)}px, 0)`;
+      const off = Math.abs(o + pull);
+      const o2 = Math.max(0, Math.min(1, 1 - (off - 0.2) / 0.35));
+      el.style.setProperty("--o", o2.toFixed(3));
+      if (el !== moreEl) indexO = Math.max(indexO, o2);
     });
+    // The index arrives and leaves with the project text, not with the section edge.
+    projectIndex.style.setProperty("--index-o", indexO.toFixed(3));
+    projectIndex.style.pointerEvents = indexO > 0.3 ? "auto" : "none";
     railIndex.textContent = String(active + 1).padStart(2, "0");
-    const inScene = p > FIRST_PROJECT - 0.5 && p < SETTLE_END - 0.5;
+    const inScene = p > FIRST_PROJECT - 0.5 && p < FIRST_PROJECT + projectEls.length - 0.5;
     indexItems.forEach((b, i) => b.classList.toggle("is-current", inScene && i === active));
     const rp = (p - FIRST_PROJECT) / Math.max(1, projectEls.length - 1);
     railFill.style.transform = `scaleX(${Math.max(0, Math.min(1, rp)).toFixed(4)})`;
+    if (edgeLive) updateEdges();
     requestAnimationFrame(frame);
   }
 
@@ -544,6 +644,14 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
     fillLines();
     introDone = true; // the spring carries the stage from wherever it is to the hero
     intros.forEach((el) => el.classList.add("in"));
+    // Once the text has arrived, the edge blur takes over its filter.
+    setTimeout(() => {
+      root.classList.add("edge-live");
+      edgeLive = true;
+    }, 1200);
+    // The terminal lines have done their job: let them blur away. Their space
+    // is kept so the greeting doesn't jump.
+    setTimeout(() => document.getElementById("boot-lines")?.classList.add("is-gone"), 1800);
   }
 
   async function typeLine(el: HTMLElement, cps: number) {

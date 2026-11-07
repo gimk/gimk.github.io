@@ -1,10 +1,24 @@
 ---
 import { getCollection, render } from "astro:content";
 import { SITE, SOCIALS } from "@consts";
+import { readingTime } from "@lib/utils";
 
-const works = (await getCollection("work")).sort(
+const allWorks = (await getCollection("work")).sort(
   (a, b) => new Date(b.data.dateStart).getTime() - new Date(a.data.dateStart).getTime(),
 );
+/** The two most recent companies; the rest is on /work. */
+const works = allWorks.slice(0, 2);
+
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const latestPosts = posts.slice(0, 2).map((entry) => ({
+  entry,
+  month: entry.data.date.toLocaleDateString("en-GB", { month: "short" }),
+  day: String(entry.data.date.getDate()).padStart(2, "0"),
+  year: entry.data.date.getFullYear(),
+  read: readingTime(entry.body ?? ""),
+}));
 
 const entries = await Promise.all(
   works.map(async (entry) => {
@@ -22,23 +36,56 @@ const entries = await Promise.all(
 
 <section data-anchor="experience" class="relative min-h-[100svh] py-[20vh]">
   <div class="max-w-xl">
-    <h2 class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-16">Experience</h2>
+    <h2 data-edge class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-16">Experience</h2>
     <ul class="flex flex-col gap-24">
       {entries.map(({ entry, Content, years }) => (
         <li class="flex flex-col gap-3">
-          <p class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{years}</p>
-          <h3 class="!font-serif text-4xl md:text-5xl tracking-tight leading-none font-normal text-black dark:text-white">
+          <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{years}</p>
+          <h3 data-edge class="!font-serif text-4xl md:text-5xl tracking-tight leading-none font-normal text-black dark:text-white">
             {entry.data.company}
           </h3>
-          <p class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{entry.data.role}</p>
-          <div class="font-serif text-sm leading-relaxed opacity-70 line-clamp-4 mt-2">
+          <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{entry.data.role}</p>
+          <div data-edge class="font-serif text-sm leading-relaxed opacity-70 line-clamp-4 mt-2">
             <Content />
           </div>
         </li>
       ))}
     </ul>
-    <a href="/work" class="inline-block mt-20 font-mono text-xs uppercase tracking-[0.2em] text-accent-primary hover:underline">
-      All work →
+    <a data-edge href="/work" class="font-mono sp-link cta-pill mt-20">
+      See all experience <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<!--
+  Writing: a centred reading list. Each post is a quiet block between short
+  rules: date and reading time, the title set big, the summary.
+-->
+<section data-anchor="blog" class="relative min-h-[100svh] py-[20vh] flex flex-col items-center text-center">
+  <div class="blog-backdrop flex flex-col items-center w-full max-w-2xl px-6">
+    <h2 data-edge class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50">Writing</h2>
+    <p data-edge class="mt-6 font-serif text-lg opacity-70">Notes on design, code and the things in between.</p>
+    <ul class="mt-16 w-full flex flex-col">
+      {latestPosts.map(({ entry, month, day, year, read }, i) => (
+        <li class="flex flex-col items-center">
+          {i > 0 && <span class="block w-10 h-px bg-current opacity-20 my-4" aria-hidden="true" />}
+          <a href={`/blog/${entry.id}`} class="blog-row group flex flex-col items-center py-12 px-4 w-full">
+            <span data-edge class="font-mono text-[10px] uppercase tracking-[0.2em] opacity-50">
+              {day} {month} {year} <span class="mx-2 opacity-60">·</span> {read}
+            </span>
+            <span data-edge class="mt-5 font-serif text-4xl md:text-5xl tracking-tight leading-[1.1] text-black dark:text-white">
+              <span class="blog-title">{entry.data.title}</span>
+            </span>
+            <span data-edge class="mt-5 max-w-md font-serif text-lg leading-relaxed opacity-70">{entry.data.description}</span>
+            <span class="blog-cta mt-7 font-mono text-xs uppercase tracking-[0.2em] text-accent-primary">
+              Read <span class="blog-arrow" aria-hidden="true">→</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a data-edge href="/blog" class="font-mono sp-link cta-pill mt-12">
+      See all posts <span aria-hidden="true">→</span>
     </a>
   </div>
 </section>
@@ -76,6 +123,38 @@ const entries = await Promise.all(
 </section>
 
 <style is:global>
+  .blog-backdrop {
+    background: radial-gradient(closest-side, var(--outro-bg) 55%, transparent);
+  }
+  .blog-title {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 50% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .blog-row:hover .blog-title,
+  .blog-row:focus-visible .blog-title {
+    background-size: 100% 1px;
+  }
+  .blog-cta {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
+  }
+  .blog-row:hover .blog-cta,
+  .blog-row:focus-visible .blog-cta {
+    opacity: 1;
+    transform: none;
+  }
+  @media (hover: none) {
+    .blog-cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
   :root {
     --outro-bg: rgb(255 247 237 / 0.85);
   }
