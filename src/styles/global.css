@@ -33,58 +33,19 @@ body {
   @apply text-black/85 dark:text-white/85;
 }
 
+/* Header: transparent, with no bar or border. Once the page is scrolled, the
+   page colour fades in behind it so content passing underneath stays legible. */
 header {
   @apply sticky top-0 left-0 right-0 z-50 py-4;
-  @apply backdrop-blur-md;
-  @apply border-b border-black/10 dark:border-white/10;
   isolation: isolate;
-  background: linear-gradient(to bottom, #fff7ed 0%, rgba(255, 247, 237, 0.7) 100%);
-}
-
-html.dark header {
-  background: linear-gradient(to bottom, #020617 0%, rgba(2, 6, 23, 0.7) 100%);
-}
-
-header::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  height: 16px;
-  z-index: -1;
-  background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-  background-size: 4px 4px;
-  @apply text-black/10 dark:text-white/10;
-  pointer-events: none;
-  mask-image: linear-gradient(to bottom, black, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
-}
-
-/* Bare header: transparent over a full-bleed canvas. Selectors are chained
-   with header.header-bare so they beat `html.dark header` (0,1,2). */
-header.header-bare,
-html.dark header.header-bare {
   background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom-color: transparent;
-}
-
-header.header-bare::after {
-  display: none;
-}
-
-/* Once scrolled, fade the page colour in behind the bare header so content
-   passing underneath stays legible, without a hard bar. */
-header.header-bare {
   transition: background 0.4s ease;
 }
-html.scrolled header.header-bare {
-  background: linear-gradient(to bottom, #fff7ed 30%, rgba(255, 247, 237, 0));
+html.scrolled header {
+  background: linear-gradient(to bottom, #fff7ed 35%, rgba(255, 247, 237, 0));
 }
-html.dark.scrolled header.header-bare {
-  background: linear-gradient(to bottom, #020617 30%, rgba(2, 6, 23, 0));
+html.dark.scrolled header {
+  background: linear-gradient(to bottom, #020617 35%, rgba(2, 6, 23, 0));
 }
 
 main {
@@ -92,8 +53,7 @@ main {
 }
 
 footer {
-  @apply py-8 text-sm overflow-x-clip;
-  @apply border-t border-black/10 dark:border-white/10;
+  @apply pt-10 pb-8 overflow-x-clip;
 }
 
 @layer components {
