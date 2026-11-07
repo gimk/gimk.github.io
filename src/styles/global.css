@@ -24,6 +24,33 @@
   }
 }
 
+/* Keyboard focus: a clear accent ring, only for keyboard users. */
+:focus-visible {
+  outline: 2px solid rgb(var(--color-accent));
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Skip link: hidden until focused. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: 9999px;
+  background: rgb(var(--color-page));
+  color: rgb(var(--color-accent));
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
 html {
   overflow-y: scroll;
   color-scheme: light;
@@ -52,11 +79,17 @@ body {
 body > header {
   @apply sticky top-0 left-0 right-0 z-50 py-4;
   isolation: isolate;
-  background: transparent;
-  transition: background 0.4s ease;
 }
-html.scrolled body > header {
+/* Gradients can't transition, so the backdrop is a layer whose opacity follows
+   the scroll (--header-fade, 0 to 1 over the first ~160px). */
+body > header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background: linear-gradient(to bottom, rgb(var(--color-page)) 35%, rgb(var(--color-page) / 0));
+  opacity: var(--header-fade, 0);
 }
 
 body > main {

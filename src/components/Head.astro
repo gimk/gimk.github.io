@@ -111,6 +111,7 @@ const imageURL = new URL(image, Astro.site);
 <script is:inline>
   // Function to add/remove 'scrolled' class based on scroll position
   function onScroll() {
+    document.documentElement.style.setProperty("--header-fade", Math.min(1, window.scrollY / 160).toFixed(3));
     if (window.scrollY > 0) {
       document.documentElement.classList.add("scrolled");
     } else {

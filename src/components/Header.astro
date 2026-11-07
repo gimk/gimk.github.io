@@ -245,6 +245,17 @@ const latest = (await getCollection("projects"))
     initMenu();
   });
   document.addEventListener("astro:after-swap", initSoundToggle);
+
+  // 1 / 2 / 3 open Projects, Work and Blog from any page.
+  const PAGES: Record<string, string> = { "1": "/projects", "2": "/work", "3": "/blog" };
+  document.addEventListener("keydown", (e) => {
+    const href = PAGES[e.key];
+    if (!href || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.defaultPrevented) return;
+    const t = e.target as HTMLElement | null;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    e.preventDefault();
+    location.href = href;
+  });
 </script>
 
 <style>

@@ -454,6 +454,29 @@ const pad = (n: number) => String(n).padStart(2, "0");
       }),
     );
 
+    // ---- Keyboard: up/down arrows step between sections, Enter opens the
+    // project in view. Other native keys are untouched.
+    function onKey(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.defaultPrevented) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT|A|BUTTON)$/.test(t.tagName))) return;
+      const behavior = engine.reducedMotion ? "auto" : "smooth";
+      if (e.key === "ArrowDown") {
+        const next = anchors.find((a) => a.y > scrollY + 10);
+        if (next) scrollTo({ top: next.y, behavior });
+      } else if (e.key === "ArrowUp") {
+        const prev = [...anchors].reverse().find((a) => a.y < scrollY - 10);
+        scrollTo({ top: prev ? prev.y : 0, behavior });
+      } else if (e.key === "Enter") {
+        const i = Math.round(engine.progress - FIRST_PROJECT);
+        const near = Math.abs(engine.progress - FIRST_PROJECT - i) < 0.25;
+        const href = near && projectEls[i]?.querySelector("a")?.getAttribute("href");
+        if (href) location.href = href;
+      } else return;
+      e.preventDefault();
+    }
+    addEventListener("keydown", onKey);
+
     // ---- Edge blur ----
     // The same blur the hero text arrives with on the boot: text blurs and fades
     // as it slides under the header or towards the bottom of the screen.
@@ -697,6 +720,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
       themeObserver.disconnect();
       removeEventListener("resize", measure);
       removeEventListener("load", measure);
+      removeEventListener("keydown", onKey);
       for (const ev of ["keydown", "pointerdown", "wheel", "touchstart"]) removeEventListener(ev, finishIntro);
     };
 

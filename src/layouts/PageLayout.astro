@@ -20,8 +20,9 @@ const { title, description, image, type } = Astro.props;
     <Head title={`${title} | Pantoine.com`} description={description} image={image} type={type} />
   </head>
   <body>
+    <a href="#main" class="skip-link">Skip to content</a>
     <Header />
-    <main>
+    <main id="main" tabindex="-1" style="outline: none">
       <slot />
     </main>
     <Footer />
