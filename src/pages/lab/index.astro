@@ -116,21 +116,19 @@ const pad = (n: number) => String(n).padStart(2, "0");
             data-thumb={entry.data.thumbnail}
             data-field={field}
             data-icon={icon}
-            class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-20 flex flex-col justify-center"
+            class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-28 flex flex-col justify-center"
           >
-            <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">
-              {pad(i + 1)} — {entry.data.date.getFullYear()} — {kind}
-            </span>
-            <h2 data-edge class="mt-6 !font-serif font-normal text-5xl md:text-7xl tracking-tight leading-[0.95] text-black dark:text-white">
-              {entry.data.title}
-            </h2>
-            <p data-edge class="mt-6 max-w-md font-serif text-lg leading-relaxed opacity-80">{entry.data.description}</p>
-            <a
-              href={`/projects/${entry.id}`}
-              data-edge
-              class="font-mono sp-link cta-pill mt-10 self-start"
-            >
-              Read the case study <span aria-hidden="true">→</span>
+            <a href={`/projects/${entry.id}`} class="link-row flex flex-col py-6">
+              <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">
+                {pad(i + 1)} — {entry.data.date.getFullYear()} — {kind}
+              </span>
+              <h2 data-edge class="mt-6 !font-serif font-normal text-5xl md:text-7xl tracking-tight leading-[1.02] text-black dark:text-white">
+                {entry.data.title}
+              </h2>
+              <p data-edge class="mt-6 max-w-md font-serif text-lg leading-relaxed opacity-80">{entry.data.description}</p>
+              <span data-edge class="font-mono sp-link cta-pill mt-10 self-start">
+                Read the case study <span aria-hidden="true">→</span>
+              </span>
             </a>
           </div>
         ))
@@ -138,7 +136,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
       <!-- The rest of the work: closes the sequence like a project would. -->
       <div
         id="more-projects"
-        class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-20 flex flex-col justify-center"
+        class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-28 flex flex-col justify-center"
       >
         <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">
           {pad(projects.length + 1)} — Archive
@@ -198,14 +196,26 @@ const pad = (n: number) => String(n).padStart(2, "0");
   html.edge-live [data-intro][data-edge] {
     transition: none;
   }
+  /* Boot lines leave like text scrolling under the header: blur, fade and
+     drift up. Then their space closes, so the greeting glides up to centre. */
   #boot-lines {
+    max-height: 4rem;
     transition:
-      opacity 1s ease,
-      filter 1s ease;
+      opacity 0.9s ease,
+      filter 0.9s ease,
+      transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+      max-height 1s cubic-bezier(0.65, 0, 0.35, 1) 0.7s,
+      min-height 1s cubic-bezier(0.65, 0, 0.35, 1) 0.7s,
+      margin-bottom 1s cubic-bezier(0.65, 0, 0.35, 1) 0.7s;
   }
   #boot-lines.is-gone {
     opacity: 0;
     filter: blur(6px);
+    transform: translateY(-10px);
+    max-height: 0;
+    min-height: 0;
+    margin-bottom: -1.75rem; /* cancels the column's gap-7 */
+    overflow: hidden;
   }
   html[data-boot] [data-intro]:not(.in) {
     opacity: 0;
@@ -295,7 +305,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
       border-color 0.3s ease;
   }
   .cta-pill:hover,
-  .cta-pill:focus-visible {
+  .cta-pill:focus-visible,
+  .link-row:hover .cta-pill,
+  .link-row:focus-visible .cta-pill {
     background: rgb(var(--color-accent) / 0.08);
     border-color: rgb(var(--color-accent) / 0.6);
   }
@@ -303,6 +315,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     display: inline-block;
     transition: transform 0.3s ease;
   }
+  .link-row:hover .sp-link span,
   .sp-link:hover span {
     transform: translateX(4px);
   }
@@ -424,7 +437,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     // "And N more": the field alone, still on the left, closing the sequence.
     { id: "more", field: "cells", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.8, ambient: 0.9 },
     { id: "experience", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.5, ambient: 0.9 },
-    { id: "blog", field: "grid", shape: null, frame: centre, intensity: 0.4, ambient: 0.9 },
+    { id: "blog", field: "grid", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.45, ambient: 0.9 },
     { id: "closing", field: "rings", shape: null, frame: centre, intensity: 0.85, ambient: 1, accent: 0.5 },
   ];
   engine.setStates(states);
@@ -528,17 +541,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
   let vel = 0;
   let introDone = false;
   let introP = 0;
-  let lastMove = 0;
-  /** States from the hero to the experience heading settle on a whole state when scrolling stops. */
-  const SETTLE_END = FIRST_PROJECT + projectEls.length + 1; // projects + "more"
-  const SETTLE_AFTER_MS = 140;
   /** Text magnetism: 0.55 = moves at 45% of scroll speed when centred. */
   const MAGNET = 0.55;
   const MAGNET_WIDTH = 0.3;
 
   function frame(now: number) {
     const dt = Math.max(1, now - lastT) / 1000;
-    if (scrollY !== lastY) lastMove = now;
     vel += ((scrollY - lastY) / dt - vel) * 0.15;
     lastY = scrollY;
     lastT = now;
@@ -547,11 +555,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
     const st = scrollTarget();
     if (!introDone && st > HERO + 0.02) finishIntro();
     if (introDone) {
-      // Native scroll is never touched. But when you stop between two
-      // projects, the visuals finish the transition to the nearer one, so
-      // every resting position shows a complete project.
-      const idle = now - lastMove > SETTLE_AFTER_MS;
-      engine.target = idle && st < SETTLE_END ? Math.round(st) : st;
+      // The stage follows the scroll exactly: stop mid-morph and it stays mid-morph.
+      engine.target = st;
     } else {
       // The opening is time-driven and exact: no spring lag.
       engine.target = introP;
@@ -630,9 +635,16 @@ const pad = (n: number) => String(n).padStart(2, "0");
     const step = (now: number) => {
       const e = now - t0;
       if (e < bloomMs) introP = easeOut(e / bloomMs);
-      else introP = 1 + easeInOut(Math.min(1, (e - bloomMs) / morphMs));
+      else {
+        // The wave starts travelling into the side ellipse.
+        if (introP < 1) hideBootLines();
+        introP = 1 + easeInOut(Math.min(1, (e - bloomMs) / morphMs));
+      }
       if (introP < 2) raf = requestAnimationFrame(step);
-      else introDone = true;
+      else {
+        introDone = true;
+        afterIntro();
+      }
     };
     raf = requestAnimationFrame(step);
   }
@@ -644,14 +656,26 @@ const pad = (n: number) => String(n).padStart(2, "0");
     fillLines();
     introDone = true; // the spring carries the stage from wherever it is to the hero
     intros.forEach((el) => el.classList.add("in"));
+    afterIntro();
+  }
+  /**
+   * The terminal lines have done their job once the wave heads to the right:
+   * they blur away, then their space closes so the greeting settles in the centre.
+   */
+  function hideBootLines() {
+    document.getElementById("boot-lines")?.classList.add("is-gone");
+  }
+  /** Runs once, however the intro ended (played through or skipped). */
+  let afterIntroDone = false;
+  function afterIntro() {
+    if (afterIntroDone) return;
+    afterIntroDone = true;
     // Once the text has arrived, the edge blur takes over its filter.
     setTimeout(() => {
       root.classList.add("edge-live");
       edgeLive = true;
     }, 1200);
-    // The terminal lines have done their job: let them blur away. Their space
-    // is kept so the greeting doesn't jump.
-    setTimeout(() => document.getElementById("boot-lines")?.classList.add("is-gone"), 1800);
+    hideBootLines();
   }
 
   async function typeLine(el: HTMLElement, cps: number) {
