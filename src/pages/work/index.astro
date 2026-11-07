@@ -1,14 +1,12 @@
 ---
 import { getCollection, render } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import Container from "@components/Container.astro";
-import BackToPrev from "@components/BackToPrev.astro";
-import { dateRange } from "@lib/utils";
+import PageIntro from "@components/stage/PageIntro.astro";
+import ExperienceCounter from "@components/ExperienceCounter.astro";
 import { WORK } from "@consts";
 
 const collection = (await getCollection("work")).sort(
-  (a, b) =>
-    new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf(),
+  (a, b) => new Date(b.data.dateStart).valueOf() - new Date(a.data.dateStart).valueOf(),
 );
 
 const work = await Promise.all(
@@ -17,62 +15,102 @@ const work = await Promise.all(
     return { ...item, Content };
   }),
 );
+/** "2021 — 2023", or "2024 — Today". */
+const years = (start: Date, end: Date | string) =>
+  `${start.getFullYear()} — ${end instanceof Date ? end.getFullYear() : end}`;
 ---
 
-<PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
-  <Container>
-    <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 items-start pt-0">
-      <aside class="md:col-span-3 pb-6 md:pb-16 md:sticky md:top-24">
-        <div class="shadow-ascii">
-          <div
-            class="relative bg-orange-50 dark:bg-slate-950 z-20 pb-8 border border-black/10 dark:border-white/10"
-          >
-          <div class="animate">
-            <BackToPrev href="/" hideShadow={true} hideBorder={true}> Back to home </BackToPrev>
-          </div>
-          <div class="px-4">
-            <div class="h-20 flex items-center">
-              <h1 class="animate font-semibold text-black dark:text-white text-3xl">
-                Work
-              </h1>
-            </div>
-            <p class="animate mt-4 text-sm opacity-60 font-serif">
-              My professional journey and the impact I've made across various
-              companies.
-            </p>
-          </div>
-        </div>
-      </div>
-      </aside>
+<PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION} asciiBackground={false} bareHeader>
+  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <div id="work-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
+    <PageIntro
+      back={{ href: "/", label: "Home" }} label={`Experience — ${work.length} companies`} title="Work">
+      <p data-reveal data-edge class="max-w-md font-serif text-xl leading-snug opacity-80" style="--i:3">
+        <ExperienceCounter /> across {work.length} companies, bridging product, design and code.
+      </p>
+    </PageIntro>
 
-      <div class="md:col-start-5 md:col-span-6 pb-16">
-        <ul class="flex flex-col gap-8 m-0 p-0 list-none">
-          {
-            work.map((entry) => (
-              <li class="animate relative">
-                <div class="shadow-ascii">
-                  <div class="bg-orange-50 dark:bg-slate-950 px-4 py-4 border border-black/10 dark:border-white/10">
-                    <div class="flex flex-wrap items-baseline gap-x-2">
-                  <div class="font-semibold text-black dark:text-white text-lg">
-                    {entry.data.company}
-                  </div>
-                  <div class="text-sm opacity-60">
-                    {dateRange(entry.data.dateStart, entry.data.dateEnd)}
-                  </div>
-                </div>
-                <div class="text-sm opacity-80 mb-6 uppercase tracking-wide font-medium">
-                  {entry.data.role}
-                </div>
-                <article class="prose-sm">
-                  <entry.Content />
-                </article>
-              </div>
+    <ul id="work-list" class="flex flex-col gap-24 pb-[25vh] m-0 p-0 list-none">
+      {
+        work.map((entry) => (
+          <li class="grid gap-4 md:grid-cols-[11rem_1fr] md:gap-8 md:w-2/3">
+            <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50 md:sticky md:top-28 self-start">
+              {years(entry.data.dateStart, entry.data.dateEnd)}
+            </p>
+            <div class="flex flex-col gap-3">
+              <h2 data-edge class="!font-serif font-normal text-4xl md:text-5xl tracking-tight leading-none text-black dark:text-white">
+                {entry.data.company}
+              </h2>
+              <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{entry.data.role}</p>
+              <article data-edge class="mt-3 font-serif prose-sm">
+                <entry.Content />
+              </article>
             </div>
           </li>
-            ))
-          }
-        </ul>
-      </div>
-    </div>
-  </Container>
+        ))
+      }
+    </ul>
+  </div>
 </PageLayout>
+
+<script>
+  import {
+    onPage,
+    createStage,
+    side,
+    sideFocus,
+    PLAYLIST,
+    scrollProgress,
+    docTop,
+    edgeBlur,
+    type Anchor,
+  } from "@lib/ascii/stage";
+  import type { AsciiState } from "@lib/ascii/types";
+
+  onPage("#work-page", () => {
+    const page = document.getElementById("work-page")!;
+    const list = document.getElementById("work-list")!;
+    const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
+
+    const stage = createStage(canvas);
+    const { engine } = stage;
+    const states: AsciiState[] = [
+      { id: "intro", field: "wave", fields: PLAYLIST, period: 6, accent: 0.8, shape: null, frame: side, focus: sideFocus, intensity: 1, ambient: 1 },
+      { id: "list", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.5, ambient: 0.9 },
+    ];
+    engine.setStates(states);
+
+    let anchors: Anchor[] = [];
+    function measure() {
+      anchors = [{ y: 0, win: [0.2, 1] }, { y: Math.max(1, docTop(list) - innerHeight * 0.2), win: [0, 1] }];
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+
+    const blur = edgeBlur([...page.querySelectorAll<HTMLElement>("[data-edge]")], engine.reducedMotion);
+    engine.target = scrollProgress(anchors);
+    engine.settle();
+    engine.start();
+
+    let raf = 0;
+    let lastY = scrollY;
+    let lastT = performance.now();
+    function frame(now: number) {
+      const dt = Math.max(1, now - lastT) / 1000;
+      engine.velocity += ((scrollY - lastY) / dt - engine.velocity) * 0.15;
+      lastY = scrollY;
+      lastT = now;
+      engine.target = scrollProgress(anchors);
+      blur();
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      stage.destroy();
+    };
+  });
+</script>

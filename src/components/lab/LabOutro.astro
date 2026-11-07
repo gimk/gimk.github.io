@@ -126,22 +126,6 @@ const entries = await Promise.all(
   .blog-backdrop {
     background: radial-gradient(closest-side, var(--outro-bg) 55%, transparent);
   }
-  /* Underline that draws in under a title when its whole block is hovered
-     (projects and posts). Thickness scales with the type size. */
-  .link-title {
-    background-image: linear-gradient(currentColor, currentColor);
-    background-size: 0% max(1px, 0.03em);
-    background-position: var(--ul-origin, 0%) 100%;
-    background-repeat: no-repeat;
-    transition: background-size 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-  .blog-row .link-title {
-    --ul-origin: 100%;
-  }
-  .link-row:hover .link-title,
-  .link-row:focus-visible .link-title {
-    background-size: 100% max(1px, 0.03em);
-  }
   .blog-cta {
     opacity: 0;
     transform: translateY(4px);

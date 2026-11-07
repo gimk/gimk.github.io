@@ -1,47 +1,175 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import Container from "@components/Container-md.astro";
-import FormattedDate from "@components/FormattedDate.astro";
+import PageIntro from "@components/stage/PageIntro.astro";
 import { readingTime } from "@lib/utils";
-import BackToPrev from "@components/BackToPrev.astro";
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog"))
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  return posts.map((post) => ({
+  return posts.map((post, i) => ({
     params: { slug: post.id },
-    props: post,
+    // Sorted newest first: the newer post is the previous index.
+    props: { post, newer: posts[i - 1] ?? null, older: posts[i + 1] ?? null },
   }));
 }
-type Props = CollectionEntry<"blog">;
+type Props = {
+  post: CollectionEntry<"blog">;
+  newer: CollectionEntry<"blog"> | null;
+  older: CollectionEntry<"blog"> | null;
+};
 
-const post = Astro.props;
+const { post, newer, older } = Astro.props;
 const { Content } = await render(post);
+const date = post.data.date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 ---
 
-<PageLayout title={post.data.title} description={post.data.description} image={post.data.ogImage} type="article">
-  <Container>
-    <div class="animate">
-      <BackToPrev href="/blog"> Back to blog </BackToPrev>
+<PageLayout
+  title={post.data.title}
+  description={post.data.description}
+  image={post.data.ogImage}
+  type="article"
+  asciiBackground={false}
+  bareHeader
+>
+  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <div
+    id="progress-bar"
+    aria-hidden="true"
+    class="fixed top-0 left-0 w-full h-[2px] bg-accent-primary z-[60] origin-left"
+    style="transform: scaleX(0)"
+  >
+  </div>
+  <div id="post-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
+    <PageIntro
+      id="post-intro"
+      align="center"
+      size="lg"
+      tall
+      back={{ href: "/blog", label: "Writing" }}
+      label={`${date} — ${readingTime(post.body ?? "")}`}
+      title={post.data.title}
+      description={post.data.description}
+    />
+
+    <div id="post-body" class="post-body mx-auto max-w-2xl pb-[16vh]">
+      <article>
+        <Content />
+      </article>
     </div>
-    <div class="space-y-1 my-10">
-      <div class="animate flex items-center gap-1.5">
-        <div class="font-base text-sm">
-          <FormattedDate date={post.data.date} />
-        </div>
-        &bull;
-        <div class="font-base text-sm">
-          {readingTime(post.body)}
-        </div>
-      </div>
-      <div class="animate text-2xl font-semibold text-black dark:text-white">
-        {post.data.title}
-      </div>
-    </div>
-    <article class="animate">
-      <Content />
-    </article>
-  </Container>
+
+    <nav aria-label="More posts" class="grid gap-12 md:grid-cols-2 md:gap-16 pb-[20vh]">
+      {
+        older ? (
+          <a href={`/blog/${older.id}`} class="link-row blog-row flex flex-col items-start text-left gap-4 py-6">
+            <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">Previous</span>
+            <span data-edge class="!font-serif text-3xl md:text-4xl tracking-tight leading-[1.1] text-black dark:text-white">
+              <span class="link-title">{older.data.title}</span>
+            </span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        newer && (
+          <a href={`/blog/${newer.id}`} class="link-row blog-row flex flex-col items-end text-right gap-4 py-6 md:col-start-2">
+            <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">Next</span>
+            <span data-edge class="!font-serif text-3xl md:text-4xl tracking-tight leading-[1.1] text-black dark:text-white">
+              <span class="link-title">{newer.data.title}</span>
+            </span>
+          </a>
+        )
+      }
+    </nav>
+  </div>
 </PageLayout>
+
+<style is:global>
+  .post-body article {
+    @apply font-serif text-lg leading-relaxed;
+  }
+  .post-body article > video,
+  .post-body article > p > video,
+  .post-body article > p > img:only-child,
+  .post-body article > img,
+  .post-body article > figure {
+    position: relative;
+    left: 50%;
+    width: min(64rem, calc(100vw - 2.5rem));
+    max-width: none;
+    transform: translateX(-50%);
+  }
+  .post-body article h2,
+  .post-body article h3 {
+    @apply !font-serif font-normal tracking-tight;
+  }
+  .post-body article h2 {
+    @apply text-3xl mt-16;
+  }
+  .post-body article h3 {
+    @apply text-2xl mt-12;
+  }
+  .post-body article hr {
+    @apply my-16 border-black/10 dark:border-white/10;
+  }
+</style>
+
+<script>
+  import { onPage, createStage, bandAround, scrollProgress, docTop, edgeBlur, type Anchor } from "@lib/ascii/stage";
+  import type { AsciiState } from "@lib/ascii/types";
+
+  onPage("#post-page", () => {
+    const page = document.getElementById("post-page")!;
+    const intro = document.getElementById("post-intro")!;
+    const body = document.getElementById("post-body")!;
+    const bar = document.getElementById("progress-bar")!;
+    const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
+
+    const stage = createStage(canvas);
+    const { engine } = stage;
+    const states: AsciiState[] = [
+      { id: "band", field: "wave", shape: null, frame: bandAround(intro), focus: bandAround(intro), intensity: 0.45, ambient: 1, accent: 0.2 },
+      { id: "gone", field: "wave", shape: null, frame: bandAround(intro), focus: bandAround(intro), intensity: 0, ambient: 1, accent: 0.4 },
+    ];
+    engine.setStates(states);
+
+    let anchors: Anchor[] = [];
+    function measure() {
+      anchors = [{ y: 0, win: [0.2, 1] }, { y: Math.max(1, docTop(body) - innerHeight * 0.3), win: [0, 1] }];
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+
+    // The article itself never blurs: only the opening and closing blocks do.
+    const blur = edgeBlur([...page.querySelectorAll<HTMLElement>("[data-edge]")], engine.reducedMotion);
+    engine.target = scrollProgress(anchors);
+    engine.settle();
+    engine.start();
+
+    let raf = 0;
+    let lastY = scrollY;
+    let lastT = performance.now();
+    function frame(now: number) {
+      const dt = Math.max(1, now - lastT) / 1000;
+      engine.velocity += ((scrollY - lastY) / dt - engine.velocity) * 0.15;
+      lastY = scrollY;
+      lastT = now;
+      engine.target = scrollProgress(anchors);
+      const top = docTop(body);
+      const p = (scrollY - top + innerHeight * 0.3) / Math.max(1, body.offsetHeight - innerHeight * 0.3);
+      bar.style.transform = `scaleX(${Math.min(1, Math.max(0, p))})`;
+      blur();
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      stage.destroy();
+    };
+  });
+</script>
