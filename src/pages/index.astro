@@ -102,7 +102,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
             ))
           }
         </nav>
-        <div id="rail" class="md:hidden absolute left-0 bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
+        <div id="rail" class="md:hidden absolute left-0 bottom-[10svh] opacity-0 flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
           <span id="rail-index" class="text-accent-primary">01</span>
           <span class="relative block w-32 h-px bg-ink/15 overflow-hidden">
             <span id="rail-fill" class="absolute inset-0 bg-accent-primary origin-left" style="transform: scaleX(0)"></span>
@@ -307,6 +307,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     const scene = document.getElementById("scene")!;
     const projectEls = [...document.querySelectorAll<HTMLElement>("[data-project]")];
     const moreEl = document.getElementById("more-projects")!;
+    const rail = document.getElementById("rail")!;
     const railIndex = document.getElementById("rail-index")!;
     const railFill = document.getElementById("rail-fill")!;
     const experience = document.querySelector<HTMLElement>('[data-anchor="experience"]')!;
@@ -564,6 +565,8 @@ const pad = (n: number) => String(n).padStart(2, "0");
       // The index arrives and leaves with the project text, not with the section edge.
       projectIndex.style.setProperty("--index-o", indexO.toFixed(3));
       projectIndex.style.pointerEvents = indexO > 0.3 ? "auto" : "none";
+      // The phone rail follows the project text too: gone after the last project.
+      rail.style.opacity = indexO.toFixed(3);
       railIndex.textContent = String(active + 1).padStart(2, "0");
       const inScene = p > FIRST_PROJECT - 0.5 && p < FIRST_PROJECT + projectEls.length - 0.5;
       indexItems.forEach((b, i) => b.classList.toggle("is-current", inScene && i === active));
