@@ -46,7 +46,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
       <div class="md:w-1/2 flex flex-col gap-7 relative z-10">
         <div id="boot-lines" class="font-mono text-xs text-accent-primary leading-6 min-h-12" aria-hidden="true">
           <p id="boot-1" data-text="> init pantoine.com"></p>
-          <p id="boot-2" data-text="> loading fields"></p>
+          <p id="boot-2" data-text="> loading projects"></p>
           <span id="boot-caret" class="boot-caret">▍</span>
         </div>
         <h1
@@ -335,16 +335,30 @@ const pad = (n: number) => String(n).padStart(2, "0");
     const themeObserver = new MutationObserver(applyTheme);
     themeObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
 
-    // ---- Project illustrations: each project's 3D thumbnail, shaded in ASCII ----
-    // The flat icon set is the fallback while an image loads or if it fails.
+    // ---- Preload the featured projects ----
+    // Each project's 3D thumbnail, shaded in ASCII on the stage (the flat icon
+    // set is the fallback while it loads or if it fails), and its case study
+    // page, fetched into the HTTP cache so opening it is instant. Pages are
+    // skipped on Save-Data or 2G connections. The boot's "loading projects"
+    // line counts these down.
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    const lightweight = !!conn?.saveData || /2g/.test(conn?.effectiveType ?? "");
+    let projectsLoaded = 0;
     projectEls.forEach((el, i) => {
       engine.setShape(`project-${i}`, iconShape(ICONS[el.dataset.icon ?? ""] ?? ICONS.blank));
-      const img = new Image();
-      img.onload = () => {
-        projectImages[i] = imageSample(img);
-        applyTheme();
-      };
-      img.src = el.dataset.thumb ?? "";
+      const thumb = new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          projectImages[i] = imageSample(img);
+          applyTheme();
+          resolve();
+        };
+        img.onerror = () => resolve();
+        img.src = el.dataset.thumb ?? "";
+      });
+      const href = el.querySelector("a")?.getAttribute("href");
+      const page = href && !lightweight ? fetch(href, { priority: "low" } as RequestInit).then(() => {}, () => {}) : null;
+      Promise.all([thumb, page]).then(() => projectsLoaded++);
     });
     applyTheme();
 
@@ -644,9 +658,13 @@ const pad = (n: number) => String(n).padStart(2, "0");
       await typeLine(lines[0], 22);
       await sleep(260);
       await typeLine(lines[1], 30);
-      for (let i = 0; i < 3 && typing; i++) {
-        lines[1].textContent += ".";
+      // One dot per featured project, as each one actually finishes loading,
+      // but never holding the opening back for more than a moment.
+      const cap = performance.now() + 1800;
+      for (let i = 0; i < projectEls.length && typing; i++) {
         await sleep(180);
+        while (projectsLoaded <= i && typing && performance.now() < cap) await sleep(50);
+        lines[1].textContent += ".";
       }
       if (introDone) return;
       await sleep(220);
