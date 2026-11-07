@@ -1,0 +1,144 @@
+---
+import { getCollection, render } from "astro:content";
+import { SITE, SOCIALS } from "@consts";
+import { readingTime } from "@lib/utils";
+
+const allWorks = (await getCollection("work")).sort(
+  (a, b) => new Date(b.data.dateStart).getTime() - new Date(a.data.dateStart).getTime(),
+);
+/** The two most recent companies; the rest is on /work. */
+const works = allWorks.slice(0, 2);
+
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const latestPosts = posts.slice(0, 2).map((entry) => ({
+  entry,
+  month: entry.data.date.toLocaleDateString("en-GB", { month: "short" }),
+  day: String(entry.data.date.getDate()).padStart(2, "0"),
+  year: entry.data.date.getFullYear(),
+  read: readingTime(entry.body ?? ""),
+}));
+
+const entries = await Promise.all(
+  works.map(async (entry) => {
+    const { Content } = await render(entry);
+    const start = new Date(entry.data.dateStart).getFullYear();
+    const end =
+      entry.data.dateEnd instanceof Date
+        ? String(entry.data.dateEnd.getFullYear())
+        : String(entry.data.dateEnd);
+    return { entry, Content, years: `${start} — ${end}` };
+  }),
+);
+
+---
+
+<section data-anchor="experience" class="relative min-h-[100svh] py-[20vh]">
+  <div class="max-w-xl">
+    <h2 data-edge class="eyebrow mb-16">Experience</h2>
+    <ul class="flex flex-col gap-24">
+      {entries.map(({ entry, Content, years }) => (
+        <li class="flex flex-col gap-3">
+          <p data-edge class="eyebrow">{years}</p>
+          <h3 data-edge class="display text-4xl md:text-5xl leading-none">
+            {entry.data.company}
+          </h3>
+          <p data-edge class="eyebrow">{entry.data.role}</p>
+          <div data-edge class="font-serif text-sm leading-relaxed opacity-70 line-clamp-4 mt-2">
+            <Content />
+          </div>
+        </li>
+      ))}
+    </ul>
+    <a data-edge href="/work" class="font-mono sp-link cta-pill mt-20">
+      See all experience <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<!--
+  Writing: a centred reading list. Each post is a quiet block between short
+  rules: date and reading time, the title set big, the summary.
+-->
+<section data-anchor="blog" class="relative min-h-[100svh] py-[20vh] flex flex-col items-end text-right">
+  <div class="stage-backdrop flex flex-col items-end w-full max-w-2xl md:pl-6">
+    <h2 data-edge class="eyebrow">Writing</h2>
+    <p data-edge class="mt-6 font-serif text-lg opacity-70">Notes on design, code and the things in between.</p>
+    <ul class="mt-16 w-full flex flex-col">
+      {latestPosts.map(({ entry, month, day, year, read }, i) => (
+        <li class="flex flex-col items-end">
+          {i > 0 && <span class="block w-10 h-px bg-current opacity-20 my-4" aria-hidden="true" />}
+          <a href={`/blog/${entry.id}`} class="link-row blog-row group flex flex-col items-end py-12 w-full">
+            <span data-edge class="font-mono text-[10px] uppercase tracking-[0.2em] opacity-50">
+              {day} {month} {year} <span class="mx-2 opacity-60">·</span> {read}
+            </span>
+            <span data-edge class="mt-5 display text-4xl md:text-5xl leading-[1.1]">
+              <span class="link-title">{entry.data.title}</span>
+            </span>
+            <span data-edge class="mt-5 max-w-md font-serif text-lg leading-relaxed opacity-70">{entry.data.description}</span>
+            <span class="blog-cta mt-7 font-mono text-xs uppercase tracking-[0.2em] text-accent-primary">
+              Read <span class="blog-arrow" aria-hidden="true">→</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a data-edge href="/blog" class="font-mono sp-link cta-pill mt-12">
+      See all posts <span aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<section
+  data-anchor="closing"
+  id="closing"
+  class="relative min-h-[100svh] flex flex-col items-center justify-center text-center gap-8"
+>
+  <div
+    class="stage-backdrop flex flex-col items-center gap-8 px-16 py-12"
+    style="--backdrop-stop: 40%"
+  >
+    <h2 class="eyebrow">Contact</h2>
+    <p class="display text-5xl md:text-7xl leading-none">
+      Let's make something.
+    </p>
+    <a
+      href={`mailto:${SITE.EMAIL}`}
+      class="font-serif text-xl md:text-2xl text-accent-primary hover:underline"
+    >
+      {SITE.EMAIL}
+    </a>
+    <ul class="flex flex-wrap justify-center items-center font-mono text-xs uppercase tracking-[0.2em]">
+      {SOCIALS.map((s, i) => (
+        <li class="flex items-center">
+          {i > 0 && <span class="opacity-50 mx-3" aria-hidden="true">/</span>}
+          <a href={s.HREF} target="_blank" rel="noopener" class="opacity-80 hover:opacity-100 hover:underline">
+            {s.NAME}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style is:global>
+  .blog-cta {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
+  }
+  .blog-row:hover .blog-cta,
+  .blog-row:focus-visible .blog-cta {
+    opacity: 1;
+    transform: none;
+  }
+  @media (hover: none) {
+    .blog-cta {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

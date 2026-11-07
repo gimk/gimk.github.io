@@ -1,22 +1,40 @@
 ---
 import Container from "@components/Container.astro";
-import { SITE } from "@consts";
-import BackToTop from "@components/BackToTop.astro";
+import InteractionSound from "@components/InteractionSound.astro";
+
+const year = new Date().getFullYear();
 ---
 
-<footer class="animate">
-  <Container hideLines={true}>
-    <div class="flex justify-between items-center">
-      <div>
-        &copy; 2025 {`|`}
-        {SITE.NAME}
-        <i> – Made with love and a lot of vibe coding.</i>
+<footer>
+  <Container>
+    <div class="footer-rule mb-8" aria-hidden="true"></div>
+    <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div class="flex flex-col gap-2">
+        <p class="font-serif italic text-base opacity-70">Made with love and a lot of vibe coding.</p>
+        <p class="font-mono text-[10px] uppercase tracking-[0.2em] opacity-50">
+          © {year} Antoine Pouligny
+        </p>
       </div>
-      <div>
-        <div>
-          <BackToTop />
-        </div>
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-4 font-mono text-[10px] uppercase tracking-[0.2em]">
+        <InteractionSound preset="button">
+          <button
+            id="back-to-top"
+            class="group flex items-center gap-2 rounded-full border border-ink/15 px-3 py-2 uppercase tracking-[0.2em] hover:border-current hover:text-accent-primary transition"
+          >
+            Top
+            <span class="transition-transform duration-300 group-hover:-translate-y-0.5" aria-hidden="true">↑</span>
+          </button>
+        </InteractionSound>
       </div>
     </div>
   </Container>
 </footer>
+
+<style>
+  /* A hairline that fades out at both ends, rather than a full-width border. */
+  .footer-rule {
+    height: 1px;
+    background: linear-gradient(to right, transparent, currentColor 20%, currentColor 80%, transparent);
+    opacity: 0.12;
+  }
+</style>

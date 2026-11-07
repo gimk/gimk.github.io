@@ -1,184 +1,161 @@
 import { playSound } from "@lib/audio-manager";
 
-let blinkTimeoutId: number | null = null;
-let pigAnimationLoopId: number | null = null;
-let isWiggling = false;
-let wiggleSoundCounter = 0;
-const wiggleSoundInterval = 3; // Play every 3 frames (~100ms at 30fps)
+/**
+ * The header pig. JS only computes a few numbers and writes them as CSS
+ * variables on the SVG; the layers' movement lives in Header.astro's CSS.
+ *   --lx, --ly  look direction, each within -1..1
+ *   --sniff     snout pulse, 0..1
+ */
+
+const LOOK_RANGE = 300; // px: the look levels off smoothly past ~2× this
+const IDLE_AFTER = 3000; // ms without pointer movement before recentring
+const NEAR_IN = 50; // px from centre: start sniffing
+const NEAR_OUT = 70; // px: stop sniffing (hysteresis)
+const STIFFNESS = 140; // spring
+const DAMPING = 10; // well under critical (~23.7) for a lively overshoot
+const SNIFF_HZ = 5;
+
+let cleanup: (() => void) | null = null;
 
 export function initPigAnimation() {
-  const svg = document.querySelector(".cochon-svg") as SVGElement | null;
-  const head = document.getElementById("head");
-  const snoutGroup = document.getElementById("snout-group");
-  const leftEar = document.getElementById("left-ear");
-  const rightEar = document.getElementById("right-ear");
-  const leftEye = document.getElementById("left-eye");
-  const rightEye = document.getElementById("right-eye");
+  cleanup?.();
+  cleanup = null;
 
-  if (!svg || !head || !snoutGroup || !leftEar || !rightEar || !leftEye || !rightEye) {
-    return;
-  }
+  const svg = document.querySelector<SVGSVGElement>(".cochon-svg");
+  if (!svg) return;
+  const ears = svg.querySelectorAll<SVGElement>(".pig-ear");
 
-  const leftEyeOrigX = parseFloat(leftEye.getAttribute("cx") || "0");
-  const leftEyeOrigY = parseFloat(leftEye.getAttribute("cy") || "0");
-  const rightEyeOrigX = parseFloat(rightEye.getAttribute("cx") || "0");
-  const rightEyeOrigY = parseFloat(rightEye.getAttribute("cy") || "0");
-  const eyeOriginalRy = parseFloat(leftEye.getAttribute("ry") || "4");
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const timers = new Set<number>();
+  const later = (fn: () => void, ms: number) => {
+    const id = window.setTimeout(() => {
+      timers.delete(id);
+      fn();
+    }, ms);
+    timers.add(id);
+  };
+  const rand = (min: number, max: number) => min + Math.random() * (max - min);
 
-  const maxSnoutOffset = 1;
-  const maxEyeOffset = 0.8;
-  const maxHeadOffset = 0.5;
-  const maxEarOffset = 0.2;
+  // Spring state.
+  let tx = 0, ty = 0; // target
+  let x = 0, y = 0, vx = 0, vy = 0; // current
+  let near = false;
+  let sniffEnv = 0, sniffPhase = 0;
+  let raf: number | null = null;
+  let last = 0;
+  let idleTimer: number | null = null;
 
-  const smoothingFactor = 0.2;
-  let targetSnoutTx = 0, targetSnoutTy = 0, targetSnoutRotation = 0;
-  let targetHeadTx = 0, targetHeadTy = 0;
-  let targetLeftEarTx = 0, targetLeftEarTy = 0;
-  let targetRightEarTx = 0, targetRightEarTy = 0;
-  let targetLeftEyeCx = leftEyeOrigX, targetLeftEyeCy = leftEyeOrigY;
-  let targetRightEyeCx = rightEyeOrigX, targetRightEyeCy = rightEyeOrigY;
-  
-  let currentSnoutTx = 0, currentSnoutTy = 0, currentSnoutRotation = 0;
-  let currentHeadTx = 0, currentHeadTy = 0;
-  let currentLeftEarTx = 0, currentLeftEarTy = 0;
-  let currentRightEarTx = 0, currentRightEarTy = 0;
-  let currentLeftEyeCx = leftEyeOrigX, currentLeftEyeCy = leftEyeOrigY;
-  let currentRightEyeCx = rightEyeOrigX, currentRightEyeCy = rightEyeOrigY;
+  const write = () => {
+    svg.style.setProperty("--lx", x.toFixed(4));
+    svg.style.setProperty("--ly", y.toFixed(4));
+    svg.style.setProperty("--sniff", (sniffEnv * (0.5 - 0.5 * Math.cos(sniffPhase))).toFixed(4));
+  };
 
-  const wiggleThreshold = 60;
-  const wiggleAmplitude = 6;
-  const wiggleFrequency = 0.025;
+  const frame = (now: number) => {
+    const dt = Math.min((now - last) / 1000, 1 / 30);
+    last = now;
 
-  const blinkDuration = 100;
-  const blinkRyValue = 1;
-  const minBlinkInterval = 5000;
-  const maxBlinkInterval = 8000;
+    const ax = STIFFNESS * (tx - x) - DAMPING * vx;
+    const ay = STIFFNESS * (ty - y) - DAMPING * vy;
+    vx += ax * dt; vy += ay * dt;
+    x += vx * dt; y += vy * dt;
 
-  function updatePigState(event: MouseEvent) {
-    if (!svg) return;
+    sniffEnv += ((near ? 1 : 0) - sniffEnv) * (1 - Math.exp(-dt * 10));
+    sniffPhase += dt * SNIFF_HZ * Math.PI * 2;
 
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
-    const svgRect = svg.getBoundingClientRect();
-    const svgCenterX = svgRect.left + svgRect.width / 2;
-    const svgCenterY = svgRect.top + svgRect.height / 2;
-    const deltaX = mouseX - svgCenterX;
-    const deltaY = mouseY - svgCenterY;
+    write();
 
-    const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
-    isWiggling = distance < wiggleThreshold;
-
-    const normalizedOffsetX = svgRect.width ? deltaX / (svgRect.width / 2) : 0;
-    const normalizedOffsetY = svgRect.height ? deltaY / (svgRect.height / 2) : 0;
-
-    targetSnoutTx = normalizedOffsetX * maxSnoutOffset;
-    targetSnoutTy = normalizedOffsetY * maxSnoutOffset;
-    targetSnoutRotation = Math.max(-15, Math.min(15, normalizedOffsetX * -0.4));
-    targetHeadTx = normalizedOffsetX * maxHeadOffset;
-    targetHeadTy = normalizedOffsetY * maxHeadOffset;
-    
-    const ear3dTilt = normalizedOffsetX * 0.2;
-    const eye3dTilt = normalizedOffsetX * 0.1;
-
-    targetLeftEarTx = normalizedOffsetX * maxEarOffset;
-    targetLeftEarTy = (normalizedOffsetY * maxEarOffset) + ear3dTilt;
-    targetRightEarTx = normalizedOffsetX * maxEarOffset;
-    targetRightEarTy = (normalizedOffsetY * maxEarOffset) - ear3dTilt;
-    
-    const targetLeftEyeTx = normalizedOffsetX * maxEyeOffset;
-    const targetLeftEyeTy = (normalizedOffsetY * maxEyeOffset) + eye3dTilt;
-    const targetRightEyeTx = normalizedOffsetX * maxEyeOffset;
-    const targetRightEyeTy = (normalizedOffsetY * maxEyeOffset) - eye3dTilt;
-
-    targetLeftEyeCx = leftEyeOrigX + targetLeftEyeTx;
-    targetLeftEyeCy = leftEyeOrigY + targetLeftEyeTy;
-    targetRightEyeCx = rightEyeOrigX + targetRightEyeTx;
-    targetRightEyeCy = rightEyeOrigY + targetRightEyeTy;
-  }
-
-  let lastPigFrameTime = 0;
-  const PIG_FPS = 30;
-  const PIG_FRAME_TIME = 1000 / PIG_FPS;
-
-  function pigAnimationLoop(timestamp: number) {
-    const elapsed = timestamp - lastPigFrameTime;
-    if (elapsed < PIG_FRAME_TIME) {
-      pigAnimationLoopId = requestAnimationFrame(pigAnimationLoop);
-      return;
-    }
-    lastPigFrameTime = timestamp;
-
-    currentSnoutTx += (targetSnoutTx - currentSnoutTx) * smoothingFactor;
-    currentSnoutTy += (targetSnoutTy - currentSnoutTy) * smoothingFactor;
-    currentSnoutRotation += (targetSnoutRotation - currentSnoutRotation) * smoothingFactor;
-    currentHeadTx += (targetHeadTx - currentHeadTx) * smoothingFactor;
-    currentHeadTy += (targetHeadTy - currentHeadTy) * smoothingFactor;
-    currentLeftEarTx += (targetLeftEarTx - currentLeftEarTx) * smoothingFactor;
-    currentLeftEarTy += (targetLeftEarTy - currentLeftEarTy) * smoothingFactor;
-    currentRightEarTx += (targetRightEarTx - currentRightEarTx) * smoothingFactor;
-    currentRightEarTy += (targetRightEarTy - currentRightEarTy) * smoothingFactor;
-    currentLeftEyeCx += (targetLeftEyeCx - currentLeftEyeCx) * smoothingFactor;
-    currentLeftEyeCy += (targetLeftEyeCy - currentLeftEyeCy) * smoothingFactor;
-    currentRightEyeCx += (targetRightEyeCx - currentRightEyeCx) * smoothingFactor;
-    currentRightEyeCy += (targetRightEyeCy - currentRightEyeCy) * smoothingFactor;
-
-    let wiggleOffset = 0;
-    if (isWiggling) {
-      wiggleOffset = Math.sin(Date.now() * wiggleFrequency) * wiggleAmplitude;
-      
-      // Play eating sound in rapid succession
-      wiggleSoundCounter++;
-      if (wiggleSoundCounter >= wiggleSoundInterval) {
-        playSound("swipe_01", 0.02);
-        wiggleSoundCounter = 0;
-      }
+    const settled =
+      Math.abs(tx - x) < 1e-3 && Math.abs(ty - y) < 1e-3 &&
+      Math.abs(vx) < 1e-3 && Math.abs(vy) < 1e-3 &&
+      !near && sniffEnv < 1e-3;
+    if (settled) {
+      x = tx; y = ty; vx = vy = 0; sniffEnv = 0; sniffPhase = 0;
+      write();
+      raf = null;
     } else {
-      wiggleSoundCounter = wiggleSoundInterval; // Reset to play immediately next time we wiggle
+      raf = requestAnimationFrame(frame);
+    }
+  };
+
+  const wake = () => {
+    if (raf !== null) return;
+    last = performance.now();
+    raf = requestAnimationFrame(frame);
+  };
+
+  const onMove = (e: PointerEvent) => {
+    if (e.pointerType === "touch") return;
+    const r = svg.getBoundingClientRect();
+    const dx = e.clientX - (r.left + r.width / 2);
+    const dy = e.clientY - (r.top + r.height / 2);
+    const d = Math.hypot(dx, dy);
+    const k = d ? Math.tanh(d / LOOK_RANGE) / d : 0;
+    tx = dx * k;
+    ty = dy * k;
+
+    const wasNear = near;
+    near = d < (near ? NEAR_OUT : NEAR_IN);
+    if (near && !wasNear) {
+      sniffPhase = 0;
+      playSound("swipe_02", 0.04);
     }
 
-    if (head && snoutGroup && leftEar && rightEar && leftEye && rightEye) {
-      head.setAttribute("transform", `translate(${currentHeadTx + wiggleOffset} ${currentHeadTy})`);
-      snoutGroup.setAttribute("transform", `translate(${currentSnoutTx + wiggleOffset} ${currentSnoutTy}) rotate(${currentSnoutRotation} 100.5 132.5)`);
-      leftEar.setAttribute("transform", `translate(${currentLeftEarTx + wiggleOffset} ${currentLeftEarTy})`);
-      rightEar.setAttribute("transform", `translate(${currentRightEarTx + wiggleOffset} ${currentRightEarTy})`);
+    if (idleTimer !== null) clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(() => {
+      tx = ty = 0;
+      near = false;
+      wake();
+    }, IDLE_AFTER);
 
-      leftEye.setAttribute("cx", (currentLeftEyeCx + wiggleOffset).toString());
-      leftEye.setAttribute("cy", currentLeftEyeCy.toString());
-      rightEye.setAttribute("cx", (currentRightEyeCx + wiggleOffset).toString());
-      rightEye.setAttribute("cy", currentRightEyeCy.toString());
+    wake();
+  };
+
+  // Blinks: every 3–7s, sometimes a double blink.
+  const blink = (times: number) => {
+    svg.classList.add("is-blinking");
+    later(() => {
+      svg.classList.remove("is-blinking");
+      if (times > 1) later(() => blink(times - 1), 140);
+      else later(() => blink(Math.random() < 0.2 ? 2 : 1), rand(3000, 7000));
+    }, 120);
+  };
+  later(() => blink(1), rand(1500, 4000));
+
+  // Ear flick: now and then, one ear.
+  const flick = () => {
+    const ear = ears[Math.floor(Math.random() * ears.length)];
+    if (ear) {
+      ear.classList.remove("is-flicking");
+      void ear.getBoundingClientRect(); // restart the animation
+      ear.classList.add("is-flicking");
     }
+    later(flick, rand(7000, 14000));
+  };
 
-    pigAnimationLoopId = requestAnimationFrame(pigAnimationLoop);
+  // Click / tap: squash-and-stretch.
+  const onDown = () => {
+    svg.classList.remove("is-bouncing");
+    void svg.getBoundingClientRect();
+    svg.classList.add("is-bouncing");
+  };
+  const onAnimEnd = (e: AnimationEvent) => {
+    (e.target as Element).classList.remove("is-bouncing", "is-flicking");
+  };
+
+  svg.addEventListener("animationend", onAnimEnd);
+  if (!reduced) {
+    window.addEventListener("pointermove", onMove, { passive: true });
+    svg.addEventListener("pointerdown", onDown);
+    later(flick, rand(5000, 10000));
   }
 
-  function triggerBlink() {
-    if (!leftEye || !rightEye) return;
-    leftEye.setAttribute("ry", blinkRyValue.toString());
-    rightEye.setAttribute("ry", blinkRyValue.toString());
-    setTimeout(() => {
-      if (!leftEye || !rightEye) return;
-      leftEye.setAttribute("ry", eyeOriginalRy.toString());
-      rightEye.setAttribute("ry", eyeOriginalRy.toString());
-      scheduleNextBlink();
-    }, blinkDuration);
-  }
-
-  function scheduleNextBlink() {
-    if (blinkTimeoutId !== null) {
-      clearTimeout(blinkTimeoutId);
-    }
-    const randomDelay = Math.random() * (maxBlinkInterval - minBlinkInterval) + minBlinkInterval;
-    blinkTimeoutId = window.setTimeout(triggerBlink, randomDelay);
-  }
-
-  document.removeEventListener("mousemove", updatePigState as EventListener);
-  document.addEventListener("mousemove", updatePigState as EventListener);
-
-  if (pigAnimationLoopId !== null) {
-    cancelAnimationFrame(pigAnimationLoopId);
-    pigAnimationLoopId = null;
-  }
-  pigAnimationLoop(performance.now());
-
-  scheduleNextBlink();
+  cleanup = () => {
+    window.removeEventListener("pointermove", onMove);
+    svg.removeEventListener("pointerdown", onDown);
+    svg.removeEventListener("animationend", onAnimEnd);
+    if (raf !== null) cancelAnimationFrame(raf);
+    if (idleTimer !== null) clearTimeout(idleTimer);
+    timers.forEach(clearTimeout);
+  };
 }

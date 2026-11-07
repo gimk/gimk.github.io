@@ -1,82 +1,124 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import Container from "@components/Container.astro";
-import ArrowCard from "@components/ArrowCard.astro";
-import BackToPrev from "@components/BackToPrev.astro";
+import PageIntro from "@components/stage/PageIntro.astro";
+import { readingTime } from "@lib/utils";
 import { BLOG } from "@consts";
 
 const data = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-type Acc = {
-  [year: string]: CollectionEntry<"blog">[];
-};
-
-const posts = data.reduce((acc: Acc, post) => {
+const grouped = data.reduce((acc: Record<string, CollectionEntry<"blog">[]>, post) => {
   const year = post.data.date.getFullYear().toString();
-  if (!acc[year]) {
-    acc[year] = [];
-  }
-  acc[year].push(post);
+  (acc[year] ??= []).push(post);
   return acc;
 }, {});
-
-const years = Object.keys(posts).sort((a, b) => parseInt(b) - parseInt(a));
+const years = Object.keys(grouped).sort((a, b) => parseInt(b) - parseInt(a));
+const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 ---
 
 <PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
-  <Container>
-    <div class="grid grid-cols-1 md:grid-cols-10 gap-x-0 items-start pt-0">
-      <aside class="md:col-span-3 pb-6 md:pb-16 md:sticky md:top-24">
-        <div class="shadow-ascii">
-          <div
-            class="relative bg-orange-50 dark:bg-slate-950 z-20 pb-8 border border-black/10 dark:border-white/10"
-          >
-          <div class="animate">
-            <BackToPrev href="/" hideShadow={true} hideBorder={true}> Back to home </BackToPrev>
-          </div>
-          <div class="px-4">
-            <div class="h-20 flex items-center">
-              <h1 class="animate font-semibold text-black dark:text-white text-3xl">
-                Blog
-              </h1>
-            </div>
-            <p class="animate mt-4 text-sm opacity-60 font-serif">
-              Thoughts on design, technology, and life.
-            </p>
-          </div>
-        </div>
-      </div>
-      </aside>
+  <canvas class="ascii-stage" aria-hidden="true" transition:persist="ascii-stage"></canvas>
+  <div id="blog-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
+    <PageIntro
+      back={{ href: "/", label: "Home" }}
+      align="right"
+      label={`Writing — ${data.length} posts`}
+      title="Writing"
+      description="Notes on design, code and the things in between."
+    />
 
-      <div class="md:col-start-5 md:col-span-6 pb-16">
-        <div class="space-y-12">
-          {
-            years.map((year) => (
-              <section class="animate flex flex-col gap-8">
-                {posts[year].map((post, index) => (
-                  <div class="grid grid-cols-1 md:grid-cols-6 gap-x-0">
-                    <div class="md:col-span-1">
-                      {index === 0 && (
-                        <div class="h-20 flex items-center pl-2">
-                          <span class="font-semibold text-black dark:text-white uppercase tracking-wider text-sm opacity-50">
-                            {year}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div class="md:col-span-5">
-                      <ArrowCard entry={post} />
-                    </div>
-                  </div>
-                ))}
-              </section>
-            ))
-          }
-        </div>
-      </div>
+    <div id="blog-list" class="md:w-1/2 md:ml-auto flex flex-col items-end text-right pb-[25vh]">
+      {
+        years.map((year) => (
+          <section class="w-full flex flex-col items-end mb-16">
+            <h2 data-edge class="display text-6xl leading-none opacity-30">
+              {year}
+            </h2>
+            <ul class="w-full flex flex-col items-end mt-8">
+              {grouped[year].map((post, i) => (
+                <li class="w-full flex flex-col items-end">
+                  {i > 0 && <span class="block w-10 h-px bg-current opacity-20 my-4" aria-hidden="true" />}
+                  <a href={`/blog/${post.id}`} class="link-row blog-row flex flex-col items-end py-10 w-full">
+                    <span data-edge class="eyebrow text-[10px]">
+                      {fmt(post.data.date)} <span class="mx-2 opacity-60">·</span> {readingTime(post.body ?? "")}
+                    </span>
+                    <span data-edge class="display mt-5 text-4xl md:text-5xl leading-[1.1]">
+                      <span class="link-title">{post.data.title}</span>
+                    </span>
+                    <span data-edge class="mt-5 max-w-md font-serif text-lg leading-relaxed opacity-70">
+                      {post.data.description}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
     </div>
-  </Container>
+  </div>
 </PageLayout>
+
+<script>
+  import {
+    onPage,
+    createStage,
+    sideLeft,
+    sideFocusLeft,
+    PLAYLIST,
+    scrollProgress,
+    docTop,
+    edgeBlur,
+    type Anchor,
+  } from "@lib/ascii/stage";
+  import type { AsciiState } from "@lib/ascii/types";
+
+  onPage("#blog-page", () => {
+    const page = document.getElementById("blog-page")!;
+    const list = document.getElementById("blog-list")!;
+    const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
+
+    const stage = createStage(canvas);
+    const { engine } = stage;
+    const states: AsciiState[] = [
+      { id: "intro", field: "wave", fields: PLAYLIST, period: 6, accent: 0.8, shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 1, ambient: 1 },
+      { id: "list", field: "calm", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.45, ambient: 0.9 },
+    ];
+    engine.setStates(states);
+
+    let anchors: Anchor[] = [];
+    function measure() {
+      anchors = [{ y: 0, win: [0.2, 1] }, { y: Math.max(1, docTop(list) - innerHeight * 0.2), win: [0, 1] }];
+    }
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+
+    const blur = edgeBlur([...page.querySelectorAll<HTMLElement>("[data-edge]")], engine.reducedMotion);
+    engine.target = scrollProgress(anchors);
+    engine.settle();
+    engine.start();
+
+    let raf = 0;
+    let lastY = scrollY;
+    let lastT = performance.now();
+    function frame(now: number) {
+      const dt = Math.max(1, now - lastT) / 1000;
+      engine.velocity += ((scrollY - lastY) / dt - engine.velocity) * 0.15;
+      lastY = scrollY;
+      lastT = now;
+      engine.target = scrollProgress(anchors);
+      blur();
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      stage.destroy();
+    };
+  });
+</script>

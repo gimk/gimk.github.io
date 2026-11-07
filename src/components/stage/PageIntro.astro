@@ -1,0 +1,77 @@
+---
+/**
+ * The opening of a page in the ASCII-stage design: a small mono label, a big
+ * serif title and a sentence, on one half of the screen; the ASCII stage owns
+ * the other half. Text arrives with the same blur-in as the lab hero.
+ */
+type Props = {
+  label?: string;
+  title: string;
+  description?: string;
+  back?: { href: string; label: string };
+  /** Which half the text sits on (the ASCII takes the other). */
+  align?: "left" | "right" | "center";
+  /** Full screen height (detail pages) or shorter (list pages). */
+  tall?: boolean;
+  /** Title size. */
+  size?: "xl" | "lg";
+  id?: string;
+  /** Extra classes for the text column (e.g. a backdrop). */
+  class?: string;
+};
+
+const { label, title, description, back, align = "left", tall = false, size = "xl", id, class: className } = Astro.props;
+const half =
+  align === "left"
+    ? "md:w-1/2 items-start text-left"
+    : align === "right"
+      ? "md:w-1/2 md:ml-auto items-end text-right"
+      : "mx-auto max-w-3xl items-center text-center";
+---
+
+<section
+  id={id}
+  class:list={[
+    "relative flex flex-col md:justify-center",
+    // Phones: the ASCII is a band across the top, so the text sits below it.
+    tall
+      ? "min-h-[calc(100svh-6rem)] pb-[14svh] md:pb-16 justify-end md:justify-center"
+      : "min-h-[62svh] pt-[40svh] pb-16 md:pt-16 md:pb-20",
+  ]}
+>
+  <div class:list={["flex flex-col gap-7", half, className]}>
+    {
+      back && (
+        <a href={back.href} data-reveal data-edge class="font-mono sp-link sp-back cta-pill" style="--i:0; --nudge:-4px">
+          <span aria-hidden="true">←</span> {back.label}
+        </a>
+      )
+    }
+    {
+      label && (
+        <p data-reveal data-edge class="eyebrow" style="--i:1">
+          {label}
+        </p>
+      )
+    }
+    <h1
+      data-reveal
+      data-edge
+      class:list={[
+        "display",
+        size === "xl" ? "text-5xl md:text-7xl leading-[0.98]" : "text-4xl md:text-6xl leading-[1.02]",
+      ]}
+      style="--i:2"
+    >
+      {title}
+    </h1>
+    {
+      description && (
+        <p data-reveal data-edge class="max-w-md font-serif text-xl leading-snug opacity-80" style="--i:3">
+          {description}
+        </p>
+      )
+    }
+    <slot />
+  </div>
+</section>

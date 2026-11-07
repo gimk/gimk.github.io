@@ -1,125 +1,713 @@
 ---
-import { getCollection, render } from "astro:content";
-import Container from "@components/Container.astro";
+import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import ArrowCard from "@components/ArrowCard.astro";
-import ArrowCardThumbnail from "@components/ArrowCardThumbnail.astro";
-import Link from "@components/Link.astro";
-import Hero from "@components/Hero.astro";
-import AppCards from "@components/AppCards.astro";
-import { dateRange } from "@lib/utils";
-import { SITE, HOME } from "@consts";
+import HomeOutro from "@components/home/HomeOutro.astro";
+import ExperienceCounter from "@components/ExperienceCounter.astro";
+import { SOCIALS, HOME } from "@consts";
 
-const blog = (await getCollection("blog"))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_POSTS_ON_HOMEPAGE);
+/** Featured projects, in scroll order, with their motion field and fallback icon. */
+const FEATURED = [
+  { id: "comp-studio", kind: "Tool · Design & code", field: "interference", icon: "comp" },
+  { id: "colors-studio", kind: "Tool · Design & code", field: "plasma", icon: "colors" },
+  { id: "vibe-coding-trilogy", kind: "Site · Photography", field: "vortex", icon: "photo" },
+];
 
-const projects = (await getCollection("projects"))
-  .filter((project) => !project.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, SITE.NUM_PROJECTS_ON_HOMEPAGE);
-
-const allwork = (await getCollection("work"))
-  .sort(
-    (a, b) =>
-      new Date(b.data.dateStart).valueOf() -
-      new Date(a.data.dateStart).valueOf(),
-  )
-  .slice(0, SITE.NUM_WORKS_ON_HOMEPAGE);
-
-const work = await Promise.all(
-  allwork.map(async (item) => {
-    const { Content } = await render(item);
-    return { ...item, Content };
-  }),
-);
+const all = await getCollection("projects");
+const published = all.filter((p) => !p.data.draft);
+const projectCount = published.length;
+/** Everything not featured, newest first, for the closing "more" card. */
+const others = published
+  .filter((p) => !FEATURED.some((f) => f.id === p.id.toLowerCase()))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const projects = FEATURED.map((f) => {
+  const entry = all.find((p) => p.id.toLowerCase() === f.id);
+  if (!entry) throw new Error(`Missing project ${f.id}`);
+  return { ...f, entry };
+});
+const pad = (n: number) => String(n).padStart(2, "0");
+/** Scroll per project inside the pinned scene, in viewport heights. */
 ---
 
 <PageLayout title={HOME.TITLE} description={HOME.DESCRIPTION}>
-  <Container>
-    <Hero />
-    <AppCards />
+  <script is:inline>
+    try {
+      const force = new URLSearchParams(location.search).has("boot");
+      if (force || !localStorage.getItem("gimk:booted")) document.documentElement.dataset.boot = "1";
+    } catch (e) {
+      // Storage unavailable: no boot.
+    }
+  </script>
 
-    <div
-      class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 pb-16 items-start"
-    >
-      <!-- Left Column: Work Experience -->
-      <div class="flex flex-col gap-12 md:gap-4 order-2 md:order-1">
-        <section class="animate">
-          <div class="h-20 flex items-center justify-between">
-            <h5 class="section-title">
-              Work Experience
-            </h5>
-            <Link href="/work" class="text-sm"> See all work </Link>
-          </div>
-          <ul class="flex flex-col gap-8">
-            {
-              work.map((entry) => (
-                <li class="animate relative">
-                  <div class="shadow-ascii">
-                    <div class="relative bg-orange-50 dark:bg-slate-950 px-4 py-4 border border-black/10 dark:border-white/10">
-                      <div class="flex flex-wrap items-baseline gap-x-1">
-                    <div class="font-semibold text-black dark:text-white">
-                      {entry.data.company}
-                    </div>
-                    <div class="text-xs opacity-60">
-                      {dateRange(entry.data.dateStart, entry.data.dateEnd)}
-                    </div>
-                  </div>
-                  <div class="text-sm opacity-75 mb-4 uppercase tracking-wide font-medium">
-                    {entry.data.role}
-                  </div>
-                  <article class="prose-sm">
-                    <entry.Content />
-                  </article>
-                    </div>
-                  </div>
-                </li>
-              ))
-            }
-          </ul>
-        </section>
+  <canvas class="ascii-stage" aria-hidden="true" transition:persist="ascii-stage"></canvas>
+
+  <div class="mx-auto max-w-screen-xl px-5 md:px-10">
+    <!-- Hero -->
+    <section id="hero" class="relative min-h-[calc(100svh-6rem)] flex items-end md:items-center pb-[13svh] md:pb-20">
+      <div class="md:w-1/2 flex flex-col gap-7 relative z-10">
+        <div id="boot-lines" class="font-mono text-xs text-accent-primary leading-6 min-h-12" aria-hidden="true">
+          <p id="boot-1" data-text="> init pantoine.com"></p>
+          <p id="boot-2" data-text="> loading fields"></p>
+          <span id="boot-caret" class="boot-caret">▍</span>
+        </div>
+        <h1
+          data-intro
+          data-edge
+          class="display text-4xl md:text-5xl leading-none"
+        >
+          Hi, I'm Antoine.
+        </h1>
+        <p data-intro data-edge class="max-w-md font-serif text-lg md:text-2xl leading-snug text-ink/80">
+          A Creative Engineer and Senior Product Designer, with <span class="hero-counter"><ExperienceCounter /></span>{" "}
+          of experience bridging product, design and code.
+        </p>
+        <p data-intro data-edge class="max-w-sm font-serif text-[15px] md:text-base leading-relaxed opacity-70">
+          Also a photographer, a foodie with a French culinary license, and lately building my own tools with AI.
+        </p>
+        <ul data-intro data-edge class="flex flex-wrap items-center font-mono text-[10px] uppercase tracking-[0.2em]">
+          {
+            SOCIALS.map((s, i) => (
+              <li class="flex items-center">
+                {i > 0 && <span class="opacity-40 mx-3" aria-hidden="true">/</span>}
+                <a href={s.HREF} target="_blank" rel="noopener" class="opacity-70 hover:opacity-100 hover:text-accent-primary transition-colors">
+                  {s.NAME}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
       </div>
+      <div id="hero-frame" class="md:hidden absolute inset-x-0 top-0 h-[36svh] -z-10" aria-hidden="true"></div>
+      <p data-intro class="scroll-cue hidden md:block absolute bottom-6 left-0 font-mono text-[10px] uppercase tracking-[0.3em] opacity-50">
+        Scroll
+      </p>
+    </section>
 
-      <!-- Right Column: Recent Projects and Latest Posts -->
-      <div class="flex flex-col gap-12 md:gap-4 order-1 md:order-2">
-        <section class="animate">
-          <div class="h-20 flex items-center justify-between">
-            <h5 class="section-title">
-              Recent projects
-            </h5>
-            <Link href="/projects" class="text-sm"> See all projects </Link>
-          </div>
-          <ul class="flex flex-col gap-8 m-0 p-0 list-none">
-            {
-              projects.map((project) => (
-                <li class="animate">
-                  <ArrowCardThumbnail entry={project} />
-                </li>
-              ))
-            }
-          </ul>
-        </section>
-
-        <section class="animate">
-          <div class="h-20 flex items-center justify-between">
-            <h5 class="section-title">
-              Latest posts
-            </h5>
-            <Link href="/blog" class="text-sm"> See all posts </Link>
-          </div>
-          <ul class="flex flex-col gap-8 m-0 p-0 list-none">
-            {
-              blog.map((post) => (
-                <li class="animate">
-                  <ArrowCard entry={post} />
-                </li>
-              ))
-            }
-          </ul>
-        </section>
+    <!--
+      Projects: the ASCII stage stays fixed while the text scrolls natively past
+      it; the stage morphs to whichever project is nearest the centre.
+    -->
+    <section id="scene" class="relative" aria-label="Selected projects">
+      <!-- Overlay pinned for the whole section: index and phone rail. -->
+      <div class="sticky top-0 h-[100svh] -mb-[100svh] pointer-events-none z-10">
+        <nav
+          id="project-index"
+          class="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 flex-col items-end gap-3 font-mono text-[10px] tracking-[0.2em] pointer-events-auto"
+          aria-label="Projects"
+        >
+          {
+            projects.map(({ entry }, i) => (
+              <button type="button" data-index={i} class="pi-item flex items-center gap-3" aria-label={entry.data.title} title={entry.data.title}>
+                <span>{pad(i + 1)}</span>
+                <span class="pi-bar" aria-hidden="true" />
+              </button>
+            ))
+          }
+        </nav>
+        <div id="rail" class="md:hidden absolute left-0 bottom-[10svh] flex items-center gap-4 font-mono text-[10px] tracking-[0.2em]" aria-hidden="true">
+          <span id="rail-index" class="text-accent-primary">01</span>
+          <span class="relative block w-32 h-px bg-ink/15 overflow-hidden">
+            <span id="rail-fill" class="absolute inset-0 bg-accent-primary origin-left" style="transform: scaleX(0)"></span>
+          </span>
+          <span class="opacity-50">{pad(projects.length)}</span>
+        </div>
       </div>
-    </div>
-  </Container>
+      {
+        projects.map(({ entry, kind, field, icon }, i) => (
+          <div
+            data-project
+            data-thumb={entry.data.thumbnail}
+            data-field={field}
+            data-icon={icon}
+            class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-28 flex flex-col justify-end pb-[10svh] md:justify-center md:pb-0"
+          >
+            <a href={`/projects/${entry.id}`} class="link-row flex flex-col py-6">
+              <span data-edge class="eyebrow">
+                {pad(i + 1)} — {entry.data.date.getFullYear()} — {kind}
+              </span>
+              <h2 data-edge class="mt-6 display text-5xl md:text-7xl leading-[1.02]">
+                {entry.data.title}
+              </h2>
+              <p data-edge class="mt-6 max-w-md font-serif text-lg leading-relaxed opacity-80">{entry.data.description}</p>
+              <span data-edge class="font-mono sp-link cta-pill mt-10 self-start">
+                Read the case study <span aria-hidden="true">→</span>
+              </span>
+            </a>
+          </div>
+        ))
+      }
+      <!-- The rest of the work: closes the sequence like a project would. -->
+      <div
+        id="more-projects"
+        class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-28 flex flex-col justify-end pb-[10svh] md:justify-center md:pb-0"
+      >
+        <span data-edge class="eyebrow">
+          {pad(projects.length + 1)} — Archive
+        </span>
+        <h2 data-edge class="mt-6 display text-5xl md:text-7xl leading-[0.95]">
+          And {others.length} more.
+        </h2>
+        <ul data-edge class="mt-6 max-w-md font-serif text-lg leading-relaxed opacity-80">
+          {
+            others.map((p, i) => (
+              <li class="inline">
+                <a href={`/projects/${p.id}`} class="underline decoration-ink/20 underline-offset-4 hover:text-accent-primary hover:decoration-current transition-colors">{p.data.title}</a>{i < others.length - 1 && <span class="opacity-50">, </span>}
+              </li>
+            ))
+          }
+        </ul>
+        <a data-edge href="/projects" class="font-mono sp-link cta-pill mt-10 self-start">
+          See all {projectCount} projects <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+
+    <HomeOutro />
+  </div>
 </PageLayout>
+
+<style is:global>
+  .boot-caret {
+    animation: caret 1s steps(1) infinite;
+  }
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  #boot-1,
+  #boot-2 {
+    display: inline;
+  }
+  #boot-2:not(:empty)::before {
+    content: "\A";
+    white-space: pre;
+  }
+
+  [data-intro] {
+    transition:
+      opacity 1.1s var(--ease-out-soft),
+      transform 1.1s var(--ease-out-soft),
+      filter 1.1s ease;
+  }
+  html.edge-live [data-intro][data-edge] {
+    transition: none;
+  }
+  /* Boot lines leave like text scrolling under the header: blur, fade and
+     drift up. Then their space closes, so the greeting glides up to centre. */
+  #boot-lines {
+    max-height: 4rem;
+    transition:
+      opacity 0.9s ease,
+      filter 0.9s ease,
+      transform 0.9s var(--ease-out-soft),
+      max-height 1s var(--ease-in-out-soft) 0.7s,
+      min-height 1s var(--ease-in-out-soft) 0.7s,
+      margin-bottom 1s var(--ease-in-out-soft) 0.7s;
+  }
+  #boot-lines.is-gone {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(-10px);
+    max-height: 0;
+    min-height: 0;
+    margin-bottom: -1.75rem; /* cancels the column's gap-7 */
+    overflow: hidden;
+  }
+  /* Arriving from another page: no boot lines at all, not even briefly. */
+  html[data-navigated] #boot-lines {
+    display: none;
+  }
+  html[data-boot] [data-intro]:not(.in) {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  .scroll-cue::after {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 36px;
+    margin-top: 10px;
+    background: currentColor;
+    transform-origin: top;
+    animation: cue 2.4s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+  }
+  @keyframes cue {
+    0% {
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+    50% {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+    51% {
+      transform: scaleY(1);
+      transform-origin: bottom;
+    }
+    100% {
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+  }
+
+  .hero-counter #experience-counter {
+    font-weight: 400;
+    color: rgb(var(--color-accent));
+    font-variant-numeric: tabular-nums;
+  }
+  #project-index {
+    opacity: var(--index-o, 0);
+    transition: opacity 0.2s linear;
+  }
+  .pi-item {
+    opacity: 0.4;
+    transition:
+      opacity 0.4s ease,
+      color 0.4s ease;
+  }
+  .pi-item:hover,
+  .pi-item:focus-visible {
+    opacity: 0.85;
+  }
+  .pi-item.is-current {
+    opacity: 1;
+    color: rgb(var(--color-accent));
+  }
+  .pi-bar {
+    display: block;
+    height: 1px;
+    width: 0.75rem;
+    background: currentColor;
+    transition: width 0.5s var(--ease-out-soft);
+  }
+  .pi-item.is-current .pi-bar {
+    width: 2.25rem;
+  }
+  .scene-project {
+    opacity: var(--o, 1);
+  }
+</style>
+
+<script>
+  import type { Rgba } from "@lib/ascii/engine";
+  import { ICONS } from "@lib/ascii/icons";
+  import { iconShape, imageSample, imageShape, type ImageSample } from "@lib/ascii/shapes";
+  import type { AsciiState, Rect } from "@lib/ascii/types";
+  import { onPage, stageEngine, releaseEngine } from "@lib/ascii/stage";
+
+  // Runs on every visit, including client-side navigations back to this page.
+  onPage("#scene", () => {
+  let alive = true;
+
+    /** The hero cycles through the original animations, each blending into the next. Starts on "wave" so the opening wave flows straight into it. */
+    const HERO_PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "rings", "solar", "cells", "grid"];
+
+    const root = document.documentElement;
+    const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
+    const heroFrame = document.getElementById("hero-frame")!;
+    const scene = document.getElementById("scene")!;
+    const projectEls = [...document.querySelectorAll<HTMLElement>("[data-project]")];
+    const moreEl = document.getElementById("more-projects")!;
+    const railIndex = document.getElementById("rail-index")!;
+    const railFill = document.getElementById("rail-fill")!;
+    const experience = document.querySelector<HTMLElement>('[data-anchor="experience"]')!;
+    const blog = document.querySelector<HTMLElement>('[data-anchor="blog"]')!;
+    const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
+    const booting = root.dataset.boot === "1";
+
+    const engine = stageEngine(canvas);
+    // Arriving from another page: the stage is already running, so it travels
+    // straight to its place here instead of replaying the opening wave.
+    const arriving = engine.carrying || root.dataset.navigated === "1";
+
+    // ---- Theme / inks: muted field, accent shape and peaks ----
+    const projectImages: (ImageSample | null)[] = projectEls.map(() => null);
+    const isDark = () => root.classList.contains("dark");
+    function applyTheme() {
+      const accent = getComputedStyle(root).getPropertyValue("--color-accent").trim().split(/\s+/).map(Number);
+      const dark = isDark();
+      const fieldInk: Rgba = dark ? [255, 255, 255, 0.34] : [20, 20, 20, 0.34];
+      const shapeInk: Rgba = [accent[0], accent[1], accent[2], dark ? 0.95 : 1];
+      engine.setInks(fieldInk, shapeInk);
+      projectImages.forEach((img, i) => {
+        if (img) engine.setShape(`project-${i}`, imageShape(img, { lightInk: dark, contrast: 1.3, floor: 0.35, fadeBottom: 0 }));
+      });
+    }
+    const themeObserver = new MutationObserver(applyTheme);
+    themeObserver.observe(root, { attributes: true, attributeFilter: ["class"] });
+
+    // ---- Project illustrations: each project's 3D thumbnail, shaded in ASCII ----
+    // The flat icon set is the fallback while an image loads or if it fails.
+    projectEls.forEach((el, i) => {
+      engine.setShape(`project-${i}`, iconShape(ICONS[el.dataset.icon ?? ""] ?? ICONS.blank));
+      const img = new Image();
+      img.onload = () => {
+        projectImages[i] = imageSample(img);
+        applyTheme();
+      };
+      img.src = el.dataset.thumb ?? "";
+    });
+    applyTheme();
+
+    // ---- Frames ----
+    const wide = () => innerWidth >= 768;
+    const rectOf = (el: Element): Rect => {
+      const r = el.getBoundingClientRect();
+      return { x: r.left, y: r.top, w: r.width, h: r.height };
+    };
+    /**
+     * Right side: the ellipse is much larger than the screen's right half,
+     * runs off the top, bottom and right edges, and its soft left rim reaches
+     * a little under the text column.
+     */
+    const side = (): Rect =>
+      wide()
+        ? { x: innerWidth * 0.28, y: -innerHeight * 0.35, w: innerWidth * 1.12, h: innerHeight * 1.7 }
+        : { x: -innerWidth * 0.15, y: innerHeight * 0.06, w: innerWidth * 1.3, h: innerHeight * 0.44 };
+    /** The visible right half, where images and the field's centre sit. */
+    const sideFocus = (): Rect =>
+      wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
+    /** Mirror images of the above, for the projects. */
+    const mirror = (r: Rect): Rect => ({ ...r, x: innerWidth - (r.x + r.w) });
+    const sideLeft = (): Rect => (wide() ? mirror(side()) : side());
+    const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : side());
+    const heroSide = (): Rect => (wide() ? side() : rectOf(heroFrame));
+    const centre = (): Rect => ({ x: innerWidth * 0.08, y: innerHeight * 0.04, w: innerWidth * 0.84, h: innerHeight * 0.92 });
+
+    // The opening wave is centred on the terminal caret: it starts as a point
+    // there, grows until it fills the screen, then travels into the hero ellipse.
+    let origin = { x: innerWidth * 0.2, y: innerHeight * 0.4 };
+    const seed = (): Rect => ({ x: origin.x - 1, y: origin.y - 1, w: 2, h: 2 });
+    const bloom = (): Rect => {
+      const r = Math.hypot(Math.max(origin.x, innerWidth - origin.x), Math.max(origin.y, innerHeight - origin.y)) * 1.15;
+      return { x: origin.x - r, y: origin.y - r, w: r * 2, h: r * 2 };
+    };
+
+    // ---- States ----
+    const states: AsciiState[] = [
+      { id: "seed", field: "wave", shape: null, frame: seed, intensity: 1, ambient: 1, accent: 0.8 },
+      { id: "bloom", field: "wave", shape: null, frame: bloom, intensity: 0.9, ambient: 1, accent: 0.6 },
+      { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: heroSide, focus: () => (wide() ? sideFocus() : heroSide()), intensity: 1, ambient: 1, accent: 1 },
+      ...projectEls.map((el, i) => ({
+        id: `project-${i}`,
+        field: el.dataset.field ?? "wave",
+        shape: `project-${i}`,
+        // Projects sit on the left: the stage crosses the page between sections.
+        frame: sideLeft,
+        focus: sideFocusLeft,
+        intensity: 1,
+        ambient: 0.75,
+        shapeScale: 0.72,
+        warp: 0.35,
+        texture: 0.5,
+      })),
+      // "And N more": the field alone, still on the left, closing the sequence.
+      { id: "more", field: "cells", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.8, ambient: 0.9 },
+      { id: "experience", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.5, ambient: 0.9 },
+      { id: "blog", field: "grid", shape: null, frame: sideLeft, focus: sideFocusLeft, intensity: 0.45, ambient: 0.9 },
+      { id: "closing", field: "rings", shape: null, frame: centre, intensity: 0.85, ambient: 1, accent: 0.5 },
+    ];
+    engine.setStates(states);
+    const HERO = 2;
+    const FIRST_PROJECT = 3;
+
+    // ---- Scroll → target ----
+    // Each anchor is the scrollY where a state (from "hero" on) is fully formed.
+    // `win` is the slice of the gap to the next anchor where the morph happens;
+    // outside it the state holds.
+    interface Anchor {
+      y: number;
+      win: [number, number];
+    }
+    let anchors: Anchor[] = [];
+    const docTop = (el: Element) => el.getBoundingClientRect().top + scrollY;
+    let sceneDocTop = 0;
+    function measure() {
+      const vh = innerHeight;
+      sceneDocTop = docTop(scene);
+      const centreOf = (el: HTMLElement) => sceneDocTop + el.offsetTop + el.offsetHeight / 2 - vh / 2;
+      anchors = [
+        { y: 0, win: [0.15, 0.95] },
+        // A project is fully formed when its text is centred on screen; the
+        // morph runs while one text leaves and the next arrives.
+        ...projectEls.map((el) => ({ y: centreOf(el), win: [0.3, 0.7] as [number, number] })),
+        { y: centreOf(moreEl), win: [0.15, 0.7] },
+        { y: docTop(experience) - vh * 0.1, win: [0.55, 1] },
+        { y: docTop(blog) - vh * 0.1, win: [0.5, 1] },
+        { y: docTop(closing), win: [0, 1] },
+      ];
+    }
+    measure();
+    addEventListener("resize", measure);
+    addEventListener("load", measure);
+
+    function scrollTarget(): number {
+      const y = scrollY;
+      if (y <= anchors[0].y) return HERO;
+      for (let j = 0; j < anchors.length - 1; j++) {
+        const a = anchors[j];
+        const b = anchors[j + 1];
+        if (y < b.y) {
+          const f = (y - a.y) / Math.max(1, b.y - a.y);
+          const [w0, w1] = a.win;
+          return HERO + j + Math.min(1, Math.max(0, (f - w0) / (w1 - w0)));
+        }
+      }
+      return HERO + anchors.length - 1;
+    }
+
+    // ---- Project index: smooth-scroll to a project ----
+    const projectIndex = document.getElementById("project-index")!;
+    const indexItems = [...document.querySelectorAll<HTMLButtonElement>(".pi-item")];
+    indexItems.forEach((b) =>
+      b.addEventListener("click", () => {
+        const i = Number(b.dataset.index);
+        scrollTo({ top: anchors[1 + i].y, behavior: engine.reducedMotion ? "auto" : "smooth" });
+      }),
+    );
+
+    // ---- Edge blur ----
+    // The same blur the hero text arrives with on the boot: text blurs and fades
+    // as it slides under the header or towards the bottom of the screen.
+    const edgeEls = [...document.querySelectorAll<HTMLElement>("[data-edge]")];
+    const edgeState = new Map<HTMLElement, number>();
+    let edgeLive = false;
+    const header = document.querySelector("header");
+    const EDGE_BLUR = 6; // px at the very edge, as in the boot
+    function updateEdges() {
+      const vh = innerHeight;
+      const top = header ? header.offsetHeight : 80;
+      const topZone = 110;
+      const bottomZone = vh * 0.16;
+      // Read everything first, then write, so layout is computed once.
+      const values = edgeEls.map((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < -50 || r.top > vh + 50) return 1;
+        const c = r.top + Math.min(r.height, 120) / 2;
+        const t = (top + topZone - c) / topZone;
+        const b = (c - (vh - bottomZone)) / bottomZone;
+        const e = Math.max(0, Math.min(1, Math.max(t, b)));
+        return e * e * (3 - 2 * e);
+      });
+      edgeEls.forEach((el, i) => {
+        const e = Math.round(values[i] * 100) / 100;
+        if (edgeState.get(el) === e) return;
+        edgeState.set(el, e);
+        el.style.filter =
+          e <= 0
+            ? ""
+            : engine.reducedMotion
+              ? `opacity(${(1 - e * 0.9).toFixed(2)})`
+              : `blur(${(e * EDGE_BLUR).toFixed(2)}px) opacity(${(1 - e * 0.9).toFixed(2)})`;
+      });
+    }
+
+    // ---- Per-frame sync ----
+    let lastY = scrollY;
+    let lastT = performance.now();
+    let vel = 0;
+    let introDone = false;
+    let introP = 0;
+    /** Text magnetism: 0.55 = moves at 45% of scroll speed when centred. */
+    const MAGNET = 0.55;
+    const MAGNET_WIDTH = 0.3;
+
+    function frame(now: number) {
+      const dt = Math.max(1, now - lastT) / 1000;
+      vel += ((scrollY - lastY) / dt - vel) * 0.15;
+      lastY = scrollY;
+      lastT = now;
+      engine.velocity = vel;
+
+      const st = scrollTarget();
+      if (!introDone && st > HERO + 0.02) finishIntro();
+      if (introDone) {
+        // The stage follows the scroll exactly: stop mid-morph and it stays mid-morph.
+        engine.target = st;
+      } else {
+        // The opening is time-driven and exact: no spring lag.
+        engine.target = introP;
+        engine.settle();
+      }
+
+      const p = engine.progress;
+      // The nearest project, even mid-morph.
+      const active = Math.max(0, Math.min(projectEls.length - 1, Math.round(p - FIRST_PROJECT)));
+      // Text scrolls natively, with a little magnetism: near the middle of the
+      // screen it moves slower than the scroll, then catches up further out.
+      // Purely visual; the scroll position itself is never touched.
+      const vh = innerHeight;
+      let indexO = 0;
+      [...projectEls, moreEl].forEach((el) => {
+        // Layout position (ignores our own transform).
+        const top = sceneDocTop + el.offsetTop - scrollY;
+        if (top + el.offsetHeight < -vh || top > 2 * vh) return;
+        const o = (top + el.offsetHeight / 2 - vh / 2) / vh; // 0 = centred
+        const pull = engine.reducedMotion ? 0 : -MAGNET * o * Math.exp(-((o / MAGNET_WIDTH) ** 2));
+        el.style.transform = `translate3d(0, ${(pull * vh).toFixed(2)}px, 0)`;
+        const off = Math.abs(o + pull);
+        const o2 = Math.max(0, Math.min(1, 1 - (off - 0.2) / 0.35));
+        el.style.setProperty("--o", o2.toFixed(3));
+        if (el !== moreEl) indexO = Math.max(indexO, o2);
+      });
+      // The index arrives and leaves with the project text, not with the section edge.
+      projectIndex.style.setProperty("--index-o", indexO.toFixed(3));
+      projectIndex.style.pointerEvents = indexO > 0.3 ? "auto" : "none";
+      railIndex.textContent = String(active + 1).padStart(2, "0");
+      const inScene = p > FIRST_PROJECT - 0.5 && p < FIRST_PROJECT + projectEls.length - 0.5;
+      indexItems.forEach((b, i) => b.classList.toggle("is-current", inScene && i === active));
+      const rp = (p - FIRST_PROJECT) / Math.max(1, projectEls.length - 1);
+      railFill.style.transform = `scaleX(${Math.max(0, Math.min(1, rp)).toFixed(4)})`;
+      if (edgeLive) updateEdges();
+      if (alive) requestAnimationFrame(frame);
+    }
+
+    // ---- Opening ----
+    const intros = [...document.querySelectorAll<HTMLElement>("[data-intro]")];
+    const caret = document.getElementById("boot-caret")!;
+    const lines = [document.getElementById("boot-1")!, document.getElementById("boot-2")!];
+    let typing = false;
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+    const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    function caretPoint() {
+      const r = caret.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    }
+    function fillLines() {
+      for (const l of lines) l.textContent = l.dataset.text ?? "";
+      lines[1].after(caret);
+    }
+    /** Show each intro element as the growing wave reaches it. */
+    function showTextAsWavePasses(bloomMs: number) {
+      const r = bloom().w / 2;
+      for (const el of intros) {
+        const b = el.getBoundingClientRect();
+        const d = Math.hypot(b.left + 24 - origin.x, b.top + b.height / 2 - origin.y);
+        // Invert the bloom's ease-out to find when its edge reaches distance d.
+        const frac = Math.min(0.999, d / (r * 0.75));
+        const t = 1 - Math.cbrt(1 - frac);
+        setTimeout(() => el.classList.add("in"), t * bloomMs + 80);
+      }
+    }
+
+    let raf = 0;
+    /** seed → bloom (the wave grows out of the caret) → hero (it travels into the ellipse and starts cycling). */
+    function playWave(bloomMs: number, morphMs: number) {
+      origin = caretPoint();
+      showTextAsWavePasses(bloomMs);
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const e = now - t0;
+        if (e < bloomMs) introP = easeOut(e / bloomMs);
+        else {
+          // The wave starts travelling into the side ellipse.
+          if (introP < 1) hideBootLines();
+          introP = 1 + easeInOut(Math.min(1, (e - bloomMs) / morphMs));
+        }
+        if (introP < 2) raf = requestAnimationFrame(step);
+        else {
+          introDone = true;
+          afterIntro();
+        }
+      };
+      raf = requestAnimationFrame(step);
+    }
+
+    function finishIntro() {
+      if (introDone) return;
+      typing = false;
+      cancelAnimationFrame(raf);
+      fillLines();
+      introDone = true; // the spring carries the stage from wherever it is to the hero
+      intros.forEach((el) => el.classList.add("in"));
+      afterIntro();
+    }
+    /**
+     * The terminal lines have done their job once the wave heads to the right:
+     * they blur away, then their space closes so the greeting settles in the centre.
+     */
+    function hideBootLines() {
+      document.getElementById("boot-lines")?.classList.add("is-gone");
+    }
+    /** Runs once, however the intro ended (played through or skipped). */
+    let afterIntroDone = false;
+    function afterIntro() {
+      if (afterIntroDone) return;
+      afterIntroDone = true;
+      // Once the text has arrived, the edge blur takes over its filter.
+      setTimeout(() => {
+        root.classList.add("edge-live");
+        edgeLive = true;
+      }, 1200);
+      hideBootLines();
+    }
+
+    async function typeLine(el: HTMLElement, cps: number) {
+      const text = el.dataset.text ?? "";
+      el.after(caret);
+      for (let i = 1; i <= text.length && typing; i++) {
+        el.textContent = text.slice(0, i);
+        await sleep(1000 / cps + Math.random() * 30);
+      }
+    }
+
+    async function boot() {
+      try {
+        localStorage.setItem("gimk:booted", "1");
+      } catch {}
+      if (engine.reducedMotion) {
+        origin = caretPoint();
+        return finishIntro();
+      }
+      for (const ev of ["keydown", "pointerdown", "wheel", "touchstart"]) {
+        addEventListener(ev, finishIntro, { once: true, passive: true });
+      }
+      typing = true;
+      await sleep(350);
+      await typeLine(lines[0], 22);
+      await sleep(260);
+      await typeLine(lines[1], 30);
+      for (let i = 0; i < 3 && typing; i++) {
+        lines[1].textContent += ".";
+        await sleep(180);
+      }
+      if (introDone) return;
+      await sleep(220);
+      playWave(1500, 2200);
+    }
+
+    engine.start();
+    requestAnimationFrame(frame);
+    if (booting && !arriving) {
+      boot();
+    } else {
+      // Returning visitors: no typing, a quicker wave.
+      fillLines();
+      if (scrollY > 10 || engine.reducedMotion || arriving) {
+        origin = caretPoint();
+        finishIntro();
+        engine.target = scrollTarget();
+        engine.settle();
+      } else {
+        playWave(800, 1300);
+      }
+    }
+
+    // Leaving the page (client-side navigation): stop everything.
+    return () => {
+      alive = false;
+      typing = false;
+      cancelAnimationFrame(raf);
+      releaseEngine(engine);
+      themeObserver.disconnect();
+      removeEventListener("resize", measure);
+      removeEventListener("load", measure);
+      for (const ev of ["keydown", "pointerdown", "wheel", "touchstart"]) removeEventListener(ev, finishIntro);
+    };
+
+  });
+</script>

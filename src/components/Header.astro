@@ -1,11 +1,26 @@
 ---
 import Container from "@components/Container.astro";
 import InteractionSound from "./InteractionSound.astro";
+import { getCollection } from "astro:content";
+
+const NAV = [
+  { href: "/projects", label: "Projects" },
+  { href: "/work", label: "Work" },
+  { href: "/blog", label: "Blog" },
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+
+/** Quick access to the most recent project, whichever it is. */
+const latest = (await getCollection("projects"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())[0];
 ---
 
 <header>
-  <Container hideLines={true}>
+  <Container>
     <div class="flex flex-wrap gap-y-2 justify-between">
+      <div class="flex items-center gap-4 sm:gap-6">
       <InteractionSound preset="link">
         <a
           style="cursor: url('/cursor-hover.svg') 16 16, auto !important;"
@@ -13,123 +28,94 @@ import InteractionSound from "./InteractionSound.astro";
           aria-label="Grouink grouink"
           ><div>
           <svg
-            class="cochon-svg"
+            class="cochon-svg text-orange-900 dark:text-slate-100"
             aria-hidden="true"
-            width="200"
-            height="200"
+            width="40"
+            height="40"
             viewBox="0 0 200 200"
-            fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            style="width: 40px; height: 40px;"
           >
-            <g clip-path="url(#clip0_2313_5602)">
-              <circle
-                cx="100"
-                cy="100"
-                r="100"
-                class="fill-orange-50 dark:fill-slate-950"></circle>
-
-              <path
-                id="right-ear"
-                class="fill-orange-900 dark:fill-slate-100"
-                d="M152.256 98.9896C152.085 99.4168 151.993 99.8496 152.012 100.306C152.851 120.331 190.403 165.414 208.086 185.745C209.925 187.86 208.856 191.052 206.071 191.798L105.09 218.854C102.537 219.539 99 217.725 99 215.215V90.3436C99 89.3302 100.43 88.3593 101.193 87.6482L132.52 58.4687C132.837 58.1736 133.204 57.9305 133.605 57.7495L158.821 46.3752C161.691 45.081 164.933 47.3168 164.507 50.2964L160.559 77.9293C160.518 78.2132 160.444 78.4917 160.337 78.7596L152.256 98.9896Z"
-              ></path>
-              <path
-                id="left-ear"
-                class="fill-orange-900 dark:fill-slate-100"
-                d="M47.744 98.9896C47.9147 99.4168 48.0069 99.8496 47.9878 100.306C47.1494 120.331 9.5965 165.414 -8.08553 185.745C-9.92479 187.86 -8.85643 191.052 -6.07075 191.798L94.9099 218.854C97.4631 219.539 101 217.725 101 215.215V90.3436C101 89.3302 99.5702 88.3593 98.8068 87.6482L67.4799 58.4687C67.1631 58.1736 66.7964 57.9305 66.3951 57.7495L41.1788 46.3752C38.3094 45.081 35.0674 47.3168 35.4932 50.2964L39.4414 77.9293C39.482 78.2132 39.5565 78.4917 39.6635 78.7596L47.744 98.9896Z"
-              ></path>
-
-              <circle
-                id="head"
-                class="fill-orange-900 dark:fill-slate-100"
-                cx="100"
-                cy="113"
-                r="63"></circle>
-
-              <g id="snout-group">
-                <path
-                  class="fill-orange-50 dark:fill-slate-950"
-                  d="M100.5 150C84.7599 150 72 142.165 72 132.5C72 122.835 84.7599 115 100.5 115C116.24 115 129 122.835 129 132.5C129 142.165 116.24 150 100.5 150Z"
-                ></path>
-                <circle
-                  class="fill-orange-900 dark:fill-slate-100"
-                  cx="89.5"
-                  cy="132.5"
-                  r="5.5"></circle>
-                <circle
-                  class="fill-orange-900 dark:fill-slate-100"
-                  cx="110.5"
-                  cy="132.5"
-                  r="5.5"></circle>
-              </g>
-
-              <ellipse
-                id="left-eye"
-                class="fill-orange-50 dark:fill-slate-950"
-                cx="81"
-                cy="94"
-                rx="8"
-                ry="8"
-                style="transition: ry 0.08s ease-in-out;"></ellipse>
-              <ellipse
-                id="right-eye"
-                class="fill-orange-50 dark:fill-slate-950"
-                cx="120"
-                cy="94"
-                rx="8"
-                ry="8"
-                style="transition: ry 0.08s ease-in-out;"></ellipse>
-            </g>
             <defs>
-              <clipPath id="clip0_2313_5602">
-                <rect
-                  width="200"
-                  height="200"
-                  rx="100"
-                  fill="white"
-                  class="dark:fill-clip-bg"></rect>
-              </clipPath>
+              <clipPath id="pig-clip"><circle cx="100" cy="100" r="100" /></clipPath>
             </defs>
+            <g clip-path="url(#pig-clip)" fill="currentColor">
+              <circle class="pig-hole" cx="100" cy="100" r="100" />
+              <ellipse class="pig-body" cx="100" cy="222" rx="92" ry="62" />
+              <g class="pig-rig">
+                <g class="pig-ears" stroke="currentColor" stroke-width="12" stroke-linejoin="round">
+                  <polygon class="pig-ear pig-ear-l" points="46,38 96,70 54,104" />
+                  <polygon class="pig-ear pig-ear-r" points="154,38 104,70 146,104" />
+                </g>
+                <circle class="pig-head" cx="100" cy="113" r="63" />
+                <g class="pig-face">
+                  <ellipse class="pig-eye pig-hole" cx="81" cy="94" rx="8" ry="8" />
+                  <ellipse class="pig-eye pig-hole" cx="119" cy="94" rx="8" ry="8" />
+                  <g class="pig-snout">
+                    <ellipse class="pig-hole" cx="100" cy="132" rx="28" ry="17" />
+                    <circle cx="89.5" cy="132" r="5" />
+                    <circle cx="110.5" cy="132" r="5" />
+                  </g>
+                </g>
+              </g>
+            </g>
           </svg>
         </div>
       </a>
       </InteractionSound>
-      <nav class="flex gap-2">
-        <InteractionSound preset="link">
+      {latest && (
+        <InteractionSound preset="button">
           <a
-            href="/projects"
-            class="px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary underline-offset-2 sm:hover:underline"
+            href={`/projects/${latest.id}`}
+            class="latest-link header-pill group flex items-center gap-2 h-10 pl-3.5 pr-4 rounded-full transition-colors duration-300 text-xs"
           >
-            projects
+            <svg width="12" height="12" viewBox="12.7 17.8 37 37" class="text-accent-primary shrink-0" fill="currentColor" aria-hidden="true">
+              <path d="M 31.2344 54.7305 C 31.8438 54.7305 32.2891 54.2852 32.4062 53.6524 C 34.0703 40.8086 35.8750 38.8633 48.5781 37.4570 C 49.2344 37.3867 49.6797 36.8945 49.6797 36.2852 C 49.6797 35.6758 49.2344 35.2070 48.5781 35.1133 C 35.8750 33.7070 34.0703 31.7617 32.4062 18.9180 C 32.2891 18.2852 31.8438 17.8633 31.2344 17.8633 C 30.6250 17.8633 30.1797 18.2852 30.0860 18.9180 C 28.4219 31.7617 26.5938 33.7070 13.9140 35.1133 C 13.2344 35.2070 12.7891 35.6758 12.7891 36.2852 C 12.7891 36.8945 13.2344 37.3867 13.9140 37.4570 C 26.5703 39.1211 28.3281 40.8321 30.0860 53.6524 C 30.1797 54.2852 30.6250 54.7305 31.2344 54.7305 Z"></path>
+            </svg>
+            <span class="opacity-60 hidden sm:inline">Last project</span>
+            <span class="opacity-30 hidden sm:inline" aria-hidden="true">·</span>
+            <span class="text-ink">{latest.data.title}</span>
+            <span class="opacity-60 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-accent-primary" aria-hidden="true">→</span>
           </a>
         </InteractionSound>
-        <InteractionSound preset="link">
-          <a
-            href="/work"
-            class="px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary underline-offset-2 sm:hover:underline"
-          >
-            work
-          </a>
-        </InteractionSound>
-        <InteractionSound preset="link">
-          <a
-            href="/blog"
-            class="px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary underline-offset-2 sm:hover:underline"
-          >
-            blog
-          </a>
-        </InteractionSound>
-        
+      )}
+      </div>
+      <nav class="header-pill flex items-center gap-0.5 sm:gap-1 pl-2 pr-1 py-0.5 rounded-full" aria-label="Main">
+        <ul class="hidden sm:flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em]">
+          {NAV.map((item) => (
+            <li>
+              <InteractionSound preset="link">
+                <a
+                  href={item.href}
+                  class:list={["nav-link px-2 py-2 flex items-center gap-2", { "is-current": isCurrent(item.href) }]}
+                  aria-current={isCurrent(item.href) ? "page" : undefined}
+                >
+                  <span class="nav-dot" aria-hidden="true"></span>
+                  {item.label}
+                </a>
+              </InteractionSound>
+            </li>
+          ))}
+        </ul>
+        <!-- Phones: the links move into a full-screen menu. -->
+        <button
+          id="menu-button"
+          type="button"
+          class="sm:hidden px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] opacity-80"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          Menu
+        </button>
+        <span class="w-px h-4 bg-current opacity-15 mx-1" aria-hidden="true"></span>
         <button
           id="sound-button"
           aria-label="Toggle sound button"
-          class="group px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary"
+          class="group p-2 flex items-center opacity-60 hover:opacity-100 transition duration-300 ease-in-out sm:hover:text-accent-primary"
         >
           <svg
             class="sound-icon sm:group-hover:stroke-accent-primary transition-colors duration-300 ease-in-out"
-            width="18"
-            height="18"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -153,12 +139,12 @@ import InteractionSound from "./InteractionSound.astro";
           <button
             id="theme-button"
             aria-label="Toggle theme button"
-            class="group px-2 py-0.5 flex items-center transition-colors duration-300 ease-in-out sm:hover:text-accent-primary"
+            class="group p-2 flex items-center opacity-60 hover:opacity-100 transition duration-300 ease-in-out sm:hover:text-accent-primary"
           >
             <svg
               class="sun-moon sm:group-hover:stroke-accent-primary transition-colors duration-300 ease-in-out"
-              width="18"
-              height="18"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -196,6 +182,26 @@ import InteractionSound from "./InteractionSound.astro";
       </nav>
     </div>
   </Container>
+  <div id="mobile-menu" class="mobile-menu sm:hidden" hidden>
+    <nav aria-label="Main" class="flex flex-col gap-2">
+      {NAV.map((item, i) => (
+        <a
+          href={item.href}
+          class:list={["font-serif text-5xl tracking-tight", { "text-accent-primary": isCurrent(item.href) }]}
+          style={`--i:${i}`}
+          data-reveal
+          aria-current={isCurrent(item.href) ? "page" : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+    {latest && (
+      <a href={`/projects/${latest.id}`} class="mt-10 eyebrow opacity-60" style="--i:3" data-reveal>
+        Last project · {latest.data.title} →
+      </a>
+    )}
+  </div>
 </header>
 
 <script>
@@ -215,21 +221,112 @@ import InteractionSound from "./InteractionSound.astro";
   }
 
   document.addEventListener("DOMContentLoaded", initSoundToggle);
+
+  // Phone menu: a full-screen overlay; closes on a link, Escape or navigation.
+  function initMenu() {
+    const btn = document.getElementById("menu-button");
+    const menu = document.getElementById("mobile-menu");
+    if (!btn || !menu || btn.hasAttribute("data-listener-added")) return;
+    btn.setAttribute("data-listener-added", "true");
+    const set = (open: boolean) => {
+      menu.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Close" : "Menu";
+      document.documentElement.classList.toggle("menu-open", open);
+    };
+    btn.addEventListener("click", () => set(menu.hidden));
+    menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => set(false)));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !menu.hidden) set(false);
+    });
+  }
+  document.addEventListener("astro:page-load", () => {
+    document.documentElement.classList.remove("menu-open");
+    initMenu();
+  });
   document.addEventListener("astro:after-swap", initSoundToggle);
 </script>
 
 <style>
-  .sun-moon {
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 1.5rem 3rem;
+    background: rgb(var(--color-page));
+    /* Links reveal quicker and tighter than page text. Toggling [hidden]
+       restarts the animation, so it replays every time the menu opens. */
+    --reveal-duration: 0.6s;
+    --reveal-step: 60ms;
+    --reveal-base: 0ms;
+  }
+  .mobile-menu[hidden] {
+    display: none;
+  }
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
+  /* Shared backdrop for the header's pills: readable over the ASCII and content. */
+  .header-pill {
+    background: rgb(var(--color-page) / 0.78);
+    border: 1px solid rgb(var(--color-ink) / 0.08);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  /* The border needs a touch more contrast on the dark page. */
+  :global(html.dark) .header-pill {
+    border-color: rgb(var(--color-ink) / 0.1);
+  }
+  a.header-pill:hover {
+    background: rgb(var(--color-page) / 0.95);
+  }
+  .nav-link {
+    opacity: 0.75;
+    transition:
+      opacity 0.3s ease,
+      color 0.3s ease;
+  }
+  .nav-link:hover,
+  .nav-link:focus-visible,
+  .nav-link.is-current {
+    opacity: 1;
+  }
+  .nav-link.is-current {
+    color: rgb(var(--color-accent));
+  }
+  .nav-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
+    background: currentColor;
+    transform: scale(0);
+    transition: transform 0.3s var(--ease-out-soft);
+  }
+  .nav-link:hover .nav-dot,
+  .nav-link.is-current .nav-dot {
+    transform: scale(1);
+  }
+  /* Timing shared by the theme and sound icons. */
+  header {
     --duration: 500ms;
     --ease-elastic: cubic-bezier(0.5, 1.25, 0.75, 1.25);
   }
+
+  /* Theme icon: the sun's mask slides in to make a moon. */
   .sun-moon .moon-mask circle {
-    transition: cx var(--duration) var(--ease-elastic), cy var(--duration) var(--ease-elastic), transform var(--duration) var(--ease-elastic);
+    transition:
+      cx var(--duration) var(--ease-elastic),
+      cy var(--duration) var(--ease-elastic),
+      transform var(--duration) var(--ease-elastic);
   }
   :global(.dark) .sun-moon .moon-mask circle {
     cx: 17;
     cy: 11;
-    transform: translateX(-7px) translateY(1px); /* fallback for browsers not supporting cx transition */
+    /* Fallback for browsers that can't transition cx. */
+    transform: translateX(-7px) translateY(1px);
   }
   @supports (cx: 17) {
     :global(.dark) .sun-moon .moon-mask circle {
@@ -244,7 +341,9 @@ import InteractionSound from "./InteractionSound.astro";
     transform: scale(1.75);
   }
   .sun-moon .sun-beams {
-    transition: transform var(--duration) var(--ease-elastic), opacity var(--duration) ease-in-out;
+    transition:
+      transform var(--duration) var(--ease-elastic),
+      opacity var(--duration) ease-in-out;
     transform-origin: center;
   }
   :global(.dark) .sun-moon .sun-beams {
@@ -252,18 +351,22 @@ import InteractionSound from "./InteractionSound.astro";
     opacity: 0;
   }
 
-  /* Sound Toggle Animations */
+  /* Sound icon: the waves collapse into a cross when muted. */
   .sound-icon .sound-waves {
-    transition: opacity var(--duration) ease-in-out, transform var(--duration) var(--ease-elastic);
+    transition:
+      opacity var(--duration) ease-in-out,
+      transform var(--duration) var(--ease-elastic);
     transform-origin: center;
   }
-  .sound-icon .sound-cross-1, .sound-icon .sound-cross-2 {
-    transition: opacity var(--duration) ease-in-out, transform var(--duration) var(--ease-elastic);
+  .sound-icon .sound-cross-1,
+  .sound-icon .sound-cross-2 {
+    transition:
+      opacity var(--duration) ease-in-out,
+      transform var(--duration) var(--ease-elastic);
     transform-origin: 18px 12px;
     opacity: 0;
     transform: scale(0.5) rotate(-45deg);
   }
-  
   :global(.muted) .sound-icon .sound-waves {
     opacity: 0;
     transform: translateX(-5px) scale(0.5);
@@ -272,5 +375,73 @@ import InteractionSound from "./InteractionSound.astro";
   :global(.muted) .sound-icon .sound-cross-2 {
     opacity: 1;
     transform: scale(1) rotate(0deg);
+  }
+
+  /* Pig: JS drives --lx/--ly (look direction, -1..1) and --sniff (0..1);
+     each layer moves by its own amount, in SVG units. */
+  .cochon-svg {
+    --lx: 0;
+    --ly: 0;
+    --sniff: 0;
+    overflow: hidden;
+  }
+  .cochon-svg .pig-hole {
+    fill: rgb(var(--color-page));
+  }
+  .pig-rig {
+    transform-origin: 100px 160px;
+    transform: rotate(calc(var(--lx) * 6deg));
+  }
+  .pig-ears {
+    transform: translate(calc(var(--lx) * 4px), calc(var(--ly) * 4px));
+  }
+  .pig-head {
+    transform: translate(calc(var(--lx) * 7px), calc(var(--ly) * 7px));
+  }
+  .pig-face {
+    transform: translate(calc(var(--lx) * 18px), calc(var(--ly) * 15px));
+  }
+  .pig-snout {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(calc(1 + var(--sniff) * 0.1), calc(1 + var(--sniff) * 0.06));
+  }
+  .pig-eye {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 70ms ease-in;
+  }
+  .cochon-svg.is-blinking .pig-eye {
+    transform: scaleY(0.12);
+  }
+  .pig-ear {
+    transform-box: fill-box;
+  }
+  .pig-ear-l {
+    transform-origin: 90% 75%;
+  }
+  .pig-ear-r {
+    transform-origin: 10% 75%;
+  }
+  .pig-ear.is-flicking {
+    animation: pig-ear-flick 420ms cubic-bezier(0.3, 0.7, 0.4, 1);
+  }
+  .pig-ear-r.is-flicking {
+    animation-name: pig-ear-flick-r;
+  }
+  @keyframes pig-ear-flick {
+    30% { transform: rotate(-14deg); }
+    60% { transform: rotate(5deg); }
+  }
+  @keyframes pig-ear-flick-r {
+    30% { transform: rotate(14deg); }
+    60% { transform: rotate(-5deg); }
+  }
+  .cochon-svg.is-bouncing {
+    animation: pig-bounce 380ms cubic-bezier(0.3, 0.7, 0.4, 1.4);
+  }
+  @keyframes pig-bounce {
+    25% { transform: scale(1.12, 0.88); }
+    55% { transform: scale(0.94, 1.08); }
   }
 </style>

@@ -1,4 +1,4 @@
-<span id="experience-counter" class="font-semibold">7 years</span>
+<span id="experience-counter" class="font-semibold">8 years</span>
 
 <script>
   function updateCounter() {
@@ -7,14 +7,7 @@
     
     let years = now.getFullYear() - startDate.getFullYear();
     let months = now.getMonth() - startDate.getMonth();
-    let days = now.getDate() - startDate.getDate();
-
-    if (days < 0) {
-      months--;
-      const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-      days += lastMonth.getDate();
-    }
-
+    if (now.getDate() < startDate.getDate()) months--;
     if (months < 0) {
       years--;
       months += 12;
@@ -25,18 +18,7 @@
       const parts = [];
       if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`);
       if (months > 0) parts.push(`${months} month${months > 1 ? "s" : ""}`);
-      if (days > 0) parts.push(`${days} day${days > 1 ? "s" : ""}`);
-
-      let text = "";
-      if (parts.length === 1) {
-        text = parts[0];
-      } else if (parts.length === 2) {
-        text = parts.join(", ");
-      } else if (parts.length === 3) {
-        text = `${parts[0]}, ${parts[1]}, and ${parts[2]}`;
-      }
-      
-      counter.textContent = text || "less than a day";
+      counter.textContent = parts.join(" and ") || "less than a month";
     }
   }
 
