@@ -33,14 +33,14 @@ const pad = (n: number) => String(n).padStart(2, "0");
               data-thumb={p.data.thumbnail}
               class="link-row project-row grid grid-cols-[2.25rem_1fr] gap-x-4 py-10 md:py-12"
             >
-              <span data-edge class="font-mono text-xs tracking-[0.2em] opacity-50 pt-1.5">
+              <span data-edge class="eyebrow pt-1.5">
                 {pad(i + 1)}
               </span>
               <span class="flex flex-col">
-                <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">
+                <span data-edge class="eyebrow">
                   {p.data.date.getFullYear()}
                 </span>
-                <span data-edge class="mt-4 font-serif text-4xl md:text-5xl tracking-tight leading-[1.05] text-black dark:text-white">
+                <span data-edge class="display mt-4 text-4xl md:text-5xl leading-[1.05]">
                   <span class="link-title">{p.data.title}</span>
                 </span>
                 <span data-edge class="mt-4 max-w-md font-serif text-lg leading-relaxed opacity-70">

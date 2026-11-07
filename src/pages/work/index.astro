@@ -34,14 +34,14 @@ const years = (start: Date, end: Date | string) =>
       {
         work.map((entry) => (
           <li class="grid gap-4 md:grid-cols-[11rem_1fr] md:gap-8 md:w-2/3">
-            <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50 md:sticky md:top-28 self-start">
+            <p data-edge class="eyebrow md:sticky md:top-28 self-start">
               {years(entry.data.dateStart, entry.data.dateEnd)}
             </p>
             <div class="flex flex-col gap-3">
-              <h2 data-edge class="!font-serif font-normal text-4xl md:text-5xl tracking-tight leading-none text-black dark:text-white">
+              <h2 data-edge class="display text-4xl md:text-5xl leading-none">
                 {entry.data.company}
               </h2>
-              <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{entry.data.role}</p>
+              <p data-edge class="eyebrow">{entry.data.role}</p>
               <article data-edge class="mt-3 font-serif prose-sm">
                 <entry.Content />
               </article>

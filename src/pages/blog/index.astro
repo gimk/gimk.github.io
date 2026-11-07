@@ -33,7 +33,7 @@ const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: 
       {
         years.map((year) => (
           <section class="w-full flex flex-col items-end mb-16">
-            <h2 data-edge class="!font-serif font-normal tracking-tight text-6xl leading-none text-black dark:text-white opacity-30">
+            <h2 data-edge class="display text-6xl leading-none opacity-30">
               {year}
             </h2>
             <ul class="w-full flex flex-col items-end mt-8">
@@ -41,10 +41,10 @@ const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: 
                 <li class="w-full flex flex-col items-end">
                   {i > 0 && <span class="block w-10 h-px bg-current opacity-20 my-4" aria-hidden="true" />}
                   <a href={`/blog/${post.id}`} class="link-row blog-row flex flex-col items-end py-10 w-full">
-                    <span data-edge class="font-mono text-[10px] uppercase tracking-[0.2em] opacity-50">
+                    <span data-edge class="eyebrow text-[10px]">
                       {fmt(post.data.date)} <span class="mx-2 opacity-60">·</span> {readingTime(post.body ?? "")}
                     </span>
-                    <span data-edge class="mt-5 !font-serif text-4xl md:text-5xl tracking-tight leading-[1.1] text-black dark:text-white">
+                    <span data-edge class="display mt-5 text-4xl md:text-5xl leading-[1.1]">
                       <span class="link-title">{post.data.title}</span>
                     </span>
                     <span data-edge class="mt-5 max-w-md font-serif text-lg leading-relaxed opacity-70">

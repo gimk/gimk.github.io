@@ -16,9 +16,11 @@ type Props = {
   /** Title size. */
   size?: "xl" | "lg";
   id?: string;
+  /** Extra classes for the text column (e.g. a backdrop). */
+  class?: string;
 };
 
-const { label, title, description, back, align = "left", tall = false, size = "xl", id } = Astro.props;
+const { label, title, description, back, align = "left", tall = false, size = "xl", id, class: className } = Astro.props;
 const half =
   align === "left"
     ? "md:w-1/2 items-start text-left"
@@ -37,17 +39,17 @@ const half =
       : "min-h-[62svh] pt-[40svh] pb-16 md:pt-16 md:pb-20",
   ]}
 >
-  <div class:list={["flex flex-col gap-7", half]}>
+  <div class:list={["flex flex-col gap-7", half, className]}>
     {
       back && (
-        <a href={back.href} data-reveal data-edge class="font-mono sp-link sp-back cta-pill" style="--i:0">
+        <a href={back.href} data-reveal data-edge class="font-mono sp-link sp-back cta-pill" style="--i:0; --nudge:-4px">
           <span aria-hidden="true">←</span> {back.label}
         </a>
       )
     }
     {
       label && (
-        <p data-reveal data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50" style="--i:1">
+        <p data-reveal data-edge class="eyebrow" style="--i:1">
           {label}
         </p>
       )
@@ -56,7 +58,7 @@ const half =
       data-reveal
       data-edge
       class:list={[
-        "!font-serif font-normal tracking-tight text-black dark:text-white",
+        "display",
         size === "xl" ? "text-5xl md:text-7xl leading-[0.98]" : "text-4xl md:text-6xl leading-[1.02]",
       ]}
       style="--i:2"
@@ -73,10 +75,3 @@ const half =
     <slot />
   </div>
 </section>
-
-<style is:global>
-  /* The back pill's arrow nudges left instead of right. */
-  .sp-back:hover span {
-    transform: translateX(-4px) !important;
-  }
-</style>
