@@ -21,7 +21,7 @@ const years = (start: Date, end: Date | string) =>
 ---
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
-  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <canvas class="ascii-stage" aria-hidden="true" transition:persist="ascii-stage"></canvas>
   <div id="work-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
     <PageIntro
       back={{ href: "/", label: "Home" }} label={`Experience — ${work.length} companies`} title="Work">

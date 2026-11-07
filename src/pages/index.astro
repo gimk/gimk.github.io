@@ -38,7 +38,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     }
   </script>
 
-  <canvas class="ascii-stage" aria-hidden="true"></canvas>
+  <canvas class="ascii-stage" aria-hidden="true" transition:persist="ascii-stage"></canvas>
 
   <div class="mx-auto max-w-screen-xl px-5 md:px-10">
     <!-- Hero -->
@@ -57,7 +57,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
           Hi, I'm Antoine.
         </h1>
         <p data-intro data-edge class="max-w-md font-serif text-lg md:text-2xl leading-snug text-ink/80">
-          A Creative Engineer and Senior Product Designer, with <span class="hero-counter"><ExperienceCounter /></span>
+          A Creative Engineer and Senior Product Designer, with <span class="hero-counter"><ExperienceCounter /></span>{" "}
           of experience bridging product, design and code.
         </p>
         <p data-intro data-edge class="max-w-sm font-serif text-[15px] md:text-base leading-relaxed opacity-70">
@@ -213,6 +213,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
     margin-bottom: -1.75rem; /* cancels the column's gap-7 */
     overflow: hidden;
   }
+  /* Arriving from another page: no boot lines at all, not even briefly. */
+  html[data-navigated] #boot-lines {
+    display: none;
+  }
   html[data-boot] [data-intro]:not(.in) {
     opacity: 0;
     transform: translateY(14px);
@@ -286,11 +290,11 @@ const pad = (n: number) => String(n).padStart(2, "0");
 </style>
 
 <script>
-  import { AsciiEngine, type Rgba } from "@lib/ascii/engine";
+  import type { Rgba } from "@lib/ascii/engine";
   import { ICONS } from "@lib/ascii/icons";
   import { iconShape, imageSample, imageShape, type ImageSample } from "@lib/ascii/shapes";
   import type { AsciiState, Rect } from "@lib/ascii/types";
-  import { onPage } from "@lib/ascii/stage";
+  import { onPage, stageEngine, releaseEngine } from "@lib/ascii/stage";
 
   // Runs on every visit, including client-side navigations back to this page.
   onPage("#scene", () => {
@@ -312,7 +316,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
     const closing = document.querySelector<HTMLElement>('[data-anchor="closing"]')!;
     const booting = root.dataset.boot === "1";
 
-    const engine = new AsciiEngine({ canvas, fontSize: 10 });
+    const engine = stageEngine(canvas);
+    // Arriving from another page: the stage is already running, so it travels
+    // straight to its place here instead of replaying the opening wave.
+    const arriving = engine.carrying || root.dataset.navigated === "1";
 
     // ---- Theme / inks: muted field, accent shape and peaks ----
     const projectImages: (ImageSample | null)[] = projectEls.map(() => null);
@@ -675,12 +682,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
     engine.start();
     requestAnimationFrame(frame);
-    if (booting) {
+    if (booting && !arriving) {
       boot();
     } else {
       // Returning visitors: no typing, a quicker wave.
       fillLines();
-      if (scrollY > 10 || engine.reducedMotion) {
+      if (scrollY > 10 || engine.reducedMotion || arriving) {
         origin = caretPoint();
         finishIntro();
         engine.target = scrollTarget();
@@ -695,7 +702,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
       alive = false;
       typing = false;
       cancelAnimationFrame(raf);
-      engine.stop();
+      releaseEngine(engine);
       themeObserver.disconnect();
       removeEventListener("resize", measure);
       removeEventListener("load", measure);
