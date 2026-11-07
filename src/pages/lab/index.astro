@@ -470,7 +470,8 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
 
     // Project text follows the stage's smoothed progress.
     const p = engine.progress;
-    let active = 0;
+    // The nearest project, even mid-morph when no project text is showing.
+    const active = Math.max(0, Math.min(projectEls.length - 1, Math.round(p - FIRST_PROJECT)));
     projectEls.forEach((el, i) => {
       // Outgoing text clears in the first half of a morph, incoming text
       // arrives in the second half: the swap lands when the image is scattered.
@@ -480,7 +481,6 @@ const sceneHeight = ((projects.length - 1) * STEP + 1.6) * 100;
       const on = Math.abs(d) < 0.5;
       el.classList.toggle("is-active", on);
       el.setAttribute("aria-hidden", on ? "false" : "true");
-      if (on) active = i;
     });
     railIndex.textContent = String(active + 1).padStart(2, "0");
     const inScene = p > FIRST_PROJECT - 0.5 && p < SETTLE_END - 0.5;
