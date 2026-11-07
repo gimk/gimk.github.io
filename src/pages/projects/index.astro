@@ -10,7 +10,7 @@ const projects = (await getCollection("projects"))
 const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
-<PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION} asciiBackground={false} bareHeader>
+<PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
   <canvas class="ascii-stage" aria-hidden="true"></canvas>
   <div id="projects-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
     <PageIntro

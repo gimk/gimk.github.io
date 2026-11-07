@@ -3,12 +3,6 @@ import Container from "@components/Container.astro";
 import InteractionSound from "./InteractionSound.astro";
 import { getCollection } from "astro:content";
 
-type Props = {
-  /** Transparent header without blur, border or dotted strip. */
-  bare?: boolean;
-};
-
-const { bare = false } = Astro.props;
 
 const NAV = [
   { href: "/projects", label: "Projects" },
@@ -24,10 +18,10 @@ const latest = (await getCollection("projects"))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())[0];
 ---
 
-<header class:list={[{ "header-bare": bare }]}>
-  <Container hideLines={true}>
+<header>
+  <Container>
     <div class="flex flex-wrap gap-y-2 justify-between">
-      <div class="flex items-center gap-6">
+      <div class="flex items-center gap-4 sm:gap-6">
       <InteractionSound preset="link">
         <a
           style="cursor: url('/cursor-hover.svg') 16 16, auto !important;"
@@ -135,7 +129,7 @@ const latest = (await getCollection("projects"))
       )}
       </div>
       <nav class="header-pill flex items-center gap-0.5 sm:gap-1 pl-2 pr-1 py-0.5 rounded-full" aria-label="Main">
-        <ul class="flex items-center gap-1 sm:gap-3 font-mono text-[10px] sm:text-[11px] uppercase tracking-[0.2em]">
+        <ul class="hidden sm:flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em]">
           {NAV.map((item) => (
             <li>
               <InteractionSound preset="link">
@@ -151,7 +145,17 @@ const latest = (await getCollection("projects"))
             </li>
           ))}
         </ul>
-        <span class="hidden sm:block w-px h-4 bg-current opacity-15 mx-1" aria-hidden="true"></span>
+        <!-- Phones: the links move into a full-screen menu. -->
+        <button
+          id="menu-button"
+          type="button"
+          class="sm:hidden px-3 py-2 font-mono text-[11px] uppercase tracking-[0.2em] opacity-80"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          Menu
+        </button>
+        <span class="w-px h-4 bg-current opacity-15 mx-1" aria-hidden="true"></span>
         <button
           id="sound-button"
           aria-label="Toggle sound button"
@@ -227,6 +231,25 @@ const latest = (await getCollection("projects"))
       </nav>
     </div>
   </Container>
+  <div id="mobile-menu" class="mobile-menu sm:hidden" hidden>
+    <nav aria-label="Main" class="flex flex-col gap-2">
+      {NAV.map((item, i) => (
+        <a
+          href={item.href}
+          class:list={["mobile-menu-link !font-serif text-5xl tracking-tight", { "text-accent-primary": isCurrent(item.href) }]}
+          style={`--i:${i}`}
+          aria-current={isCurrent(item.href) ? "page" : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
+    {latest && (
+      <a href={`/projects/${latest.id}`} class="mobile-menu-link mt-10 font-mono text-xs uppercase tracking-[0.2em] opacity-60" style="--i:3">
+        Last project · {latest.data.title} →
+      </a>
+    )}
+  </div>
 </header>
 
 <script>
@@ -246,10 +269,63 @@ const latest = (await getCollection("projects"))
   }
 
   document.addEventListener("DOMContentLoaded", initSoundToggle);
+
+  // Phone menu: a full-screen overlay; closes on a link, Escape or navigation.
+  function initMenu() {
+    const btn = document.getElementById("menu-button");
+    const menu = document.getElementById("mobile-menu");
+    if (!btn || !menu || btn.hasAttribute("data-listener-added")) return;
+    btn.setAttribute("data-listener-added", "true");
+    const set = (open: boolean) => {
+      menu.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Close" : "Menu";
+      document.documentElement.classList.toggle("menu-open", open);
+    };
+    btn.addEventListener("click", () => set(menu.hidden));
+    menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => set(false)));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !menu.hidden) set(false);
+    });
+  }
+  document.addEventListener("astro:page-load", () => {
+    document.documentElement.classList.remove("menu-open");
+    initMenu();
+  });
   document.addEventListener("astro:after-swap", initSoundToggle);
 </script>
 
 <style>
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 1.5rem 3rem;
+    background: #fff7ed;
+  }
+  .mobile-menu[hidden] {
+    display: none;
+  }
+  :global(html.dark) .mobile-menu {
+    background: #020617;
+  }
+  .mobile-menu-link {
+    animation: menu-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+      filter: blur(6px);
+    }
+  }
+  :global(html.menu-open) {
+    overflow: hidden;
+  }
   /* Shared backdrop for the header's pills: readable over the ASCII and content. */
   .header-pill {
     background: rgb(255 247 237 / 0.78);

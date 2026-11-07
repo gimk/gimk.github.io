@@ -33,11 +33,11 @@ Blue is somewhat overused in companies brandings today, but that's their origina
 
 Once you'e authenticated, you land on the account page. Here you can see your accounts or savings, all your past transactions, and set a budget feature, to give you an overview of your month.
 
-<div class="flex gap-4 md:-mx-24 md:my-8">
-    <div class=""><img src="/projectfiles/bp-redesign/home1.png" alt="Home redesign focus"/></div>
-    <div class=""><img src="/projectfiles/bp-redesign/home2.png" alt="Home redesign focus"/></div>
-    <div class=""><img src="/projectfiles/bp-redesign/home3.png" alt="Home redesign focus"/></div>
-</div>
+<figure class="flex items-start gap-4">
+    <img src="/projectfiles/bp-redesign/home1.png" alt="Home redesign focus"/>
+    <img src="/projectfiles/bp-redesign/home2.png" alt="Home redesign focus"/>
+    <img src="/projectfiles/bp-redesign/home3.png" alt="Home redesign focus"/>
+</figure>
 
 <p class="text-center">The illustration here is from Krestovskaya Anna, on <a href="https://dribbble.com/shots/6683266-How-to-build-a-remote-company">Dribbble</a>.</p>
 
@@ -47,11 +47,11 @@ Once you'e authenticated, you land on the account page. Here you can see your ac
 
 Below is the process to do a new money transfer. You type in the amount, then you choose the originating account, and then the receiving one. You can choose one of your accounts, an external account, or use PayLib to send money via a phone number or email.
 
-<div class="flex gap-4 md:-mx-24 md:my-8">
-    <div class=""><img src="/projectfiles/bp-redesign/transac1.png" alt="Transactions redesign focus"/></div>
-    <div class=""><img src="/projectfiles/bp-redesign/transac2.png" alt="Transactions redesign focus"/></div>
-    <div class=""><img src="/projectfiles/bp-redesign/transac3.png" alt="Transactions redesign focus"/></div>
-</div>
+<figure class="flex items-start gap-4">
+    <img src="/projectfiles/bp-redesign/transac1.png" alt="Transactions redesign focus"/>
+    <img src="/projectfiles/bp-redesign/transac2.png" alt="Transactions redesign focus"/>
+    <img src="/projectfiles/bp-redesign/transac3.png" alt="Transactions redesign focus"/>
+</figure>
 
 <div class="flex gap-4 mx-8">
     <div class=""><img src="/projectfiles/bp-redesign/transac4.png" alt="transaction redesign funnel"/></div>

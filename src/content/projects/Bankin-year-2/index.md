@@ -27,7 +27,7 @@ The idea was to make the interface more modern, to go with the redesigned home p
 
 While perfectly fine in UX terms, the UI from 2015 is a bit lacking now, so I needed to propose and design an alternative, that you can see below.
 
-<div class="md:-mx-32"><img src="/projectfiles/bankin/transactions-new1.png" alt="New transaction design"/></div>
+<img src="/projectfiles/bankin/transactions-new1.png" alt="New transaction design"/>
 
 You can notice there's a lot going on in those transactions, that's because I took every type of transaction into account. Also, a new feature has been added during the redesign : the daily amount. With this you can quickly figure out how much you did spend during a day.
 
@@ -41,17 +41,17 @@ The first big project of 2023 was the implementation of loans inside the app. Ba
 
 The subscription is pretty straightforward: it's a 5 part form with personal information, ID check and a few settings.
 
-<div class="md:-mx-32"><img src="/projectfiles/bankin/inapp-loans1.png" alt="New in-app loan funnel design"/></div>
+<img src="/projectfiles/bankin/inapp-loans1.png" alt="New in-app loan funnel design"/>
 
 Once that's done and your file is accepted, you gain access to withdrawal and management of your subscription.
 
-<div class="md:-mx-32"><img src="/projectfiles/bankin/inapp-loans2.png" alt="New in-app loan results design"/></div>
+<img src="/projectfiles/bankin/inapp-loans2.png" alt="New in-app loan results design"/>
 
 The last screens of this feature are the loan management ones below. The way the "Crédit Renouvelable" works can be a bit complicated so I had to take multiple use-cases into account while designing.
 
 They allow you to make a new withdrawal, and see in detail all your current and past withdrawals. With that type of loan you actually have a total amount of $3000 available, that you can withdraw all at once, or in multiple instances. Each loan repayment is cumulative, so I had to make clear what had to be paid and when.
 
-<div class="md:-mx-32"><img src="/projectfiles/bankin/inapp-loans3.png" alt="New in-app loan results design"/></div>
+<img src="/projectfiles/bankin/inapp-loans3.png" alt="New in-app loan results design"/>
 
 ## Boosted Cashback
 
@@ -76,13 +76,13 @@ There are a lot of implications to this design elsewhere on the cashback tab, bu
 
 During the last few months, we had a big focus on the new Savings tab. This tab's goal is to help users monitoring their spending in comparison to their income, and help them save money on the long run. From that statement, I designed two sub-tabs.
 
-<div class="md:-mx-32"><img src="/projectfiles/bankin/savings-tab1.png" alt="New savings tab design"/></div>
+<img src="/projectfiles/bankin/savings-tab1.png" alt="New savings tab design"/>
 
 The first sub-tab here, is about keeping an eye on your spendings on a weekly basis. Here, you can define a savings goal, using diverse presets to help you know how to split your revenues. We'll then take the goal into account in that gauge on the left, telling you how much you can still spend this month.
 
 This sub-tab updates dynamically and is all about increasing the feature's stickiness.
 
-<div class="md:-mx-32"><img src="/projectfiles/bankin/savings-tab2.png" alt="New savings tab design"/></div>
+<img src="/projectfiles/bankin/savings-tab2.png" alt="New savings tab design"/>
 
 The second sub-tab of this feature is where the user can take action on his savings. Here, you can define an investment profile, telling us how open you are with risk, what type of investments could interest you, and how knowledgeable you are with finance.
 
@@ -98,9 +98,9 @@ After that, I didn't keep much more projects. That said, the work didn't stop, a
 
 Below you can see paywalls, a reward system, a redesign of the budget feature, and a redesign of the onboarding!
 
-<div class="flex gap-4 md:-mx-24 md:my-8">
-    <div class=""><img src="/projectfiles/bankin/see-more01.png" alt="more projects"/></div>
-    <div class=""><img src="/projectfiles/bankin/see-more02.png" alt="more projects"/></div>
-    <div class=""><img src="/projectfiles/bankin/see-more03.png" alt="more projects"/></div>
-    <div class=""><img src="/projectfiles/bankin/see-more04.png" alt="more projects"/></div>
-</div>
+<figure class="flex items-start gap-4">
+    <img src="/projectfiles/bankin/see-more01.png" alt="more projects"/>
+    <img src="/projectfiles/bankin/see-more02.png" alt="more projects"/>
+    <img src="/projectfiles/bankin/see-more03.png" alt="more projects"/>
+    <img src="/projectfiles/bankin/see-more04.png" alt="more projects"/>
+</figure>

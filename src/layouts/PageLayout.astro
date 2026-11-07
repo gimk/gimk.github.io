@@ -2,22 +2,16 @@
 import Head from "@components/Head.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
-import AsciiBackground from "@components/AsciiBackground.astro";
 import Lightbox from "@components/Lightbox.astro";
-import { SITE } from "@consts";
 
 type Props = {
   title: string;
   description: string;
   image?: string;
   type?: "website" | "article";
-  /** Set false on pages that run their own full-viewport ASCII stage. */
-  asciiBackground?: boolean;
-  /** Transparent header with no blur, border or dotted strip, for pages with a full-bleed ASCII canvas. */
-  bareHeader?: boolean;
 };
 
-const { title, description, image, type, asciiBackground = true, bareHeader = false } = Astro.props;
+const { title, description, image, type } = Astro.props;
 ---
 
 <!doctype html>
@@ -26,12 +20,11 @@ const { title, description, image, type, asciiBackground = true, bareHeader = fa
     <Head title={`${title} | Pantoine.com`} description={description} image={image} type={type} />
   </head>
   <body>
-    <Header bare={bareHeader} />
+    <Header />
     <main>
       <slot />
     </main>
     <Footer />
-    {asciiBackground && <AsciiBackground />}
     <Lightbox />
   </body>
 </html>

@@ -18,7 +18,7 @@ const years = Object.keys(grouped).sort((a, b) => parseInt(b) - parseInt(a));
 const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 ---
 
-<PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION} asciiBackground={false} bareHeader>
+<PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
   <canvas class="ascii-stage" aria-hidden="true"></canvas>
   <div id="blog-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
     <PageIntro

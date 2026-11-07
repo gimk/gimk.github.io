@@ -20,7 +20,7 @@ const years = (start: Date, end: Date | string) =>
   `${start.getFullYear()} — ${end instanceof Date ? end.getFullYear() : end}`;
 ---
 
-<PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION} asciiBackground={false} bareHeader>
+<PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
   <canvas class="ascii-stage" aria-hidden="true"></canvas>
   <div id="work-page" class="mx-auto max-w-screen-xl px-5 md:px-10">
     <PageIntro

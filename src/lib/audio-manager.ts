@@ -21,7 +21,7 @@ export function playSound(name: string, volume: number = 1.0) {
   audio.volume = finalVolume;
   
   audio.play().catch((err) => {
-    if (err.name !== 'NotAllowedError') console.warn('Playback failed:', err);
+    if (err.name !== "NotAllowedError") console.warn("Playback failed:", err);
   });
 }
 

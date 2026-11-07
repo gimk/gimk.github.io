@@ -9,7 +9,7 @@ repoURL: "https://github.com/gimk/compstudio"
 repoLabel: "view on GitHub"
 ---
 
-<video src="/projectfiles/comp-studio/comp-loop.mp4" autoplay loop muted playsinline aria-label="A looping tour of Comp: images, video, noise, text and sound feeding a Layers module; a module palette with over 130 modules; a Depth Relight module running on device; keyframes animating a Halftone on a timeline; and a Renderer exporting to MP4, WebM, GIF, PNG and JPG" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-loop.mp4" autoplay loop muted playsinline aria-label="A looping tour of Comp: images, video, noise, text and sound feeding a Layers module; a module palette with over 130 modules; a Depth Relight module running on device; keyframes animating a Halftone on a timeline; and a Renderer exporting to MP4, WebM, GIF, PNG and JPG"></video>
 
 **Comp** is a node-based image and video editor in the browser. You drop in a photo or a video (or generate one), wire it through effects, animate the sliders with modulators, and watch the result update live. When you're happy with it, you export a file.
 
@@ -27,7 +27,7 @@ I spent a lot of time on the first few minutes. Most people don't know what "com
 
 The landing screen is a small working graph: an input photo, an effect node, and an output. An animated cursor wires it together right in front of you:
 
-<video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the transformed house appears in it" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-hero.webm" autoplay loop muted playsinline aria-label="Comp's opening screen: a cursor wires a photo of a red house into a module titled comp, drags an Output card in from the edge and connects it, and the transformed house appears in it"></video>
 
 A picture goes in on the left and comes out changed on the right. You get the idea in a few seconds, before even clicking Get started.
 
@@ -41,25 +41,25 @@ First-time visitors also get a short four-step walkthrough, using short clips re
 
 Start with a picture, run it through a couple of effects, and see the result live. Wires connect each step from left to right.
 
-<video src="/projectfiles/comp-studio/comp-step-1.mp4" autoplay loop muted playsinline aria-label="A small graph: an image wired through two effects into a viewer" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-step-1.mp4" autoplay loop muted playsinline aria-label="A small graph: an image wired through two effects into a viewer"></video>
 
 #### 2. Bring in an image
 
 Drag and drop an image or video onto the canvas, paste from your clipboard, or pick Image from the Input menu.
 
-<video src="/projectfiles/comp-studio/comp-step-2.mp4" autoplay loop muted playsinline aria-label="An image node on the canvas showing a photo" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-step-2.mp4" autoplay loop muted playsinline aria-label="An image node on the canvas showing a photo"></video>
 
 #### 3. Connect your modules
 
 Add an effect from the menu (or press `Shift+A` anywhere on the canvas), then drag a wire from your image to the effect, and into a Viewer.
 
-<video src="/projectfiles/comp-studio/comp-step-3.mp4" autoplay loop muted playsinline aria-label="An image wired into an effect, then into a viewer showing the result" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-step-3.mp4" autoplay loop muted playsinline aria-label="An image wired into an effect, then into a viewer showing the result"></video>
 
 #### 4. Export
 
 Connect your chain to a Render module, pick a format (PNG, JPG, GIF, MP4, or WebM), and hit Render.
 
-<video src="/projectfiles/comp-studio/comp-step-4.mp4" autoplay loop muted playsinline aria-label="A Renderer with a finished file ready to download" style="width: 100%;"></video>
+<video src="/projectfiles/comp-studio/comp-step-4.mp4" autoplay loop muted playsinline aria-label="A Renderer with a finished file ready to download"></video>
 
 ---
 
