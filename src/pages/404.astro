@@ -17,6 +17,7 @@ import PageIntro from "@components/stage/PageIntro.astro";
       label="404 — Not found"
       title="Lost in the field."
       description="This page doesn't exist, or it moved."
+      class="stage-backdrop px-8 py-16 [--backdrop-stop:45%]"
     >
       <div data-reveal class="flex flex-wrap items-center justify-center gap-3" style="--i:4">
         <a href="/" class="font-mono sp-link cta-pill"><span aria-hidden="true">←</span> Home</a>
@@ -42,14 +43,6 @@ import PageIntro from "@components/stage/PageIntro.astro";
     min-height: calc(100svh - 5.5rem);
     padding-bottom: 0;
     justify-content: center;
-  }
-  /* Soft backdrop so the text stays legible over the ASCII. */
-  #notfound-page section > div {
-    background: radial-gradient(closest-side, rgb(255 247 237 / 0.85) 45%, transparent);
-    padding: 4rem 2rem;
-  }
-  html.dark #notfound-page section > div {
-    background: radial-gradient(closest-side, rgb(2 6 23 / 0.85) 45%, transparent);
   }
 </style>
 

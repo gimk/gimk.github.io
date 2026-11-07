@@ -10,6 +10,12 @@ export default {
         accent: {
           primary: "rgb(var(--color-accent) / <alpha-value>)",
         },
+        page: "rgb(var(--color-page) / <alpha-value>)",
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+      },
+      transitionTimingFunction: {
+        soft: "var(--ease-out-soft)",
+        "soft-in-out": "var(--ease-in-out-soft)",
       },
       fontFamily: {
         sans: ["DM Sans", ...defaultTheme.fontFamily.sans],

@@ -64,7 +64,7 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
       }
     </PageIntro>
 
-    <div id="project-body" class="project-body mx-auto max-w-2xl pb-[20vh]">
+    <div id="project-body" class="reading-body mx-auto max-w-2xl pb-[20vh]">
       <article>
         <Content />
       </article>
@@ -73,8 +73,8 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     <!-- Next project: the stage morphs into its image as it arrives. -->
     <section id="project-next" class="relative min-h-[100svh] flex items-center">
       <a href={`/projects/${next.id}`} class="link-row flex flex-col gap-6 md:w-1/2 py-10">
-        <span data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">Next project</span>
-        <span data-edge class="!font-serif text-5xl md:text-7xl tracking-tight leading-[0.98] text-black dark:text-white">
+        <span data-edge class="eyebrow">Next project</span>
+        <span data-edge class="display text-5xl md:text-7xl leading-[0.98]">
           {next.data.title}
         </span>
         <span data-edge class="max-w-md font-serif text-xl leading-snug opacity-80">{next.data.description}</span>
@@ -85,49 +85,6 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     </section>
   </div>
 </PageLayout>
-
-<style is:global>
-  /* Reading column: media runs wider than the text. */
-  .project-body article {
-    @apply font-serif text-lg leading-relaxed;
-  }
-  .project-body article > video,
-  .project-body article > p > video,
-  .project-body article > p > img:only-child,
-  .project-body article > img,
-  .project-body article > figure {
-    position: relative;
-    left: 50%;
-    width: min(64rem, calc(100vw - 2.5rem));
-    max-width: none;
-    transform: translateX(-50%);
-  }
-  /* Rows of images inside a wide figure share the width instead of overflowing. */
-  .project-body article figure > img,
-  .project-body article figure > video {
-    width: 100%;
-    height: auto;
-    margin: 0;
-  }
-  .project-body article figure.flex > *,
-  .project-body article figure .flex > * {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  .project-body article h2,
-  .project-body article h3 {
-    @apply !font-serif font-normal tracking-tight;
-  }
-  .project-body article h2 {
-    @apply text-3xl mt-20;
-  }
-  .project-body article h3 {
-    @apply text-2xl mt-14;
-  }
-  .project-body article hr {
-    @apply my-16 border-black/10 dark:border-white/10;
-  }
-</style>
 
 <script>
   import {

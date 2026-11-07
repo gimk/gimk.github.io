@@ -38,7 +38,7 @@ const focusVolume = focusVolumeProp ?? presetData.focusVolume ?? 1.0;
 
 <div
   id={id}
-  class:list={["interaction-sound-wrapper", className]}
+  class:list={["interaction-sound-wrapper contents", className]}
   data-sound-click={click}
   data-sound-click-volume={clickVolume}
   data-sound-cursor-in={cursorIn}
@@ -111,10 +111,3 @@ const focusVolume = focusVolumeProp ?? presetData.focusVolume ?? 1.0;
     }
   }, { passive: true });
 </script>
-
-
-<style>
-  .interaction-sound-wrapper {
-    display: contents; /* Ensures the wrapper doesn't break flex/grid layouts */
-  }
-</style>

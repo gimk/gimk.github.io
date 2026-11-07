@@ -36,15 +36,15 @@ const entries = await Promise.all(
 
 <section data-anchor="experience" class="relative min-h-[100svh] py-[20vh]">
   <div class="max-w-xl">
-    <h2 data-edge class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50 mb-16">Experience</h2>
+    <h2 data-edge class="eyebrow mb-16">Experience</h2>
     <ul class="flex flex-col gap-24">
       {entries.map(({ entry, Content, years }) => (
         <li class="flex flex-col gap-3">
-          <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{years}</p>
-          <h3 data-edge class="!font-serif text-4xl md:text-5xl tracking-tight leading-none font-normal text-black dark:text-white">
+          <p data-edge class="eyebrow">{years}</p>
+          <h3 data-edge class="display text-4xl md:text-5xl leading-none">
             {entry.data.company}
           </h3>
-          <p data-edge class="font-mono text-xs uppercase tracking-[0.2em] opacity-50">{entry.data.role}</p>
+          <p data-edge class="eyebrow">{entry.data.role}</p>
           <div data-edge class="font-serif text-sm leading-relaxed opacity-70 line-clamp-4 mt-2">
             <Content />
           </div>
@@ -62,8 +62,8 @@ const entries = await Promise.all(
   rules: date and reading time, the title set big, the summary.
 -->
 <section data-anchor="blog" class="relative min-h-[100svh] py-[20vh] flex flex-col items-end text-right">
-  <div class="blog-backdrop flex flex-col items-end w-full max-w-2xl md:pl-6">
-    <h2 data-edge class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50">Writing</h2>
+  <div class="stage-backdrop flex flex-col items-end w-full max-w-2xl md:pl-6">
+    <h2 data-edge class="eyebrow">Writing</h2>
     <p data-edge class="mt-6 font-serif text-lg opacity-70">Notes on design, code and the things in between.</p>
     <ul class="mt-16 w-full flex flex-col">
       {latestPosts.map(({ entry, month, day, year, read }, i) => (
@@ -73,7 +73,7 @@ const entries = await Promise.all(
             <span data-edge class="font-mono text-[10px] uppercase tracking-[0.2em] opacity-50">
               {day} {month} {year} <span class="mx-2 opacity-60">·</span> {read}
             </span>
-            <span data-edge class="mt-5 font-serif text-4xl md:text-5xl tracking-tight leading-[1.1] text-black dark:text-white">
+            <span data-edge class="mt-5 display text-4xl md:text-5xl leading-[1.1]">
               <span class="link-title">{entry.data.title}</span>
             </span>
             <span data-edge class="mt-5 max-w-md font-serif text-lg leading-relaxed opacity-70">{entry.data.description}</span>
@@ -96,11 +96,11 @@ const entries = await Promise.all(
   class="relative min-h-[100svh] flex flex-col items-center justify-center text-center gap-8"
 >
   <div
-    class="flex flex-col items-center gap-8 px-16 py-12"
-    style="background: radial-gradient(closest-side, var(--outro-bg) 40%, transparent)"
+    class="stage-backdrop flex flex-col items-center gap-8 px-16 py-12"
+    style="--backdrop-stop: 40%"
   >
-    <h2 class="!font-mono text-xs uppercase tracking-[0.2em] opacity-50">Contact</h2>
-    <p class="font-serif text-5xl md:text-7xl tracking-tight leading-none text-black dark:text-white">
+    <h2 class="eyebrow">Contact</h2>
+    <p class="display text-5xl md:text-7xl leading-none">
       Let's make something.
     </p>
     <a
@@ -123,9 +123,6 @@ const entries = await Promise.all(
 </section>
 
 <style is:global>
-  .blog-backdrop {
-    background: radial-gradient(closest-side, var(--outro-bg) 55%, transparent);
-  }
   .blog-cta {
     opacity: 0;
     transform: translateY(4px);
@@ -143,11 +140,5 @@ const entries = await Promise.all(
       opacity: 1;
       transform: none;
     }
-  }
-  :root {
-    --outro-bg: rgb(255 247 237 / 0.85);
-  }
-  html.dark {
-    --outro-bg: rgb(2 6 23 / 0.85);
   }
 </style>

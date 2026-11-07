@@ -154,6 +154,16 @@ const imageURL = new URL(image, Astro.site);
       window.getComputedStyle(css).opacity;
       document.head.removeChild(css);
     }
+
+    syncThemeColor();
+  }
+
+  // Match the browser UI colour to the page colour token. Runs after the
+  // 'dark' class flips; skipped if the stylesheet hasn't loaded yet.
+  function syncThemeColor() {
+    const meta = document.querySelector("meta[name=\"theme-color\"]");
+    const rgb = getComputedStyle(document.documentElement).getPropertyValue("--color-page").trim();
+    if (meta && rgb) meta.setAttribute("content", `rgb(${rgb.split(/\s+/).join(",")})`);
   }
 
   // Update sound for theme toggle
@@ -169,7 +179,6 @@ const imageURL = new URL(image, Astro.site);
   // Function to apply the theme based on localStorage or system preference on initial load
   function preloadTheme() {
     const userTheme = localStorage.theme;
-    const themeColorMeta = document.querySelector("meta[name=\"theme-color\"]");
     // Determine if dark mode should be enabled
     const isDark =
       userTheme === "dark" ||
@@ -177,10 +186,6 @@ const imageURL = new URL(image, Astro.site);
         window.matchMedia("(prefers-color-scheme: dark)").matches); // Check system preference
     toggleTheme(isDark); // Apply the theme
     updateThemeSound(isDark); // Set initial click sound
-    // Update the theme-color meta tag for browser UI consistency
-    if (themeColorMeta) {
-      themeColorMeta.setAttribute("content", isDark ? "#020617" : "#fff7ed");
-    }
   }
 
   // Preload sound state to prevent UI flicker
@@ -210,7 +215,6 @@ const imageURL = new URL(image, Astro.site);
     backToTop?.addEventListener("click", scrollToTop); // Use named function directly
 
     // Theme Toggle Button
-    const themeColorMeta = document.querySelector("meta[name=\"theme-color\"]");
     const toggleThemeButton = document.getElementById("theme-button");
     // Add listener only if it hasn't been added before
     if (
@@ -222,13 +226,11 @@ const imageURL = new URL(image, Astro.site);
         if (isDark) {
           // Switch to light theme
           localStorage.setItem("theme", "light");
-          themeColorMeta?.setAttribute("content", "#fff7ed");
           toggleTheme(false, true);
           updateThemeSound(false);
         } else {
           // Switch to dark theme
           localStorage.setItem("theme", "dark");
-          themeColorMeta?.setAttribute("content", "#020617");
           toggleTheme(true, true);
           updateThemeSound(true);
         }
