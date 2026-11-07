@@ -71,7 +71,7 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     </div>
 
     <!-- Next project: the stage morphs into its image as it arrives. -->
-    <section id="project-next" class="relative min-h-[100svh] flex items-center">
+    <section id="project-next" class="relative pt-[45svh] md:pt-[30vh]">
       <a href={`/projects/${next.id}`} class="link-row flex flex-col gap-6 md:w-1/2 py-10">
         <span data-edge class="eyebrow">Next project</span>
         <span data-edge class="display text-5xl md:text-7xl leading-[0.98]">
@@ -129,7 +129,8 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
       anchors = [
         { y: 0, win: [0.35, 1] },
         { y: docTop(body) + vh * 0.1, win: [0.5, 1] },
-        { y: docTop(next) + next.offsetHeight / 2 - vh / 2, win: [0, 1] },
+        // Fully formed at the bottom of the page, where the footer follows it.
+        { y: Math.min(docTop(next) + next.offsetHeight / 2 - vh / 2, document.documentElement.scrollHeight - vh), win: [0, 1] },
       ];
     }
     measure();

@@ -76,7 +76,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
           }
         </ul>
       </div>
-      <div id="hero-frame" class="md:hidden absolute inset-x-0 top-0 h-[36svh] -z-10" aria-hidden="true"></div>
       <p data-intro class="scroll-cue hidden md:block absolute bottom-6 left-0 font-mono text-[10px] uppercase tracking-[0.3em] opacity-50">
         Scroll
       </p>
@@ -294,7 +293,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
   import { ICONS } from "@lib/ascii/icons";
   import { iconShape, imageSample, imageShape, type ImageSample } from "@lib/ascii/shapes";
   import type { AsciiState, Rect } from "@lib/ascii/types";
-  import { onPage, stageEngine, releaseEngine } from "@lib/ascii/stage";
+  import { onPage, stageEngine, releaseEngine, side, sideFocus, sideLeft, sideFocusLeft, centre } from "@lib/ascii/stage";
 
   // Runs on every visit, including client-side navigations back to this page.
   onPage("#scene", () => {
@@ -305,7 +304,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
     const root = document.documentElement;
     const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
-    const heroFrame = document.getElementById("hero-frame")!;
     const scene = document.getElementById("scene")!;
     const projectEls = [...document.querySelectorAll<HTMLElement>("[data-project]")];
     const moreEl = document.getElementById("more-projects")!;
@@ -350,31 +348,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
     });
     applyTheme();
 
-    // ---- Frames ----
-    const wide = () => innerWidth >= 768;
-    const rectOf = (el: Element): Rect => {
-      const r = el.getBoundingClientRect();
-      return { x: r.left, y: r.top, w: r.width, h: r.height };
-    };
-    /**
-     * Right side: the ellipse is much larger than the screen's right half,
-     * runs off the top, bottom and right edges, and its soft left rim reaches
-     * a little under the text column.
-     */
-    const side = (): Rect =>
-      wide()
-        ? { x: innerWidth * 0.28, y: -innerHeight * 0.35, w: innerWidth * 1.12, h: innerHeight * 1.7 }
-        : { x: -innerWidth * 0.15, y: innerHeight * 0.06, w: innerWidth * 1.3, h: innerHeight * 0.44 };
-    /** The visible right half, where images and the field's centre sit. */
-    const sideFocus = (): Rect =>
-      wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
-    /** Mirror images of the above, for the projects. */
-    const mirror = (r: Rect): Rect => ({ ...r, x: innerWidth - (r.x + r.w) });
-    const sideLeft = (): Rect => (wide() ? mirror(side()) : side());
-    const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : side());
-    const heroSide = (): Rect => (wide() ? side() : rectOf(heroFrame));
-    const centre = (): Rect => ({ x: innerWidth * 0.08, y: innerHeight * 0.04, w: innerWidth * 0.84, h: innerHeight * 0.92 });
-
     // The opening wave is centred on the terminal caret: it starts as a point
     // there, grows until it fills the screen, then travels into the hero ellipse.
     let origin = { x: innerWidth * 0.2, y: innerHeight * 0.4 };
@@ -388,7 +361,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     const states: AsciiState[] = [
       { id: "seed", field: "wave", shape: null, frame: seed, intensity: 1, ambient: 1, accent: 0.8 },
       { id: "bloom", field: "wave", shape: null, frame: bloom, intensity: 0.9, ambient: 1, accent: 0.6 },
-      { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: heroSide, focus: () => (wide() ? sideFocus() : heroSide()), intensity: 1, ambient: 1, accent: 1 },
+      { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: side, focus: sideFocus, intensity: 1, ambient: 1, accent: 1 },
       ...projectEls.map((el, i) => ({
         id: `project-${i}`,
         field: el.dataset.field ?? "wave",

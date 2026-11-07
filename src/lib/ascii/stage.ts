@@ -69,23 +69,31 @@ export const rectOf = (el: Element): Rect => {
   const r = el.getBoundingClientRect();
   return { x: r.left, y: r.top, w: r.width, h: r.height };
 };
+/**
+ * Phones: one large circle, about 2.3 screen widths across, centred near the
+ * top so it runs off both sides and the top, with its soft rim above the text.
+ */
+const phoneCircle = (): Rect => {
+  const d = innerWidth * 2.3;
+  return { x: innerWidth / 2 - d / 2, y: innerHeight * 0.1 - d / 2, w: d, h: d };
+};
+/** Phones: the visible band at the top, where images and the field's centre sit. */
+const phoneFocus = (): Rect => ({ x: -innerWidth * 0.15, y: innerHeight * 0.06, w: innerWidth * 1.3, h: innerHeight * 0.44 });
 /** Right side: an ellipse overscanning the right half, its rim under the text. */
 export const side = (): Rect =>
-  wide()
-    ? { x: innerWidth * 0.28, y: -innerHeight * 0.35, w: innerWidth * 1.12, h: innerHeight * 1.7 }
-    : { x: -innerWidth * 0.15, y: innerHeight * 0.06, w: innerWidth * 1.3, h: innerHeight * 0.44 };
+  wide() ? { x: innerWidth * 0.28, y: -innerHeight * 0.35, w: innerWidth * 1.12, h: innerHeight * 1.7 } : phoneCircle();
 /** The visible right half, where images and the field's centre sit. */
 export const sideFocus = (): Rect =>
-  wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : side();
+  wide() ? { x: innerWidth * 0.5, y: 0, w: innerWidth * 0.5, h: innerHeight } : phoneFocus();
 const mirror = (r: Rect): Rect => ({ ...r, x: innerWidth - (r.x + r.w) });
 export const sideLeft = (): Rect => (wide() ? mirror(side()) : side());
-export const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : side());
-export const centre = (): Rect => ({
-  x: innerWidth * 0.08,
-  y: innerHeight * 0.04,
-  w: innerWidth * 0.84,
-  h: innerHeight * 0.92,
-});
+export const sideFocusLeft = (): Rect => (wide() ? mirror(sideFocus()) : sideFocus());
+/** Centred on the screen. On phones it is wider than the screen and runs off both sides. */
+export const centre = (): Rect => {
+  if (wide()) return { x: innerWidth * 0.08, y: innerHeight * 0.04, w: innerWidth * 0.84, h: innerHeight * 0.92 };
+  const d = Math.min(innerWidth * 1.8, innerHeight);
+  return { x: innerWidth / 2 - d / 2, y: innerHeight / 2 - d / 2, w: d, h: d };
+};
 /** A wide, low ellipse behind an element (e.g. a centred title). */
 export const bandAround = (el: Element) => (): Rect => {
   const r = el.getBoundingClientRect();
