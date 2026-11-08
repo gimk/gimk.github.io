@@ -15,12 +15,16 @@ type Props = {
   tall?: boolean;
   /** Title size. */
   size?: "xl" | "lg";
+  /** Phones: centre the text vertically instead of resting it at the bottom. */
+  mobileCenter?: boolean;
+  /** Scroll hint at the foot of a full-height intro. Defaults to on with `tall`. */
+  scrollCue?: boolean;
   id?: string;
   /** Extra classes for the text column (e.g. a backdrop). */
   class?: string;
 };
 
-const { label, title, description, back, align = "left", tall = false, size = "xl", id, class: className } = Astro.props;
+const { label, title, description, back, align = "left", tall = false, size = "xl", mobileCenter = false, scrollCue = tall, id, class: className } = Astro.props;
 const half =
   align === "left"
     ? "md:w-1/2 items-start text-left"
@@ -35,7 +39,10 @@ const half =
     "relative flex flex-col md:justify-center",
     // Phones: the ASCII is a band across the top, so the text sits below it.
     tall
-      ? "min-h-[calc(100svh-6rem)] pb-[14svh] md:pb-16 justify-end md:justify-center"
+      ? [
+          "min-h-[calc(100svh-6rem)] md:pb-16 md:justify-center",
+          mobileCenter ? "justify-center pb-[12svh] md:pt-0" : "justify-end pb-[14svh]",
+        ]
       : "min-h-[62svh] pt-[40svh] pb-16 md:pt-16 md:pb-20",
   ]}
 >
@@ -74,4 +81,43 @@ const half =
     }
     <slot />
   </div>
+  {
+    scrollCue && (
+      <p
+        data-reveal
+        style="--i:4"
+        aria-hidden="true"
+        class:list={[
+          "scroll-cue hidden md:block absolute bottom-6 font-mono text-[10px] uppercase tracking-[0.3em] opacity-50",
+          align === "left" ? "left-0" : align === "right" ? "right-0 text-right" : "inset-x-0 mx-auto w-fit text-center",
+        ]}
+      >
+        Scroll
+      </p>
+    )
+  }
 </section>
+
+<style is:global>
+  .scroll-cue::after {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 36px;
+    margin-top: 10px;
+    background: currentColor;
+    animation: cue 2.4s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+  }
+  .scroll-cue.text-center::after {
+    margin-inline: auto;
+  }
+  .scroll-cue.text-right::after {
+    margin-left: auto;
+  }
+  @keyframes cue {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+</style>

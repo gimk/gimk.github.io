@@ -81,3 +81,7 @@ currentHeadTx += (targetHeadTx - currentHeadTx) * smoothingFactor;
 ```
 
 Combined with a random blinking interval, these small touches of physics and randomness transform a simple SVG icon into a character with its own little personality.
+
+---
+
+*Edit, November 2026: I reworked the pig, refining the animations and adding an ear twitch.*

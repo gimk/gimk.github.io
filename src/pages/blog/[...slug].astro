@@ -47,6 +47,7 @@ const date = post.data.date.toLocaleDateString("en-GB", { day: "numeric", month:
       align="center"
       size="lg"
       tall
+      mobileCenter
       back={{ href: "/blog", label: "Writing" }}
       label={`${date} — ${readingTime(post.body ?? "")}`}
       title={post.data.title}
