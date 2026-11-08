@@ -9,49 +9,18 @@ repoURL: "https://github.com/gimk/colors.pantoine.com"
 repoLabel: "view on GitHub"
 ---
 
-![Colors review board — six named palettes side by side, each swatch labelled with its step, hex value, and contrast ratios](/projectfiles/colors-studio/colors-cover.png)
+![Colors review board showing six named palettes side by side, each swatch labelled with its step, hex value, and contrast ratios](/projectfiles/colors-studio/colors-cover.png)
 
-**Colors** is a palette builder driven by curves instead of fixed steps. Pick a base colour, then shape the ramp using three cubic Bézier curves — lightness, chroma, and hue.
+<a href="https://colors.pantoine.com" target="_blank" rel="noopener noreferrer">**Colors**</a> is a palette builder that uses curves instead of fixed steps. You pick a base color, and then shape the rest of the ramp using three Bézier curves for lightness, chroma, and hue. Everything is saved directly in the URL, so if you want to share a palette, you just copy the link.
 
-No accounts, no backend. The whole document lives in the URL hash, so sharing a link shares the palette: <a href="https://colors.pantoine.com" target="_blank" rel="noopener noreferrer">**colors.pantoine.com**</a>.
+I built this because I kept running into the same frustration when working on design systems and rebrands. Most palette generators just lighten or darken a base color in fixed increments. You can't easily boost saturation in the midtones, or shift the hue slightly warmer in the highlights and cooler in the shadows. The results usually feel flat, and the darker shades quickly turn muddy.
 
----
+Using curves in the OKLCH color space fixes that, because you can treat a color ramp as a continuous shape rather than a list of numbers. Still, raw curves can be annoying to set up from scratch, so I spent a lot of time making sure the tool gives you a good starting point right away:
 
-## Why I Built It
+- When you pick a color, the chroma curve automatically follows the natural ceiling of that hue (yellows stay saturated in the light steps, blues stay saturated in the darks), so you only use the handles to tweak the result.
+- Your base color stays locked in place. A lot of generators quietly shift your input color to make the math easier, whereas here the curve bends around your exact hex value so your brand color never drifts.
+- If you work in wider color spaces like Display P3, each swatch shows a small indicator whenever a shade clips outside the target gamut.
 
-Most tint and shade generators use the same rigid formula: lighten or darken a base colour in fixed increments. You can't adjust saturation along the ramp or subtly shift hue in the shadows and highlights. The results feel flat, and dark tones quickly turn to mud.
+The basic generator was up and running in a single evening with the help of coding agents, which left me free to obsess over the tricky math and interaction details. For example, standard CSS gamut mapping often lets hues drift by up to 9 degrees just to keep a tiny bit of extra saturation. Since the whole point of this tool is deliberate hue control, I tightened that search so the hue stays within 0.5 degrees. Same thing for locking the base color without warping the neighboring steps on the curve.
 
-I kept running into this while building design systems for rebrands. Ramps need to look deliberate, not computed. I built Colors around OKLCH curves to give designers full control over how colours evolve across light, mid, and dark values.
-
----
-
-## Design Decisions
-
-**Curves, not sliders.** A colour ramp is a shape, not a series of increments. Three Bézier curves (lightness, chroma, hue) with unconstrained handles let you create natural peaks and arcs — like boosting mid-ramp saturation or shifting warm highlights toward cool shadows.
-
-**Sensible defaults.** Curves can be intimidating, so nothing starts from a blank canvas. Chroma defaults to the natural gamut ceiling of your hue: yellow holds saturation when light, blue when dark. You get a balanced ramp immediately, using curves to refine rather than build from scratch.
-
-**The base colour stays locked.** Most generators quietly drift your input colour when calculating steps. Here, locking the base colour ensures it remains exact while the curve fits around it as a mathematical constraint.
-
-**Clear gamut warnings.** Wide gamut support (sRGB, Display P3, Adobe RGB, Rec. 2020) is only useful if you know when a colour clips. Each swatch includes an adaptive clipping indicator that remains legible against any background.
-
----
-
-## Where the Time Went
-
-The core generator worked in one evening. Most of the effort went into two invisible details:
-
-- **Strict gamut mapping:** Standard CSS Color 4 mapping often allows up to 9° of hue drift just to preserve negligible chroma. Because this tool is built for intentional hue steering, the search algorithm holds hue strictly within 0.5°.
-- **Preserving the base colour:** Simply bending a fitted curve through a locked point distorted the ramp and crushed chroma. Incorporating the base point directly into the curve fit solved it cleanly without warping adjacent steps.
-
-Neither detail is flashy, but they make the difference between a palette that looks machine-generated and one that feels hand-crafted.
-
----
-
-## Under the Hood
-
-Built with React 19, TypeScript, Vite, and Vitest. It relies on two runtime libraries: <a href="https://culorijs.org" target="_blank" rel="noopener noreferrer">`culori`</a> for colour conversions, gamut mapping, and contrast, and <a href="https://github.com/meodai/color-names" target="_blank" rel="noopener noreferrer">`color-name-list`</a> to name palettes from 30,000 curated colour names.
-
-Exports support Hex, OKLCH, CSS variables, Tailwind, SCSS, JSON, PNG, and SVG. Ramps scale from 5 to 21 steps, configured globally or per palette.
-
-As with my <a href="/projects/vibe-coding-trilogy">other recent projects</a>, AI agents handled scaffolding and math implementations, leaving me free to focus on ergonomics, interaction design, and colour behaviour.
+It's built with React, TypeScript, and <a href="https://culorijs.org" target="_blank" rel="noopener noreferrer">`culori`</a> for the color math, plus <a href="https://github.com/meodai/color-names" target="_blank" rel="noopener noreferrer">`color-name-list`</a> to automatically name every palette. Once you're happy with your ramps, you can export them to Hex, OKLCH, CSS variables, Tailwind, JSON, or SVG to drop straight into Figma.

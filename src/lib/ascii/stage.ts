@@ -110,7 +110,7 @@ export const PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "
 const ICON_BY_PROJECT: Record<string, string> = {
   "comp-studio": "comp",
   "colors-studio": "colors",
-  "vibe-coding-trilogy": "photo",
+  "photo-portfolio": "photo",
   "dither-studio": "dither",
   "bankin-year-2": "bankin",
   "bankin-year-1": "bankin",
