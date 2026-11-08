@@ -293,14 +293,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
   import { ICONS } from "@lib/ascii/icons";
   import { iconShape, imageSample, imageShape, type ImageSample } from "@lib/ascii/shapes";
   import type { AsciiState, Rect } from "@lib/ascii/types";
-  import { onPage, stageEngine, releaseEngine, side, sideFocus, sideLeft, sideFocusLeft, centre } from "@lib/ascii/stage";
+  import { onPage, stageEngine, releaseEngine, side, sideFocus, sideLeft, sideFocusLeft, centre, PLAYLIST } from "@lib/ascii/stage";
 
   // Runs on every visit, including client-side navigations back to this page.
   onPage("#scene", () => {
   let alive = true;
 
-    /** The hero cycles through the original animations, each blending into the next. Starts on "wave" so the opening wave flows straight into it. */
-    const HERO_PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "rings", "solar", "cells", "grid"];
 
     const root = document.documentElement;
     const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
@@ -376,7 +374,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
     const states: AsciiState[] = [
       { id: "seed", field: "wave", shape: null, frame: seed, intensity: 1, ambient: 1, accent: 0.8 },
       { id: "bloom", field: "wave", shape: null, frame: bloom, intensity: 0.9, ambient: 1, accent: 0.6 },
-      { id: "hero", field: "wave", fields: HERO_PLAYLIST, period: 6, shape: null, frame: side, focus: sideFocus, intensity: 1, ambient: 1, accent: 1 },
+      { id: "hero", field: "wave", fields: PLAYLIST, period: 6, shape: null, frame: side, focus: sideFocus, intensity: 1, ambient: 1, accent: 1 },
       ...projectEls.map((el, i) => ({
         id: `project-${i}`,
         field: el.dataset.field ?? "wave",

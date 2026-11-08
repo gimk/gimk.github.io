@@ -3,6 +3,7 @@ import { type CollectionEntry, getCollection, render } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import PageIntro from "@components/stage/PageIntro.astro";
 import { readingTime } from "@lib/utils";
+import { fieldAt } from "@lib/ascii/stage";
 
 export async function getStaticPaths() {
   const projects = (await getCollection("projects"))
@@ -11,12 +12,17 @@ export async function getStaticPaths() {
   return projects.map((project, i) => ({
     params: { slug: project.id },
     // The next (older) project, wrapping around to the newest.
-    props: { project, next: projects[(i + 1) % projects.length] },
+    props: {
+      project,
+      next: projects[(i + 1) % projects.length],
+      field: fieldAt(i),
+      nextField: fieldAt((i + 1) % projects.length),
+    },
   }));
 }
-type Props = { project: CollectionEntry<"projects">; next: CollectionEntry<"projects"> };
+type Props = { project: CollectionEntry<"projects">; next: CollectionEntry<"projects">; field: string; nextField: string };
 
-const { project, next } = Astro.props;
+const { project, next, field, nextField } = Astro.props;
 const { Content } = await render(project);
 const date = project.data.date.toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 ---
@@ -34,6 +40,8 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     id="project-page"
     class="mx-auto max-w-screen-xl px-5 md:px-10"
     data-id={project.id}
+    data-field={field}
+    data-next-field={nextField}
     data-thumb={project.data.thumbnail}
     data-next-id={next.id}
     data-next-thumb={next.data.thumbnail}
@@ -92,7 +100,6 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     createStage,
     side,
     sideFocus,
-    fieldFor,
     PROJECT_LOOK,
     scrollProgress,
     docTop,
@@ -106,7 +113,7 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     const canvas = document.querySelector<HTMLCanvasElement>(".ascii-stage")!;
     const body = document.getElementById("project-body")!;
     const next = document.getElementById("project-next")!;
-    const { id = "", thumb = "", nextId = "", nextThumb = "" } = page.dataset;
+    const { id = "", thumb = "", nextId = "", nextThumb = "", field = "wave", nextField = "wave" } = page.dataset;
 
     const stage = createStage(canvas);
     const { engine } = stage;
@@ -115,11 +122,11 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
 
     const states: AsciiState[] = [
       // The project's image, as on the home page.
-      { id: "this", field: fieldFor(id), shape: "this", frame: side, focus: sideFocus, intensity: 1, ...PROJECT_LOOK },
+      { id: "this", field, shape: "this", frame: side, focus: sideFocus, intensity: 1, ...PROJECT_LOOK },
       // Reading: the stage steps back almost entirely.
       { id: "read", field: "calm", shape: null, frame: side, focus: sideFocus, intensity: 0.08, ambient: 0.6 },
       // The next project arrives.
-      { id: "next", field: fieldFor(nextId), shape: "next", frame: side, focus: sideFocus, intensity: 1, ...PROJECT_LOOK },
+      { id: "next", field: nextField, shape: "next", frame: side, focus: sideFocus, intensity: 1, ...PROJECT_LOOK },
     ];
     engine.setStates(states);
 

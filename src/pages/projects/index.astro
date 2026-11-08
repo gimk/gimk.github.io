@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import PageIntro from "@components/stage/PageIntro.astro";
 import { PROJECTS } from "@consts";
+import { fieldAt } from "@lib/ascii/stage";
 
 const projects = (await getCollection("projects"))
   .filter((project) => !project.data.draft)
@@ -30,6 +31,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
               href={`/projects/${p.id}`}
               data-row
               data-id={p.id}
+              data-field={fieldAt(i)}
               data-thumb={p.data.thumbnail}
               class="link-row project-row grid grid-cols-[2.25rem_1fr] gap-x-4 py-10 md:py-12"
             >
@@ -71,7 +73,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
     createStage,
     side,
     sideFocus,
-    fieldFor,
     PROJECT_LOOK,
     PLAYLIST,
     edgeBlur,
@@ -93,7 +94,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
       { id: "intro", field: "wave", fields: PLAYLIST, period: 6, shape: null, frame: side, focus: sideFocus, intensity: 1, ambient: 1, accent: 0.8 },
       ...rows.map((row, i) => ({
         id: `p${i}`,
-        field: fieldFor(row.dataset.id ?? ""),
+        field: row.dataset.field ?? "wave",
         shape: `p${i}`,
         frame: side,
         focus: sideFocus,

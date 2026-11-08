@@ -194,6 +194,79 @@ const solar: FieldFactory = () => ({
   },
 });
 
+/** Moiré: two rotating line gratings beat against each other into big drifting checker bands. */
+const moire: FieldFactory = () => ({
+  name: "moire",
+  sample(_x, _y, _dist, dx, dy, ctx) {
+    const time = ctx.t;
+    const k = 0.42 + Math.sin(time * 0.25) * 0.06;
+    // Rotation sweeps the beat bands around; the phase drift makes each grating glide.
+    const a = Math.sin(time * 0.16) * 0.5 + time * 0.12;
+    const b = 0.6 - time * 0.1 + Math.cos(time * 0.2) * 0.3;
+    const g1 = Math.sin(k * (dx * Math.cos(a) + dy * Math.sin(a)) + time * 0.9);
+    const g2 = Math.sin(k * (dx * Math.cos(b) + dy * Math.sin(b)) - time * 0.7);
+    return g1 * g2 * 0.9;
+  },
+});
+
+/** Rose curves: nested petal outlines at different lobe counts, counter-rotating. */
+const rose: FieldFactory = () => ({
+  name: "rose",
+  sample(_x, _y, dist, dx, dy, ctx) {
+    const time = ctx.t;
+    const rmax = Math.min(ctx.cols * 0.875, ctx.rows) * 0.45;
+    const ang = Math.atan2(dy, dx);
+    let v = 0;
+    for (let i = 0; i < 3; i++) {
+      const k = 3 + i * 2; // 3, 5, 7 petals
+      const dir = i % 2 ? -1 : 1;
+      const r = rmax * (1 - i * 0.28) * (0.55 + 0.45 * Math.cos(k * ang + dir * time * (0.35 + i * 0.1)));
+      const e = (dist - r) * 0.3;
+      v += 1 / (1 + e * e);
+    }
+    return v * 0.6 - 0.35;
+  },
+});
+
+/** Domain-warped bands: sine coordinates folded through themselves, a slow marble. */
+const warp: FieldFactory = () => ({
+  name: "warp",
+  sample(_x, _y, _dist, dx, dy, ctx) {
+    const time = ctx.t;
+    let x = dx * 0.05;
+    let y = dy * 0.05;
+    for (let i = 0; i < 3; i++) {
+      x += 0.9 * Math.sin(y * 1.6 + time * 0.3 + i * 1.3);
+      y += 0.9 * Math.sin(x * 1.6 - time * 0.25 + i * 2.1);
+    }
+    return Math.sin(x * 2.2 + y * 1.4) * 0.9;
+  },
+});
+
+/** Quasicrystal: five plane waves at 72° offsets give non-repeating, almost-crystal symmetry. */
+const quasicrystal: FieldFactory = () => {
+  const cs = new Float64Array(5);
+  const sn = new Float64Array(5);
+  for (let i = 0; i < 5; i++) {
+    cs[i] = Math.cos((i * 2 * Math.PI) / 5);
+    sn[i] = Math.sin((i * 2 * Math.PI) / 5);
+  }
+  return {
+    name: "quasicrystal",
+    sample(_x, _y, _dist, dx, dy, ctx) {
+      const time = ctx.t;
+      const k = 0.34 + Math.sin(time * 0.1) * 0.04;
+      const rot = time * 0.05;
+      const rc = Math.cos(rot), rs = Math.sin(rot);
+      const ux = dx * rc - dy * rs;
+      const uy = dx * rs + dy * rc;
+      let v = 0;
+      for (let i = 0; i < 5; i++) v += Math.cos(k * (ux * cs[i] + uy * sn[i]) + time * 0.8);
+      return v * 0.4;
+    },
+  };
+};
+
 export const FIELDS: Record<string, FieldFactory> = {
   wave,
   cells,
@@ -205,5 +278,9 @@ export const FIELDS: Record<string, FieldFactory> = {
   rings,
   solar,
   calm,
+  quasicrystal,
+  moire,
+  rose,
+  warp,
 };
 

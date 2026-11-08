@@ -105,17 +105,8 @@ export const bandAround = (el: Element) => (): Rect => {
 // ---------------------------------------------------------------------------
 // Stage
 
-/** The original animations, for intros that cycle. */
-export const PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "rings", "solar", "cells", "grid"];
-/** Motion field per project, so a project looks the same everywhere on the site. */
-const FIELD_BY_PROJECT: Record<string, string> = {
-  "comp-studio": "interference",
-  "colors-studio": "plasma",
-  "vibe-coding-trilogy": "vortex",
-  "dither-studio": "grid",
-  "bankin-year-2": "rings",
-  "future-of-coach": "cells",
-};
+/** Every animation, in order: intros cycle through it and projects take from it by position. */
+export const PLAYLIST = ["wave", "vortex", "interference", "plasma", "tunnel", "rings", "solar", "cells", "grid", "quasicrystal", "moire", "rose", "warp"];
 const ICON_BY_PROJECT: Record<string, string> = {
   "comp-studio": "comp",
   "colors-studio": "colors",
@@ -126,12 +117,16 @@ const ICON_BY_PROJECT: Record<string, string> = {
   "future-of-coach": "coach",
   "coach-desktop": "coach",
 };
-export function fieldFor(projectId: string) {
-  const id = projectId.toLowerCase();
-  if (FIELD_BY_PROJECT[id]) return FIELD_BY_PROJECT[id];
-  let h = 0;
-  for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return PLAYLIST[h % PLAYLIST.length];
+/**
+ * The animation for the project at `index` in the projects list (newest first,
+ * the order shown on /projects): project 0 gets PLAYLIST[0], project 1 gets
+ * PLAYLIST[1], and so on, wrapping back to the start when projects outnumber
+ * animations. Add or remove animations and projects freely: the list order is
+ * the only input, so there is no table to keep in sync.
+ */
+export function fieldAt(index: number) {
+  const n = PLAYLIST.length;
+  return PLAYLIST[((index % n) + n) % n];
 }
 
 /** The settings a project image gets wherever it is shown. */
