@@ -66,15 +66,12 @@ const latest = (await getCollection("projects"))
         <InteractionSound preset="button">
           <a
             href={`/projects/${latest.id}`}
-            class="latest-link header-pill group flex items-center gap-2 h-10 pl-3.5 pr-4 rounded-full transition-colors duration-300 text-xs"
+            class="latest-link header-pill group flex items-center gap-2.5 h-10 pl-3.5 pr-4 rounded-full transition-colors duration-300"
+            aria-label={`New project: ${latest.data.title}`}
           >
-            <svg width="12" height="12" viewBox="12.7 17.8 37 37" class="text-accent-primary shrink-0" fill="currentColor" aria-hidden="true">
-              <path d="M 31.2344 54.7305 C 31.8438 54.7305 32.2891 54.2852 32.4062 53.6524 C 34.0703 40.8086 35.8750 38.8633 48.5781 37.4570 C 49.2344 37.3867 49.6797 36.8945 49.6797 36.2852 C 49.6797 35.6758 49.2344 35.2070 48.5781 35.1133 C 35.8750 33.7070 34.0703 31.7617 32.4062 18.9180 C 32.2891 18.2852 31.8438 17.8633 31.2344 17.8633 C 30.6250 17.8633 30.1797 18.2852 30.0860 18.9180 C 28.4219 31.7617 26.5938 33.7070 13.9140 35.1133 C 13.2344 35.2070 12.7891 35.6758 12.7891 36.2852 C 12.7891 36.8945 13.2344 37.3867 13.9140 37.4570 C 26.5703 39.1211 28.3281 40.8321 30.0860 53.6524 C 30.1797 54.2852 30.6250 54.7305 31.2344 54.7305 Z"></path>
-            </svg>
-            <span class="opacity-60 hidden sm:inline">Last project</span>
-            <span class="opacity-30 hidden sm:inline" aria-hidden="true">·</span>
-            <span class="text-ink">{latest.data.title}</span>
-            <span class="opacity-60 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-accent-primary" aria-hidden="true">→</span>
+            <span class="new-dot" aria-hidden="true"></span>
+            <span class="font-mono text-[11px] uppercase tracking-[0.2em] opacity-60 hidden sm:inline" aria-hidden="true">New</span>
+            <span class="latest-title font-mono text-[11px] uppercase tracking-[0.12em] text-ink" aria-hidden="true" data-text={latest.data.title}>{latest.data.title}</span>
           </a>
         </InteractionSound>
       )}
@@ -198,7 +195,7 @@ const latest = (await getCollection("projects"))
     </nav>
     {latest && (
       <a href={`/projects/${latest.id}`} class="mt-10 eyebrow opacity-60" style="--i:3" data-reveal>
-        Last project · {latest.data.title} →
+        New · {latest.data.title} →
       </a>
     )}
   </div>
@@ -245,6 +242,47 @@ const latest = (await getCollection("projects"))
     initMenu();
   });
   document.addEventListener("astro:after-swap", initSoundToggle);
+
+
+  // ASCII shimmer: a short wave of glyphs sweeps across the latest project's
+  // title, then the letters settle back. Monospace keeps the width stable.
+  const RAMP = "·:+*#%@░▒";
+  let shimmerTimer: number | undefined;
+  function initShimmer() {
+    clearInterval(shimmerTimer);
+    const el = document.querySelector<HTMLElement>(".latest-title");
+    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const text = el.dataset.text ?? "";
+    const link = el.closest("a");
+    let running = false;
+    const run = () => {
+      if (running || document.hidden) return;
+      running = true;
+      const t0 = performance.now();
+      const speed = 38; // ms per character
+      const tail = 4;
+      const step = (now: number) => {
+        const head = Math.floor((now - t0) / speed);
+        let out = "";
+        for (let i = 0; i < text.length; i++) {
+          const d = head - i;
+          out += d >= 0 && d < tail && text[i] !== " " ? RAMP[Math.floor(Math.random() * RAMP.length)] : text[i];
+        }
+        el.textContent = out;
+        el.classList.toggle("is-shimmering", head < text.length + tail);
+        if (head < text.length + tail) requestAnimationFrame(step);
+        else {
+          el.textContent = text;
+          running = false;
+        }
+      };
+      requestAnimationFrame(step);
+    };
+    setTimeout(run, 900);
+    shimmerTimer = window.setInterval(run, 8000);
+    link?.addEventListener("mouseenter", run);
+  }
+  document.addEventListener("astro:page-load", initShimmer);
 
   // 1 / 2 / 3 open Projects, Work and Blog from any page.
   const PAGES: Record<string, string> = { "1": "/projects", "2": "/work", "3": "/blog" };
@@ -293,6 +331,33 @@ const latest = (await getCollection("projects"))
   }
   a.header-pill:hover {
     background: rgb(var(--color-page) / 0.95);
+  }
+  /* Pulsing "new" dot. */
+  .new-dot {
+    position: relative;
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgb(var(--color-accent));
+    flex-shrink: 0;
+  }
+  .new-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: new-pulse 2.4s ease-out infinite;
+  }
+  @keyframes new-pulse {
+    from { transform: scale(1); opacity: 0.6; }
+    to { transform: scale(3.2); opacity: 0; }
+  }
+  .latest-title.is-shimmering {
+    color: rgb(var(--color-accent));
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .new-dot::after { animation: none; }
   }
   .nav-link {
     opacity: 0.75;
