@@ -71,7 +71,7 @@ const latest = (await getCollection("projects"))
           >
             <span class="new-dot" aria-hidden="true"></span>
             <span class="font-mono text-[11px] uppercase tracking-[0.2em] opacity-60 hidden sm:inline" aria-hidden="true">New</span>
-            <span class="latest-title font-mono text-[11px] uppercase tracking-[0.12em] text-ink" aria-hidden="true" data-text={latest.data.title}>{latest.data.title}</span>
+            <span class="latest-title font-mono text-[11px] uppercase tracking-[0.12em] text-ink" aria-hidden="true">{latest.data.title}</span>
           </a>
         </InteractionSound>
       )}
@@ -244,46 +244,6 @@ const latest = (await getCollection("projects"))
   document.addEventListener("astro:after-swap", initSoundToggle);
 
 
-  // ASCII shimmer: a short wave of glyphs sweeps across the latest project's
-  // title, then the letters settle back. Monospace keeps the width stable.
-  const RAMP = "·:+*#%@░▒";
-  let shimmerTimer: number | undefined;
-  function initShimmer() {
-    clearInterval(shimmerTimer);
-    const el = document.querySelector<HTMLElement>(".latest-title");
-    if (!el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const text = el.dataset.text ?? "";
-    const link = el.closest("a");
-    let running = false;
-    const run = () => {
-      if (running || document.hidden) return;
-      running = true;
-      const t0 = performance.now();
-      const speed = 38; // ms per character
-      const tail = 4;
-      const step = (now: number) => {
-        const head = Math.floor((now - t0) / speed);
-        let out = "";
-        for (let i = 0; i < text.length; i++) {
-          const d = head - i;
-          out += d >= 0 && d < tail && text[i] !== " " ? RAMP[Math.floor(Math.random() * RAMP.length)] : text[i];
-        }
-        el.textContent = out;
-        el.classList.toggle("is-shimmering", head < text.length + tail);
-        if (head < text.length + tail) requestAnimationFrame(step);
-        else {
-          el.textContent = text;
-          running = false;
-        }
-      };
-      requestAnimationFrame(step);
-    };
-    setTimeout(run, 900);
-    shimmerTimer = window.setInterval(run, 8000);
-    link?.addEventListener("mouseenter", run);
-  }
-  document.addEventListener("astro:page-load", initShimmer);
-
   // 1 / 2 / 3 open Projects, Work and Blog from any page.
   const PAGES: Record<string, string> = { "1": "/projects", "2": "/work", "3": "/blog" };
   document.addEventListener("keydown", (e) => {
@@ -352,9 +312,6 @@ const latest = (await getCollection("projects"))
   @keyframes new-pulse {
     from { transform: scale(1); opacity: 0.6; }
     to { transform: scale(3.2); opacity: 0; }
-  }
-  .latest-title.is-shimmering {
-    color: rgb(var(--color-accent));
   }
   @media (prefers-reduced-motion: reduce) {
     .new-dot::after { animation: none; }

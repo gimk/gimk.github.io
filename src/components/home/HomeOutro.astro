@@ -112,8 +112,8 @@ const entries = await Promise.all(
     <ul class="flex flex-wrap justify-center items-center font-mono text-xs uppercase tracking-[0.2em] -my-3">
       {SOCIALS.map((s, i) => (
         <li class="flex items-center">
-          {i > 0 && <span class="opacity-50 mx-1 md:mx-2" aria-hidden="true">/</span>}
-          <a href={s.HREF} target="_blank" rel="noopener" class="inline-block px-2 py-3 opacity-80 hover:opacity-100 hover:underline">
+          {i > 0 && <span class="opacity-40 mx-1 md:mx-2" aria-hidden="true">/</span>}
+          <a href={s.HREF} target="_blank" rel="noopener" class="inline-block px-2 py-3 opacity-70 hover:opacity-100 hover:text-accent-primary transition-colors">
             {s.NAME}
           </a>
         </li>

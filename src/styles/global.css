@@ -246,6 +246,13 @@ html.scrolled #back-to-top {
   transform: translateX(var(--nudge, 4px));
 }
 
+/* Glyph shimmer (scripts/glyph-shimmer.ts): small text links only, never CTA
+   pills or cards. The script wraps link text in .glyph-text and flags the
+   sweep with .is-shimmering. */
+.glyph-text.is-shimmering {
+  color: rgb(var(--color-accent));
+}
+
 /* Underline that draws in under a title when its whole block is hovered
    (projects and posts). Thickness scales with the type size. */
 .link-title {

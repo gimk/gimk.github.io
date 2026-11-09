@@ -29,3 +29,9 @@ const { title, description, image, type } = Astro.props;
     <Lightbox />
   </body>
 </html>
+
+<script>
+  // ASCII glyph shimmer on small text links (see scripts/glyph-shimmer.ts).
+  import { initGlyphShimmer } from "../scripts/glyph-shimmer";
+  document.addEventListener("astro:page-load", initGlyphShimmer);
+</script>
