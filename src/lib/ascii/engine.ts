@@ -24,7 +24,9 @@ const SPRING = 4.5;
 /** Speed of the blend from the previous page's stage into the new one. */
 const CARRY_SPRING = 3;
 const CARRY = "__carry";
-/** Repel: how far the cursor's push reaches, and how hard it shoves content outward (< 1). */
+/** Magnifier under the cursor: radius (px) and strength. Follows the pointer with no easing. */
+const LENS_RADIUS = 150;
+const LENS_STRENGTH = 0.5;
 /** Press and hold: the hole grows to this radius (px) and reaches this far (px). */
 const HOLD_RADIUS = 60;
 const HOLD_REACH = 150;
@@ -141,7 +143,6 @@ export class AsciiEngine {
   private used = new Uint8Array(NB);
   private bucketStyle: string[] = new Array(NB).fill("#000");
   // Pointer lens (eased).
-  private pTarget = { x: -9999, y: -9999, on: 0 };
   private pointer = { x: -9999, y: -9999, s: 0 };
   private ripples: Ripple[] = [];
   // Press and hold: `s` eases 0..1 while held; `down` is when it started.
@@ -293,21 +294,17 @@ export class AsciiEngine {
 
   private onPointer(e: PointerEvent) {
     if (e.pointerType === "touch" || this.reduced) return;
-    if (this.pointer.s < 0.01) {
-      this.pointer.x = e.clientX;
-      this.pointer.y = e.clientY;
-    }
-    this.pTarget.x = e.clientX;
-    this.pTarget.y = e.clientY;
-    this.pTarget.on = 1;
+    this.pointer.x = e.clientX;
+    this.pointer.y = e.clientY;
+    this.pointer.s = 1;
   }
 
   /** Press: a hole opens under the pointer and deepens while it is held. */
   private onDown(e: PointerEvent) {
     if (this.reduced) return;
     // Touch never hovers, so place the pointer where it landed.
-    this.pointer.x = this.pTarget.x = e.clientX;
-    this.pointer.y = this.pTarget.y = e.clientY;
+    this.pointer.x = e.clientX;
+    this.pointer.y = e.clientY;
     this.press.on = true;
     this.press.down = performance.now();
   }
@@ -327,7 +324,7 @@ export class AsciiEngine {
   }
 
   private onLeave() {
-    this.pTarget.on = 0;
+    this.pointer.s = 0;
   }
 
   private field(name: string): Field {
@@ -356,11 +353,6 @@ export class AsciiEngine {
         if (this.carryK > 0.998) this.carryK = 1;
       }
       if (Math.abs(this.target - this.progress) < 1e-4) this.progress = this.target;
-      const pa = 1 - Math.exp(-dt * 12);
-      this.pointer.x += (this.pTarget.x - this.pointer.x) * pa;
-      this.pointer.y += (this.pTarget.y - this.pointer.y) * pa;
-      this.pointer.s += (this.pTarget.on - this.pointer.s) * (1 - Math.exp(-dt * 4));
-      if (this.pointer.s < 0.002) this.pointer.s = 0;
       const h = this.press;
       h.s += ((h.on ? 1 : 0) - h.s) * (1 - Math.exp(-dt * (h.on ? 5 : 11)));
       if (h.s < 0.002) h.s = 0;
@@ -485,6 +477,9 @@ export class AsciiEngine {
     const held = this.press.on ? clamp01((now - this.press.down) / HOLD_MAX) : 0;
     const vib = this.press.on ? smooth(clamp01(((now - this.press.down) / HOLD_MAX - 1) / 0.12 + 0)) : 0;
     const shake = now * 0.001;
+    // The lens steps aside while the hole is open.
+    const ls = this.pointer.s * LENS_STRENGTH * (1 - hs);
+    const lr2 = LENS_RADIUS * LENS_RADIUS;
     const lx0 = this.pointer.x;
     const ly0 = this.pointer.y;
 
@@ -527,6 +522,19 @@ export class AsciiEngine {
         let sx = px;
         let sy = py;
         let holeMul = 1;
+        // Magnifier: sample from a point pulled towards the pointer.
+        let lens = 0;
+        if (ls > 0) {
+          const mx = px - lx0;
+          const my = py - ly0;
+          const md2 = mx * mx + my * my;
+          if (md2 < lr2) {
+            const g = 1 - Math.sqrt(md2) / LENS_RADIUS;
+            lens = g * g * ls;
+            sx = px - mx * lens;
+            sy = py - my * lens;
+          }
+        }
 
         // Press and hold: a round hole opens under the pointer, content squeezed
         // outward. Longer holds make it bigger; at the max it vibrates.
@@ -619,7 +627,7 @@ export class AsciiEngine {
         const light = f * ambient * fieldMax;
         // Low texture: the image's own shading drives the ink, the field only grains it.
         const dense = 0.5 + 0.5 * (0.7 + (f - 0.7) * texture);
-        let val = ell * (light + (dense - light) * m) * intensity * holeMul + ell * wave * 0.4;
+        let val = ell * (light + (dense - light) * m) * intensity * holeMul + ell * (wave * 0.4 + lens * 0.3);
         let ink = m > 0.28 || val > accentT || wave * ell > 0.25 ? 1 : 0;
         if (front > 0) {
           const fv = front * front * (0.65 + 0.35 * f);
