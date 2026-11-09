@@ -24,8 +24,17 @@ const SPRING = 4.5;
 /** Speed of the blend from the previous page's stage into the new one. */
 const CARRY_SPRING = 3;
 const CARRY = "__carry";
-const LENS_RADIUS = 170;
-const LENS_STRENGTH = 0.55;
+/** Repel: how far the cursor's push reaches, and how hard it shoves content outward (< 1). */
+/** Press and hold: the hole grows to this radius (px) and reaches this far (px). */
+const HOLD_RADIUS = 60;
+const HOLD_REACH = 150;
+/** Holding this long (ms) reaches the biggest ripple and makes the hole vibrate. */
+const HOLD_MAX = 2000;
+/** Ripples: spawned by clicks. */
+const RIPPLE_SPEED = 460;
+const RIPPLE_LIFE = 1.9;
+const RIPPLE_WIDTH = 26;
+const RIPPLE_MAX = 8;
 
 export interface EngineOptions {
   canvas: HTMLCanvasElement;
@@ -40,6 +49,15 @@ interface Reveal {
   start: number;
   speed: number;
   front: number;
+}
+
+interface Ripple {
+  x: number;
+  y: number;
+  start: number;
+  amp: number;
+  /** Bigger ripples travel faster and farther, and last longer. */
+  size: number;
 }
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -125,6 +143,9 @@ export class AsciiEngine {
   // Pointer lens (eased).
   private pTarget = { x: -9999, y: -9999, on: 0 };
   private pointer = { x: -9999, y: -9999, s: 0 };
+  private ripples: Ripple[] = [];
+  // Press and hold: `s` eases 0..1 while held; `down` is when it started.
+  private press = { s: 0, on: false, down: 0 };
 
   /** Float index into `states` the page wants to show. */
   target = 0;
@@ -143,6 +164,8 @@ export class AsciiEngine {
     this.onResize = this.onResize.bind(this);
     this.onPointer = this.onPointer.bind(this);
     this.onLeave = this.onLeave.bind(this);
+    this.onDown = this.onDown.bind(this);
+    this.onUp = this.onUp.bind(this);
     this.tick = this.tick.bind(this);
     this.onVisibility = this.onVisibility.bind(this);
     this.setInks([0, 0, 0, 0.3], [249, 115, 22, 0.9]);
@@ -218,6 +241,9 @@ export class AsciiEngine {
     this.running = true;
     addEventListener("resize", this.onResize);
     addEventListener("pointermove", this.onPointer, { passive: true });
+    addEventListener("pointerdown", this.onDown, { passive: true });
+    addEventListener("pointerup", this.onUp, { passive: true });
+    addEventListener("pointercancel", this.onUp, { passive: true });
     document.documentElement.addEventListener("pointerleave", this.onLeave);
     document.addEventListener("visibilitychange", this.onVisibility);
     this.onResize();
@@ -230,6 +256,9 @@ export class AsciiEngine {
     cancelAnimationFrame(this.raf);
     removeEventListener("resize", this.onResize);
     removeEventListener("pointermove", this.onPointer);
+    removeEventListener("pointerdown", this.onDown);
+    removeEventListener("pointerup", this.onUp);
+    removeEventListener("pointercancel", this.onUp);
     document.documentElement.removeEventListener("pointerleave", this.onLeave);
     document.removeEventListener("visibilitychange", this.onVisibility);
   }
@@ -273,6 +302,30 @@ export class AsciiEngine {
     this.pTarget.on = 1;
   }
 
+  /** Press: a hole opens under the pointer and deepens while it is held. */
+  private onDown(e: PointerEvent) {
+    if (this.reduced) return;
+    // Touch never hovers, so place the pointer where it landed.
+    this.pointer.x = this.pTarget.x = e.clientX;
+    this.pointer.y = this.pTarget.y = e.clientY;
+    this.press.on = true;
+    this.press.down = performance.now();
+  }
+
+  /** Release: the hole closes and sends out a ripple, stronger the longer it was held. */
+  private onUp() {
+    if (!this.press.on) return;
+    this.press.on = false;
+    const now = performance.now();
+    const held = clamp01((now - this.press.down) / HOLD_MAX);
+    this.addRipple(this.pointer.x, this.pointer.y, 0.7 + 0.5 * held, 0.65 + 1.15 * held, now);
+  }
+
+  private addRipple(x: number, y: number, amp: number, size: number, now: number) {
+    this.ripples.push({ x, y, start: now, amp, size });
+    if (this.ripples.length > RIPPLE_MAX) this.ripples.shift();
+  }
+
   private onLeave() {
     this.pTarget.on = 0;
   }
@@ -308,6 +361,9 @@ export class AsciiEngine {
       this.pointer.y += (this.pTarget.y - this.pointer.y) * pa;
       this.pointer.s += (this.pTarget.on - this.pointer.s) * (1 - Math.exp(-dt * 4));
       if (this.pointer.s < 0.002) this.pointer.s = 0;
+      const h = this.press;
+      h.s += ((h.on ? 1 : 0) - h.s) * (1 - Math.exp(-dt * (h.on ? 5 : 11)));
+      if (h.s < 0.002) h.s = 0;
     }
     this.draw(now);
   }
@@ -424,11 +480,21 @@ export class AsciiEngine {
       }
     }
 
-    // Lens
-    const ls = this.pointer.s * LENS_STRENGTH;
+    // Press and hold: how long, 0..1 over HOLD_MAX; at the max the hole vibrates.
+    const hs = this.press.s;
+    const held = this.press.on ? clamp01((now - this.press.down) / HOLD_MAX) : 0;
+    const vib = this.press.on ? smooth(clamp01(((now - this.press.down) / HOLD_MAX - 1) / 0.12 + 0)) : 0;
+    const shake = now * 0.001;
     const lx0 = this.pointer.x;
     const ly0 = this.pointer.y;
-    const lr2 = LENS_RADIUS * LENS_RADIUS;
+
+    // Live ripples, as expanding rings (radius, amplitude).
+    this.ripples = this.ripples.filter((r) => (now - r.start) / 1000 < RIPPLE_LIFE * r.size);
+    const rips = this.ripples.map((r) => {
+      const age = (now - r.start) / 1000;
+      return { x: r.x, y: r.y, rad: age * RIPPLE_SPEED * r.size, amp: r.amp * (1 - age / (RIPPLE_LIFE * r.size)) ** 2 };
+    });
+    const reach = RIPPLE_WIDTH * 3;
 
     const warp = 0.01 * warpAmt;
     const scat = scatter * 0.075;
@@ -458,20 +524,49 @@ export class AsciiEngine {
         }
         if (ell < 0.004 && front <= 0) continue;
 
-        // Lens: sample from a point pulled towards the pointer (magnifies).
         let sx = px;
         let sy = py;
-        let lens = 0;
-        if (ls > 0) {
-          const lx = px - lx0;
-          const ly = py - ly0;
-          const d2 = lx * lx + ly * ly;
-          if (d2 < lr2) {
-            const g = 1 - Math.sqrt(d2) / LENS_RADIUS;
-            lens = g * g * ls;
-            sx = px - lx * lens;
-            sy = py - ly * lens;
+        let holeMul = 1;
+
+        // Press and hold: a round hole opens under the pointer, content squeezed
+        // outward. Longer holds make it bigger; at the max it vibrates.
+        if (hs > 0) {
+          const hx = px - lx0;
+          const hy = py - ly0;
+          const hd2 = hx * hx + hy * hy;
+          if (hd2 < HOLD_REACH * HOLD_REACH) {
+            const hd = Math.sqrt(hd2);
+            const hg = 1 - hd / HOLD_REACH;
+            const push = hg * hg * (0.5 + 0.3 * held) * hs;
+            sx -= hx * push;
+            sy -= hy * push;
+            if (vib > 0) {
+              // Fast tremor, strongest around the hole.
+              sx += Math.sin(shake * 190 + py * 0.9) * hg * hg * 6 * vib;
+              sy += Math.cos(shake * 170 + px * 0.8) * hg * hg * 6 * vib;
+            }
+            const hr = HOLD_RADIUS * hs * (0.8 + 0.5 * held) * (1 + 0.1 * vib * Math.sin(shake * 120));
+            holeMul = smooth(clamp01((hd - hr * 0.35) / (hr * 0.65 + 1)));
           }
+        }
+
+        // Ripples: a ring of displacement and density travelling outward.
+        let wave = 0;
+        for (let i = 0; i < rips.length; i++) {
+          const r = rips[i];
+          const rx = px - r.x;
+          const ry = py - r.y;
+          const rd2 = rx * rx + ry * ry;
+          const lo = r.rad - reach;
+          const hi = r.rad + reach;
+          if (rd2 > hi * hi || (lo > 0 && rd2 < lo * lo)) continue;
+          const rd = Math.sqrt(rd2) || 1;
+          const w = (rd - r.rad) / RIPPLE_WIDTH;
+          const env = Math.exp(-w * w) * r.amp;
+          const bend = env * Math.cos(w * 2.4) * 12;
+          sx -= (rx / rd) * bend;
+          sy -= (ry / rd) * bend;
+          wave += env;
         }
 
         const cx = sx / UNIT_X;
@@ -524,8 +619,8 @@ export class AsciiEngine {
         const light = f * ambient * fieldMax;
         // Low texture: the image's own shading drives the ink, the field only grains it.
         const dense = 0.5 + 0.5 * (0.7 + (f - 0.7) * texture);
-        let val = ell * (light + (dense - light) * m) * intensity + lens * ell * 0.35;
-        let ink = m > 0.28 || val > accentT ? 1 : 0;
+        let val = ell * (light + (dense - light) * m) * intensity * holeMul + ell * wave * 0.4;
+        let ink = m > 0.28 || val > accentT || wave * ell > 0.25 ? 1 : 0;
         if (front > 0) {
           const fv = front * front * (0.65 + 0.35 * f);
           if (fv > val) {
