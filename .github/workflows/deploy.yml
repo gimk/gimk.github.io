@@ -14,6 +14,12 @@ permissions:
   pages: write
   id-token: write
 
+# One deploy at a time: a new push waits for the running deploy instead of
+# racing it. In-progress deploys are never cancelled half way.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -48,3 +54,7 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # Pages sometimes sits in "syncing_files" for a while; wait 20 minutes
+          # (default 10) before giving up.
+          timeout: 1200000
