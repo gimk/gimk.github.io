@@ -37,6 +37,8 @@ const RIPPLE_SPEED = 460;
 const RIPPLE_LIFE = 1.9;
 const RIPPLE_WIDTH = 26;
 const RIPPLE_MAX = 8;
+/** How much the circle draws in (fraction of its radius) halfway through a side-to-side move. */
+const TRAVEL_GATHER = 0.32;
 
 export interface EngineOptions {
   canvas: HTMLCanvasElement;
@@ -426,7 +428,9 @@ export class AsciiEngine {
     const wB = sB ? ks : 0;
     const hasShape = wA + wB > 0;
 
-    const r = lerpRect(A.frame(), B.frame(), k);
+    const rA = A.frame();
+    const rB = B.frame();
+    const r = lerpRect(rA, rB, k);
     const fo = lerpRect((A.focus ?? A.frame)(), (B.focus ?? B.frame)(), k);
     const intensity = lerp(A.intensity, B.intensity, k);
     const ambient = lerp(A.ambient, B.ambient, k);
@@ -451,7 +455,12 @@ export class AsciiEngine {
     const swell = 1 + Math.min(0.05, Math.abs(this.velocity) / 18000);
     const ecx = r.x + r.w / 2;
     const ecy = r.y + r.h / 2;
-    const erx = Math.max(1, (Math.min(r.w, r.h) / 2) * breathe * swell);
+    // Crossing the screen, it draws in a little on the way and opens again on
+    // arrival, deepest mid-move. Only for real crossings (side to side), scaled
+    // by how far the centre travels; small moves keep their size.
+    const travel = Math.abs(rB.x + rB.w / 2 - (rA.x + rA.w / 2)) / innerWidth;
+    const gather = 1 - TRAVEL_GATHER * smooth(clamp01((travel - 0.2) / 0.3)) * Math.sin(Math.PI * k);
+    const erx = Math.max(1, (Math.min(r.w, r.h) / 2) * breathe * swell * gather);
     const ery = erx;
     const rim = 0.32;
 
