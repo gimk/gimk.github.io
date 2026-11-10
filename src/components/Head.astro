@@ -89,6 +89,14 @@ const imageURL = new URL(image, Astro.site);
   import { initPigAnimation } from "../scripts/pig-animation";
   import "@lib/ui-sounds";
   
+  // The router copies <html> attributes from the incoming page, which would
+  // drop the client-set 'muted' class until after-swap re-adds it, replaying
+  // the sound icon's mute animation. Carry it onto the new document instead.
+  document.addEventListener("astro:before-swap", (e) => {
+    const html = (e as TransitionBeforeSwapEvent).newDocument.documentElement;
+    html.classList.toggle("muted", document.documentElement.classList.contains("muted"));
+  });
+
   document.addEventListener("astro:before-swap", (e) =>
     [
       // Select all font preload links in the incoming document's head

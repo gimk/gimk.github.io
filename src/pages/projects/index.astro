@@ -28,7 +28,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
         projects.map((p, i) => (
           <li>
             <a
-              href={`/projects/${p.id}`}
+              href={`/projects/${p.id}/`}
               data-row
               data-id={p.id}
               data-field={fieldAt(i)}

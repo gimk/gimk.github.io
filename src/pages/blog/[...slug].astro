@@ -48,7 +48,7 @@ const date = post.data.date.toLocaleDateString("en-GB", { day: "numeric", month:
       size="lg"
       tall
       mobileCenter
-      back={{ href: "/blog", label: "Writing" }}
+      back={{ href: "/blog/", label: "Writing" }}
       label={`${date} — ${readingTime(post.body ?? "")}`}
       title={post.data.title}
       description={post.data.description}
@@ -63,7 +63,7 @@ const date = post.data.date.toLocaleDateString("en-GB", { day: "numeric", month:
     <nav aria-label="More posts" class="grid gap-12 md:grid-cols-2 md:gap-16 pb-[20vh]">
       {
         older ? (
-          <a href={`/blog/${older.id}`} class="link-row blog-row flex flex-col items-start text-left gap-4 py-6">
+          <a href={`/blog/${older.id}/`} class="link-row blog-row flex flex-col items-start text-left gap-4 py-6">
             <span data-edge class="eyebrow">Previous</span>
             <span data-edge class="display text-3xl md:text-4xl leading-[1.1]">
               <span class="link-title">{older.data.title}</span>
@@ -75,7 +75,7 @@ const date = post.data.date.toLocaleDateString("en-GB", { day: "numeric", month:
       }
       {
         newer && (
-          <a href={`/blog/${newer.id}`} class="link-row blog-row flex flex-col items-end text-right gap-4 py-6 md:col-start-2">
+          <a href={`/blog/${newer.id}/`} class="link-row blog-row flex flex-col items-end text-right gap-4 py-6 md:col-start-2">
             <span data-edge class="eyebrow">Next</span>
             <span data-edge class="display text-3xl md:text-4xl leading-[1.1]">
               <span class="link-title">{newer.data.title}</span>

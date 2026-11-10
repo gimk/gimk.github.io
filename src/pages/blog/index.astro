@@ -40,7 +40,7 @@ const fmt = (d: Date) => d.toLocaleDateString("en-GB", { day: "2-digit", month: 
               {grouped[year].map((post, i) => (
                 <li class="w-full flex flex-col items-end">
                   {i > 0 && <span class="block w-10 h-px bg-current opacity-20 my-4" aria-hidden="true" />}
-                  <a href={`/blog/${post.id}`} class="link-row blog-row flex flex-col items-end py-10 w-full">
+                  <a href={`/blog/${post.id}/`} class="link-row blog-row flex flex-col items-end py-10 w-full">
                     <span data-edge class="eyebrow text-[10px]">
                       {fmt(post.data.date)} <span class="mx-2 opacity-60">·</span> {readingTime(post.body ?? "")}
                     </span>

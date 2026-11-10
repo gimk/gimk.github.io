@@ -51,7 +51,7 @@ const entries = await Promise.all(
         </li>
       ))}
     </ul>
-    <a data-edge href="/work" class="font-mono sp-link cta-pill mt-20">
+    <a data-edge href="/work/" class="font-mono sp-link cta-pill mt-20">
       See all experience <span aria-hidden="true">→</span>
     </a>
   </div>
@@ -69,7 +69,7 @@ const entries = await Promise.all(
       {latestPosts.map(({ entry, month, day, year, read }, i) => (
         <li class="flex flex-col items-end">
           {i > 0 && <span class="block w-10 h-px bg-current opacity-20 my-4" aria-hidden="true" />}
-          <a href={`/blog/${entry.id}`} class="link-row blog-row group flex flex-col items-end py-12 w-full">
+          <a href={`/blog/${entry.id}/`} class="link-row blog-row group flex flex-col items-end py-12 w-full">
             <span data-edge class="font-mono text-[10px] uppercase tracking-[0.2em] opacity-50">
               {day} {month} {year} <span class="mx-2 opacity-60">·</span> {read}
             </span>
@@ -84,7 +84,7 @@ const entries = await Promise.all(
         </li>
       ))}
     </ul>
-    <a data-edge href="/blog" class="font-mono sp-link cta-pill mt-12">
+    <a data-edge href="/blog/" class="font-mono sp-link cta-pill mt-12">
       See all posts <span aria-hidden="true">→</span>
     </a>
   </div>

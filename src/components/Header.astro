@@ -4,12 +4,12 @@ import InteractionSound from "./InteractionSound.astro";
 import { getCollection } from "astro:content";
 
 const NAV = [
-  { href: "/projects", label: "Projects" },
-  { href: "/work", label: "Work" },
-  { href: "/blog", label: "Blog" },
+  { href: "/projects/", label: "Projects" },
+  { href: "/work/", label: "Work" },
+  { href: "/blog/", label: "Blog" },
 ];
 const path = Astro.url.pathname;
-const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+const isCurrent = (href: string) => path.startsWith(href);
 
 /** Quick access to the most recent project, whichever it is. */
 const latest = (await getCollection("projects"))
@@ -65,7 +65,7 @@ const latest = (await getCollection("projects"))
       {latest && (
         <InteractionSound preset="button">
           <a
-            href={`/projects/${latest.id}`}
+            href={`/projects/${latest.id}/`}
             class="latest-link header-pill group flex items-center gap-2.5 h-10 pl-3.5 pr-4 rounded-full transition-colors duration-300"
             aria-label={`New project: ${latest.data.title}`}
           >
@@ -194,7 +194,7 @@ const latest = (await getCollection("projects"))
       ))}
     </nav>
     {latest && (
-      <a href={`/projects/${latest.id}`} class="mt-10 eyebrow opacity-60" style="--i:3" data-reveal>
+      <a href={`/projects/${latest.id}/`} class="mt-10 eyebrow opacity-60" style="--i:3" data-reveal>
         New · {latest.data.title} →
       </a>
     )}
@@ -245,7 +245,7 @@ const latest = (await getCollection("projects"))
 
 
   // 1 / 2 / 3 open Projects, Work and Blog from any page.
-  const PAGES: Record<string, string> = { "1": "/projects", "2": "/work", "3": "/blog" };
+  const PAGES: Record<string, string> = { "1": "/projects/", "2": "/work/", "3": "/blog/" };
   document.addEventListener("keydown", (e) => {
     const href = PAGES[e.key];
     if (!href || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.defaultPrevented) return;

@@ -52,6 +52,6 @@ Anyway, here you can see an opened project, with all the information, actions an
 
 This covers everything I made in the couple of evenings I had to produce this desktop version. It's obviously incomplete, and looks more like a Dribbble shot than an actual product, but I think it showcases to an extent my ability to design for a different format, like a _desktop_.
 
-It's much older, but I also worked on a desktop-first environment at Mention. I don't have much to show but the two designs I kept are [here](/projects/older-projects).
+It's much older, but I also worked on a desktop-first environment at Mention. I don't have much to show but the two designs I kept are [here](/projects/older-projects/).
 
 Thank you for reading!

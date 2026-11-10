@@ -11,7 +11,7 @@ repoLabel: "view on GitHub"
 
 ![Dither Studio showing a dithered blue portrait on a flat red background, with the algorithm, color, levels and compositing panels open on the right](/projectfiles/dither-studio/dither-cover.png)
 
-<a href="https://studio.pantoine.com" target="_blank" rel="noopener noreferrer">**Dither Studio**</a> started as a small weekend experiment. After writing about <a href="/blog/inner-workings-of-ascii">the math behind this site's ASCII wave</a>, I wanted to build a small interactive wave toy to play with those ideas further. I kept adding features after work, and it quickly snowballed into a full dithering and raster tool in the browser.
+<a href="https://studio.pantoine.com" target="_blank" rel="noopener noreferrer">**Dither Studio**</a> started as a small weekend experiment. After writing about <a href="/blog/inner-workings-of-ascii/">the math behind this site's ASCII wave</a>, I wanted to build a small interactive wave toy to play with those ideas further. I kept adding features after work, and it quickly snowballed into a full dithering and raster tool in the browser.
 
 You can drop in an image, a video, a 3D model, or use a procedural wave, and convert it into ASCII, Braille, halftone dots, classic 1-bit dithering, or CRT scanlines. Everything runs locally in your browser, and you can export clean vector SVGs, PNGs, GIFs, MP4 videos, or color separation plates for print.
 
@@ -26,4 +26,4 @@ From a design perspective, the main challenge was keeping over 40 controls in a 
 
 My favorite feature in the whole app is probably **Beam Mode**. It's inspired by the old Rutt-Etra analog video synthesizer (and the classic Joy Division *Unknown Pleasures* album cover). Instead of a grid of pixels, it draws horizontal scanlines across the canvas and pushes them up or down based on brightness. Because it's pure geometry, when you export to SVG you get continuous vector paths that you can send straight to a pen plotter.
 
-Like my other recent projects, coding agents handled the heavy math, Three.js setup, and `WebCodecs` video encoding, while I spent my evenings focused on the layout, the interactions, and tuning how the effects look. The project is currently on hold though, as I moved on to building <a href="/projects/comp-studio">**Comp**</a>, which takes a lot of these ideas into a much more capable node-based tool.
+Like my other recent projects, coding agents handled the heavy math, Three.js setup, and `WebCodecs` video encoding, while I spent my evenings focused on the layout, the interactions, and tuning how the effects look. The project is currently on hold though, as I moved on to building <a href="/projects/comp-studio/">**Comp**</a>, which takes a lot of these ideas into a much more capable node-based tool.

@@ -49,7 +49,7 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
     <PageIntro
       id="project-intro"
       tall
-      back={{ href: "/projects", label: "Projects" }}
+      back={{ href: "/projects/", label: "Projects" }}
       label={`${date} — ${readingTime(project.body)}`}
       title={project.data.title}
       description={project.data.description}
@@ -80,7 +80,7 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
 
     <!-- Next project: the stage morphs into its image as it arrives. -->
     <section id="project-next" class="relative pt-[45svh] md:pt-[30vh]">
-      <a href={`/projects/${next.id}`} class="link-row flex flex-col gap-6 md:w-1/2 py-10">
+      <a href={`/projects/${next.id}/`} class="link-row flex flex-col gap-6 md:w-1/2 py-10">
         <span data-edge class="eyebrow">Next project</span>
         <span data-edge class="display text-5xl md:text-7xl leading-[0.98]">
           {next.data.title}

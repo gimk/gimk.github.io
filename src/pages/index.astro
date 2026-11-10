@@ -119,7 +119,7 @@ const pad = (n: number) => String(n).padStart(2, "0");
             data-icon={icon}
             class="scene-project relative h-[85svh] w-full md:w-1/2 md:ml-[50%] md:pl-12 md:pr-28 flex flex-col justify-end pb-[10svh] md:justify-center md:pb-0"
           >
-            <a href={`/projects/${entry.id}`} class="link-row flex flex-col py-6">
+            <a href={`/projects/${entry.id}/`} class="link-row flex flex-col py-6">
               <span data-edge class="eyebrow">
                 {pad(i + 1)} — {entry.data.date.getFullYear()} — {kind}
               </span>
@@ -149,12 +149,12 @@ const pad = (n: number) => String(n).padStart(2, "0");
           {
             others.map((p, i) => (
               <li class="inline">
-                <a href={`/projects/${p.id}`} class="underline decoration-ink/20 underline-offset-4 hover:text-accent-primary hover:decoration-current transition-colors">{p.data.title}</a>{i < others.length - 1 && <span class="opacity-50">, </span>}
+                <a href={`/projects/${p.id}/`} class="underline decoration-ink/20 underline-offset-4 hover:text-accent-primary hover:decoration-current transition-colors">{p.data.title}</a>{i < others.length - 1 && <span class="opacity-50">, </span>}
               </li>
             ))
           }
         </ul>
-        <a data-edge href="/projects" class="font-mono sp-link cta-pill mt-10 self-start">
+        <a data-edge href="/projects/" class="font-mono sp-link cta-pill mt-10 self-start">
           See all {projectCount} projects <span aria-hidden="true">→</span>
         </a>
       </div>

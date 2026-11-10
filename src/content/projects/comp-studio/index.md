@@ -13,7 +13,7 @@ repoLabel: "view on GitHub"
 
 <a href="https://www.compstud.io" target="_blank" rel="noopener noreferrer">**Comp**</a> is a node-based image and video editor that runs in the browser. You drop in a photo or video (or generate one from scratch), wire it through effects, animate sliders with modulators, and see everything update in real time before exporting your file.
 
-I started building it right after <a href="/projects/dither-studio">Dither Studio</a>. Working on Dither Studio made me realize that a single fixed pipeline with forty controls crammed into a sidebar only gets you so far. With Comp, I ditched the sidebar and put every step on an open canvas, so you can see the whole chain, reorder effects whenever you want, and branch things off.
+I started building it right after <a href="/projects/dither-studio/">Dither Studio</a>. Working on Dither Studio made me realize that a single fixed pipeline with forty controls crammed into a sidebar only gets you so far. With Comp, I ditched the sidebar and put every step on an open canvas, so you can see the whole chain, reorder effects whenever you want, and branch things off.
 
 Everything runs locally in your browser, with no account needed. Your projects and files stay on your machine, except if you choose to use the AI Image node with your own API key.
 
