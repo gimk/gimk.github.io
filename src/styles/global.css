@@ -236,6 +236,13 @@ html.scrolled #back-to-top {
   background: rgb(var(--color-accent) / 0.08);
   border-color: rgb(var(--color-accent) / 0.6);
 }
+/* Disabled pill, e.g. a link to a private repository. */
+.cta-pill-off {
+  color: rgb(var(--color-ink) / 0.35);
+  border-color: rgb(var(--color-ink) / 0.15);
+  cursor: not-allowed;
+  user-select: none;
+}
 /* Arrow inside a pill nudges on hover. Back links set --nudge: -4px. */
 .sp-link span {
   display: inline-block;

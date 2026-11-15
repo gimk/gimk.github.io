@@ -6,7 +6,8 @@ thumbnail: "/projectfiles/thumbnails/comp-thumbnail.png"
 demoURL: "https://www.compstud.io"
 demoLabel: "visit site"
 repoURL: "https://github.com/gimk/compstudio"
-repoLabel: "view on GitHub"
+repoLabel: "private repo"
+repoPrivate: true
 ---
 
 <video src="/projectfiles/comp-studio/comp-loop.mp4" autoplay loop muted playsinline aria-label="A looping tour of Comp: images, video, noise, text and sound feeding a Layers module; a module palette with over 130 modules; a Depth Relight module running on device; keyframes animating a Halftone on a timeline; and a Renderer exporting to MP4, WebM, GIF, PNG and JPG"></video>

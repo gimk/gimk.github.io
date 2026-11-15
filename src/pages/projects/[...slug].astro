@@ -62,7 +62,12 @@ const date = project.data.date.toLocaleDateString("en-GB", { month: "short", yea
                 {project.data.demoLabel || "Visit site"} <span aria-hidden="true">↗</span>
               </a>
             )}
-            {project.data.repoURL && (
+            {project.data.repoURL && project.data.repoPrivate && (
+              <span class="font-mono cta-pill cta-pill-off" aria-disabled="true">
+                {project.data.repoLabel || "Private repo"}
+              </span>
+            )}
+            {project.data.repoURL && !project.data.repoPrivate && (
               <a href={project.data.repoURL} target="_blank" rel="noopener" class="font-mono sp-link cta-pill">
                 {project.data.repoLabel || "More info"} <span aria-hidden="true">↗</span>
               </a>
