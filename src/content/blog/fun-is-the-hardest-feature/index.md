@@ -23,7 +23,7 @@ Here is where each of my three projects is now.
 
 Transit Flow is a 2D street-design simulation where you redesign a real intersection in Paris. The buildings and street width are fixed, and the plan is to share that space between cars, cyclists, and pedestrians using lanes, crossings, signals, speed limits, kerbs, planters, and green areas. Once your layout is ready, you run the traffic and get a report on conflicts and comfort: annoyance and injuries cost points, while free space and greenery give a bonus.
 
-It is built in Rust with a Bevy 0.20 game on top of a standalone simulation library, and it is very much a work in progress. Right now, it is only a simulation: there is no UI and no tools yet, so it is not even usable. That's where I ran straight into the problem I mentioned earlier: making the traffic behave realistically is an engineering task, but turning those rules into something that feels rewarding to play is a completely different challenge.
+It is built in Rust with a Bevy 0.20 game on top of a standalone simulation library, and it is very much a work in progress. Right now, it is only a simulation: there is no UI and barely any tools yet, so it is not really usable. That's where I ran straight into the problem I mentioned earlier: making the traffic behave realistically is an engineering task, but turning those rules into something that feels rewarding to play is a completely different challenge, and one that seems daunting.
 
 Repo: [github.com/gimk/transit-flow](https://github.com/gimk/transit-flow)
 
