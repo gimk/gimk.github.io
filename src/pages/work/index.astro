@@ -15,6 +15,26 @@ const work = await Promise.all(
     return { ...item, Content };
   }),
 );
+const education = [
+  {
+    school: "L'atelier des Chefs",
+    degree: "CAP Cuisine, culinary arts and chef training",
+    years: "2023 — 2024",
+    text: "Passed with honors.",
+  },
+  {
+    school: "Chalmers University of Technology",
+    degree: "Interaction Design Technologies",
+    years: "2017 — 2018",
+    text: "Exchange student. I followed courses on interaction design and game design.",
+  },
+  {
+    school: "ESIEE Paris",
+    degree: "Engineer degree, Information Systems",
+    years: "2013 — 2018",
+    text: "During my 5-year engineering master program, I learned different development languages and other general engineer qualities that helped me build my multi-disciplinary education and critical mind. I led 3 student offices as lead designer, and co-founded the Design Club, where I was vice president.",
+  },
+];
 /** "2021 — 2023", or "2024 — Today". */
 const years = (start: Date, end: Date | string) =>
   `${start.getFullYear()} — ${end instanceof Date ? end.getFullYear() : end}`;
@@ -30,7 +50,7 @@ const years = (start: Date, end: Date | string) =>
       </p>
     </PageIntro>
 
-    <ul id="work-list" class="flex flex-col gap-24 pb-[25vh] m-0 p-0 list-none">
+    <ul id="work-list" class="flex flex-col gap-24 pb-24 m-0 p-0 list-none">
       {
         work.map((entry) => (
           <li class="grid gap-4 md:grid-cols-[11rem_1fr] md:gap-8 md:w-2/3">
@@ -50,6 +70,27 @@ const years = (start: Date, end: Date | string) =>
         ))
       }
     </ul>
+
+    <section aria-labelledby="education-title" class="pb-[25vh]">
+      <p data-edge class="eyebrow mb-3">Education</p>
+      <h2 id="education-title" data-edge class="display text-4xl md:text-5xl leading-none mb-16">
+        Schools
+      </h2>
+      <ul class="flex flex-col gap-16 m-0 p-0 list-none">
+        {
+          education.map((entry) => (
+            <li class="grid gap-4 md:grid-cols-[11rem_1fr] md:gap-8 md:w-2/3">
+              <p data-edge class="eyebrow md:sticky md:top-28 self-start">{entry.years}</p>
+              <div class="flex flex-col gap-3">
+                <h3 data-edge class="display text-3xl md:text-4xl leading-none">{entry.school}</h3>
+                <p data-edge class="eyebrow">{entry.degree}</p>
+                <p data-edge class="mt-3 font-serif prose-sm">{entry.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
   </div>
 </PageLayout>
 
